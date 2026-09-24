@@ -1,0 +1,37 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      args:
+        INSTALL_KNOWLEDGE: ${QIWEN_INSTALL_KNOWLEDGE:-false}
+    environment:
+      QIWEN_ENV: ${QIWEN_ENV:-development}
+      QIWEN_SECRET_KEY: ${QIWEN_SECRET_KEY:-}
+      QIWEN_CORS_ORIGINS: ${QIWEN_CORS_ORIGINS:-http://localhost:23000,http://127.0.0.1:23000}
+      QIWEN_DATA_DIR: /app/.data
+      QIWEN_MODEL_MODE: ${QIWEN_MODEL_MODE:-mock}
+      QIWEN_MODEL_BASE_URL: ${QIWEN_MODEL_BASE_URL:-}
+      QIWEN_MODEL_API_KEY: ${QIWEN_MODEL_API_KEY:-}
+      QIWEN_MODEL_NAME: ${QIWEN_MODEL_NAME:-}
+      QIWEN_RAG_MODE: ${QIWEN_RAG_MODE:-mock}
+      QIWEN_EMBEDDING_MODEL: ${QIWEN_EMBEDDING_MODEL:-}
+    volumes:
+      - qiwen_data:/app/.data
+    expose:
+      - "8000"
+    init: true
+
+  frontend:
+    build:
+      context: ./frontend
+    environment:
+      API_PROXY_TARGET: http://backend:8000
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${QIWEN_WEB_PORT:-23000}:3000"
+    init: true
+
+volumes:
+  qiwen_data:
