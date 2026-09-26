@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "followup_and_history": {"inputs": ["最近失眠", "已经三天，白天疲劳"], "expected_intents": ["consult", "diagnose"], "expected_messages": 4},
+  "account_isolation": {"expected_status": 404},
+  "urgent_route": {"input": "现在胸痛并且呼吸困难", "expected_intent": "safety_rejected", "forbidden": "方剂知识示例"},
+  "contraindication": {"herbs": ["甘草", "海藻"], "expected_error": true},
+  "allergy_and_final_history": {"profile": {"allergies": "甘草"}, "input": "最近失眠三天，白天疲劳", "required": "药材清单已隐藏"},
+  "multi_stream_and_final_version": {"input": "最近咳嗽三天，白天疲劳", "experts": ["bianzheng", "formula", "herb"], "expected_notes": 3},
+  "retrieval_provenance": {"query": "桂枝汤", "required_fields": ["title", "chapter", "body"]}
+}

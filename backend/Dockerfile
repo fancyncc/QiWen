@@ -14,6 +14,11 @@ RUN if [ "$INSTALL_KNOWLEDGE" = "true" ]; then \
       python -m pip install --no-cache-dir 'chromadb>=1,<2'; \
     fi
 
+ARG INSTALL_TOOLS=false
+RUN if [ "$INSTALL_TOOLS" = "true" ]; then \
+      python -m pip install --no-cache-dir 'mcp>=2,<3'; \
+    fi
+
 COPY . ./
 RUN groupadd --system qiwen && useradd --system --gid qiwen --home-dir /app qiwen \
     && mkdir -p /app/.data && chown -R qiwen:qiwen /app

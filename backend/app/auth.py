@@ -49,22 +49,29 @@ def make_token(user_id: str) -> str:
     return f"{body}.{signature}"
 
 
-def current_user(credentials: HTTPAuthorizationCredentials | None = Depends(bearer)) -> dict:
-    if not credentials or credentials.scheme.lower() != "bearer":
-        raise HTTPException(401, "请先登录")
+def token_identity(token: str) -> tuple[dict, dict]:
     try:
-        header, payload, signature = credentials.credentials.split(".")
+        header, payload, signature = token.split(".")
         expected = _b64(hmac.new(SECRET_KEY.encode(), f"{header}.{payload}".encode(), hashlib.sha256).digest())
         if not hmac.compare_digest(signature, expected):
             raise ValueError("signature")
-        if json.loads(_unb64(header)).get("alg") != "HS256":
+        decoded_header = json.loads(_unb64(header))
+        if not isinstance(decoded_header, dict) or decoded_header.get("alg") != "HS256":
             raise ValueError("algorithm")
         claims = json.loads(_unb64(payload))
+        if not isinstance(claims, dict) or not isinstance(claims.get("exp"), (int, float)):
+            raise ValueError("claims")
         if claims.get("exp", 0) <= time.time() or not isinstance(claims.get("sub"), str):
             raise ValueError("expired")
-    except (ValueError, UnicodeDecodeError, json.JSONDecodeError, binascii.Error):
+    except (ValueError, TypeError, UnicodeDecodeError, json.JSONDecodeError, binascii.Error):
         raise HTTPException(401, "登录已失效") from None
     user = one("SELECT id, username FROM users WHERE id=?", (claims["sub"],))
     if not user:
         raise HTTPException(401, "用户不存在")
-    return user
+    return user, claims
+
+
+def current_user(credentials: HTTPAuthorizationCredentials | None = Depends(bearer)) -> dict:
+    if not credentials or credentials.scheme.lower() != "bearer":
+        raise HTTPException(401, "请先登录")
+    return token_identity(credentials.credentials)[0]

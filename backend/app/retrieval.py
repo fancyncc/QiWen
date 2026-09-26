@@ -95,19 +95,26 @@ def _collection():
     return chromadb.PersistentClient(path=str(DATA_DIR / "chroma")).get_or_create_collection("classics")
 
 
-def index_vectors(rows: list[dict]) -> None:
+def index_vectors(rows: list[dict]) -> int:
     if not rows:
-        return
+        return 0
     collection = _collection()
+    indexed = 0
     for start in range(0, len(rows), 32):
         batch = rows[start:start + 32]
-        embeddings = _embed([row["body"] for row in batch])
+        existing = set(collection.get(ids=[row["id"] for row in batch])["ids"])
+        missing = [row for row in batch if row["id"] not in existing]
+        if not missing:
+            continue
+        embeddings = _embed([row["body"] for row in missing])
         collection.upsert(
-            ids=[row["id"] for row in batch],
+            ids=[row["id"] for row in missing],
             embeddings=embeddings,
-            documents=[row["body"] for row in batch],
-            metadatas=[{"title": row["title"], "chapter": row["chapter"]} for row in batch],
+            documents=[row["body"] for row in missing],
+            metadatas=[{"title": row["title"], "chapter": row["chapter"]} for row in missing],
         )
+        indexed += len(missing)
+    return indexed
 
 
 def retrieve_with_status(query: str, limit: int = 4) -> tuple[list[dict], str]:
@@ -119,7 +126,11 @@ def retrieve_with_status(query: str, limit: int = 4) -> tuple[list[dict], str]:
     if RAG_MODE == "hybrid" and rows:
         try:
             vector = _embed([query])[0]
-            vector_ids = _collection().query(query_embeddings=[vector], n_results=min(15, len(rows)))["ids"][0]
+            collection = _collection()
+            if collection.count() == 0:
+                warning = "向量索引为空，已退化为关键词检索；请先运行古籍向量建索引。"
+            else:
+                vector_ids = collection.query(query_embeddings=[vector], n_results=min(15, len(rows)))["ids"][0]
         except Exception as exc:
             warning = f"向量检索暂不可用，已退化为关键词检索：{type(exc).__name__}"
     scores: dict[str, float] = {}

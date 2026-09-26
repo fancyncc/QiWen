@@ -1,0 +1,162 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-serif, var(--font-sans));
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+  /* 系统中文衬线栈（标题用，避免加载大体积 CJK webfont；设备自带宋体/思源宋体） */
+  --font-serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif;
+  /* 淡蓝背景、白色卡片与清晰的蓝色交互；警告仍使用红色。 */
+  --background: #f3f8fe;
+  --foreground: #243c54;
+  --card: #ffffff;
+  --card-foreground: #243c54;
+  --popover: #ffffff;
+  --popover-foreground: #243c54;
+  --primary: #2767a3;
+  --primary-foreground: #ffffff;
+  --secondary: #e5f0fc;
+  --secondary-foreground: #315b82;
+  --muted: #edf4fc;
+  --muted-foreground: #60758a;
+  --accent: #d9eafa;
+  --accent-foreground: #245981;
+  --destructive: oklch(0.54 0.20 25);
+  --border: #d5e4f3;
+  --input: #c9ddef;
+  --ring: #4386bf;
+  --chart-1: #4386bf;
+  --chart-2: #74a9d8;
+  --chart-3: #56a6b0;
+  --chart-4: #596fac;
+  --chart-5: #8e9ed0;
+  --radius: 0.75rem;
+  --sidebar: #eaf3fd;
+  --sidebar-foreground: #243c54;
+  --sidebar-primary: #2767a3;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #d8eafa;
+  --sidebar-accent-foreground: #245981;
+  --sidebar-border: #d5e4f3;
+  --sidebar-ring: #4386bf;
+}
+
+.dark {
+  /* 暗色模式沿用蓝色交互与冷色背景。 */
+  --background: #142233;
+  --foreground: #e3eef9;
+  --card: #1d2e43;
+  --card-foreground: #e3eef9;
+  --popover: #1d2e43;
+  --popover-foreground: #e3eef9;
+  --primary: #8bbce9;
+  --primary-foreground: #142233;
+  --secondary: #253b54;
+  --secondary-foreground: #e3eef9;
+  --muted: #253b54;
+  --muted-foreground: #a2b8cd;
+  --accent: #304d69;
+  --accent-foreground: #e3eef9;
+  --destructive: oklch(0.65 0.18 25);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: #8bbce9;
+  --chart-1: #8bbce9;
+  --chart-2: #a5c7e6;
+  --chart-3: #7dbec6;
+  --chart-4: #92a4d8;
+  --chart-5: #b1bce4;
+  --sidebar: #192b3e;
+  --sidebar-foreground: #e3eef9;
+  --sidebar-primary: #8bbce9;
+  --sidebar-primary-foreground: #142233;
+  --sidebar-accent: #304d69;
+  --sidebar-accent-foreground: #e3eef9;
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: #8bbce9;
+}
+
+@layer components {
+  .auth-page {
+    background:
+      radial-gradient(ellipse at 20% 15%, color-mix(in srgb, var(--accent) 80%, transparent), transparent 50%),
+      radial-gradient(ellipse at 85% 85%, color-mix(in srgb, var(--secondary) 90%, transparent), transparent 45%),
+      var(--background);
+  }
+
+  .auth-card {
+    box-shadow: 0 24px 70px -24px color-mix(in srgb, var(--primary) 24%, transparent);
+  }
+
+  .chat-surface {
+    background: linear-gradient(160deg, var(--background), var(--card));
+  }
+
+  .chat-sidebar {
+    background: linear-gradient(180deg, var(--sidebar), var(--background));
+  }
+
+  .chat-composer {
+    box-shadow: 0 8px 32px -12px color-mix(in srgb, var(--primary) 18%, transparent);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+  h1, h2, h3, h4 {
+    @apply font-heading;
+  }
+}

@@ -65,3 +65,36 @@ def seed_bundled_knowledge(db: sqlite3.Connection) -> None:
         [(item["herb"], item["type"], item["detail"], item["severity"], "LingYi 基础种子")
          for item in data["contraindications"]],
     )
+
+
+def seed_structured_dosage(db: sqlite3.Connection) -> None:
+    from .prescription import herb_id, parse_seed_dosage, structured_herb
+    for column in ("herb_id", "structured_dosage", "source_ids", "verification_status"):
+        _column(db, "herbs", column)
+    _column(db, "formulas", "structured_herbs")
+    data = json.loads(SEED_FILE.read_text(encoding="utf-8"))
+    def evidence(identifier, name, raw, preparation, source, locator):
+        dosage = parse_seed_dosage(raw)
+        db.execute("""INSERT OR IGNORE INTO dosage_evidence(id,herb_id,herb_name,min_dose,max_dose,unit,raw_dosage,
+            preparation,source,source_locator,data_version) VALUES(?,?,?,?,?,?,?,?,?,?,?)""",
+            (identifier, herb_id(name), name, dosage["min"], dosage["max"], dosage["unit"], raw,
+             preparation, source, locator, "LingYi-cb6b49d-seed-v1"))
+        return structured_herb(name, raw_dosage=raw, preparation=preparation, source_ids=[identifier])
+    for index, item in enumerate(data["herbs"]):
+        identifier = "seed:" + herb_id(item["name"])
+        herb = evidence(identifier, item["name"], item["dosage"], item["processing"], "LingYi 基础种子",
+                        f"knowledge_seed.json#/herbs/{index}")
+        db.execute("UPDATE herbs SET herb_id=?,structured_dosage=?,source_ids=?,verification_status='unverified' WHERE name=? AND structured_dosage=''",
+                   (herb["herb_id"], json.dumps(herb["dosage"]), json.dumps(herb["source_ids"]), item["name"]))
+    for index, item in enumerate(data["formulas"]):
+        herbs = []
+        for position, entry in enumerate(item["composition"]):
+            identifier = "seed:formula:" + str(index) + ":" + str(position)
+            herbs.append(evidence(identifier, entry["herb"], entry.get("dosage", ""), entry.get("preparation", ""),
+                                  item["source"], f"knowledge_seed.json#/formulas/{index}/composition/{position}"))
+        db.execute("UPDATE formulas SET structured_herbs=? WHERE name=? AND structured_herbs=''",
+                   (json.dumps(herbs, ensure_ascii=False), item["name"]))
+    for name, in db.execute("SELECT name FROM herbs WHERE herb_id=''").fetchall():
+        herb = structured_herb(name)
+        db.execute("UPDATE herbs SET herb_id=?,structured_dosage=?,source_ids='[]',verification_status='unverified' WHERE name=?",
+                   (herb["herb_id"], json.dumps(herb["dosage"]), name))

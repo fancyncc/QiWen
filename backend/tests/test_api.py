@@ -43,8 +43,13 @@ def test_accounts_threads_profiles_and_file_isolation():
         uploaded = client.post("/api/upload", headers=auth(a), files={"file": ("note.txt", b"hello", "text/plain")})
         assert uploaded.status_code == 201
         file_id = uploaded.json()["id"]
+        assert any(item["id"] == file_id for item in client.get("/api/uploads", headers=auth(a)).json())
+        assert all(item["id"] != file_id for item in client.get("/api/uploads", headers=auth(b)).json())
         denied = client.post("/api/chat", headers=auth(b), json={"message": "你好", "files": [file_id]})
         assert denied.status_code == 404
+        assert client.delete(f"/api/uploads/{file_id}", headers=auth(b)).status_code == 404
+        assert client.delete(f"/api/uploads/{file_id}", headers=auth(a)).status_code == 204
+        assert all(item["id"] != file_id for item in client.get("/api/uploads", headers=auth(a)).json())
         assert client.post("/api/chat", headers=auth(b), json={"message": "你好", "thread_id": thread}).status_code == 404
         assert client.get("/api/profiles/" + b_id, headers=auth(b)).status_code == 200
 
@@ -55,7 +60,7 @@ def test_followup_sse_multi_and_history():
         headers = auth(token)
         thread = client.post("/api/threads", headers=headers, json={"mode": "fixed"}).json()["id"]
         first = client.post("/api/chat", headers=headers, json={"message": "最近失眠", "thread_id": thread}).json()
-        assert first["intent_type"] == "consult"
+        assert first.get("intent_type") == "consult", first
         assert client.get("/api/threads", headers=headers).json()[0]["title"] == "最近失眠"
         second = client.post("/api/chat", headers=headers, json={"message": "三天，白天有些疲劳", "thread_id": thread}).json()
         assert second["intent_type"] == "diagnose"
@@ -79,9 +84,13 @@ def test_followup_sse_multi_and_history():
         for stage in ("inquiry", "search", "bianzheng", "formula", "herb", "synthesis", "reviewer", "safety"):
             assert at(stage, "start") < at(stage, "done")
         assert at("synthesis", "start") > max(at(stage, "done") for stage in ("bianzheng", "formula", "herb"))
-        assert any("token" in item for item in events)
+        assert any(item["type"] == "candidate.delta" for item in events)
         assert events[-1]["done"] is True
         assert len(events[-1]["notes"]) == 3
+        assert [note["expert"] for note in events[-1]["notes"]] == ["辨证", "方剂", "本草"]
+        assert all(note.get("evidence") and note.get("reasoning") for note in events[-1]["notes"])
+        assert "药材清单已隐藏" in events[-1]["notes"][1]["content"]
+        assert events[-1]["notes"][2]["warning"]
         assert len(client.get(f"/api/threads/{multi}/messages", headers=headers).json()) == 2
 
         client.patch(f"/api/profiles/{user_id}", headers=headers, json={"allergies": ""})
@@ -89,6 +98,61 @@ def test_followup_sse_multi_and_history():
                               json={"message": "最近总是睡不好，白天容易疲劳"}).json()
         assert "失眠" in example["symptoms"]
         assert "酸枣仁汤" in example["response"]
+
+
+def test_multi_expert_cards_are_persisted_after_safety_review():
+    with TestClient(app) as client:
+        token, user_id = register(client, "experts_" + uuid4().hex[:6])
+        headers = auth(token)
+        thread = client.post("/api/threads", headers=headers, json={"mode": "multi"}).json()["id"]
+        result = client.post("/api/chat", headers=headers,
+                             json={"message": "最近失眠三天，白天疲劳", "thread_id": thread}).json()
+        assert "## 会诊综合" in result["response"]
+        assert [note["expert"] for note in result["notes"]] == ["辨证", "方剂", "本草"]
+        assert result["notes"][0]["status"] == "资料有限"
+        assert "酸枣仁汤" in result["notes"][1]["content"]
+        assert result["notes"][2]["warning"] == ""
+        saved = client.get(f"/api/threads/{thread}/messages", headers=headers).json()[-1]
+        assert saved["notes"] == result["notes"]
+
+        client.patch(f"/api/profiles/{user_id}", headers=headers, json={"allergies": "甘草"})
+        blocked = client.post("/api/chat", headers=headers,
+                              json={"message": "最近失眠三天，白天疲劳", "thread_id": thread}).json()
+        assert "药材清单已隐藏" in blocked["response"]
+        assert "酸枣仁汤" not in blocked["notes"][1]["content"]
+        assert "甘草" in blocked["notes"][2]["warning"]
+
+
+def test_contextual_followup_preserves_denials_without_searching_them(monkeypatch):
+    from app import workflow
+
+    assert workflow.symptom_observations("没有口干口苦、腹痛，舌苔发白") == (
+        ["舌苔白"], ["腹痛", "口干", "口苦"],
+    )
+    queries = []
+    monkeypatch.setattr(workflow, "retrieve_with_status",
+                        lambda query: (queries.append(query) or [], ""))
+    with TestClient(app) as client:
+        token, _ = register(client, "followup_" + uuid4().hex[:6])
+        headers = auth(token)
+        thread = client.post("/api/threads", headers=headers, json={"mode": "multi"}).json()["id"]
+        first = client.post("/api/chat", headers=headers,
+                            json={"message": "肚子胀、怕冷、大便稀", "thread_id": thread}).json()
+        assert first["intent_type"] == "consult"
+        assert "腹痛" in first["response"] and "舌苔" in first["response"]
+        assert "formula" not in [event["stage"] for event in
+               client.get(f"/api/threads/{thread}/messages", headers=headers).json()[-1]["trace"]["events"]]
+
+        second = client.post("/api/chat", headers=headers,
+                             json={"message": "没有口干口苦、腹痛，舌苔发白，大概两三天吧", "thread_id": thread}).json()
+        assert second["intent_type"] == "diagnose"
+        assert {"腹胀", "怕冷", "大便稀", "舌苔白"} <= set(second["symptoms"])
+        assert not {"腹痛", "口干", "口苦"} & set(second["symptoms"])
+        assert "用户表示没有" in second["response"]
+        assert "腹痛" in second["notes"][0]["evidence"]
+        assert [note["expert"] for note in second["notes"]] == ["辨证", "方剂", "本草"]
+        assert queries and all("腹痛" not in query and "口干" not in query and "口苦" not in query
+                               for query in queries)
 
 
 def test_upload_validation_and_retrieval(tmp_path, monkeypatch):
@@ -102,6 +166,18 @@ def test_upload_validation_and_retrieval(tmp_path, monkeypatch):
         stream = io.BytesIO()
         doc.save(stream)
         assert client.post("/api/upload", headers=headers, files={"file": ("note.docx", stream.getvalue())}).status_code == 201
+        symptom_doc = Document()
+        symptom_doc.add_paragraph("已经失眠三天，伴有疲劳。")
+        symptom_stream = io.BytesIO()
+        symptom_doc.save(symptom_stream)
+        symptom_file = client.post("/api/upload", headers=headers,
+                                  files={"file": ("symptoms.docx", symptom_stream.getvalue())}).json()["id"]
+        attached = client.post("/api/chat", headers=headers,
+                               json={"message": "请看附件", "files": [symptom_file]}).json()
+        assert attached["intent_type"] == "diagnose"
+        assert "失眠" in attached["symptoms"]
+        attached_trace = client.get(f'/api/threads/{attached["thread_id"]}/messages', headers=headers).json()[-1]["trace"]["events"]
+        assert any(event["stage"] == "document_parse" and event["status"] == "done" for event in attached_trace)
         writer = PdfWriter()
         writer.add_blank_page(width=300, height=300)
         valid_pdf = io.BytesIO()
@@ -133,6 +209,44 @@ def test_contraindication_rules():
     assert not check_herbs(["酸枣仁", "茯苓", "知母", "川芎", "甘草"])
 
 
+def test_followup_herb_addition_checks_prior_formula_and_isolates_threads():
+    from app.db import connection
+
+    with TestClient(app) as client:
+        token, _ = register(client, "herb_" + uuid4().hex[:6])
+        headers = auth(token)
+        original = client.post("/api/chat", headers=headers,
+                               json={"message": "最近失眠三天，白天疲劳"}).json()
+        thread = original["thread_id"]
+        assert "甘草" in original["response"]
+        warning = client.post("/api/chat", headers=headers,
+                              json={"message": "可以加海藻吗？", "thread_id": thread}).json()
+        assert warning["intent_type"] == "safety_rejected"
+        assert all(word in warning["response"] for word in ("安全警告", "甘草", "海藻", "十八反"))
+        assert "严重毒副作用" not in warning["response"]
+        trace = client.get(f"/api/threads/{thread}/messages", headers=headers).json()[-1]["trace"]["events"]
+        stages = [event["stage"] for event in trace if event["status"] == "start"]
+        assert "pre_safety" in stages and "inquiry" not in stages and "formula" not in stages
+
+        independent = client.post("/api/chat", headers=headers,
+                                  json={"message": "可以加海藻吗？"}).json()
+        assert independent["intent_type"] == "safety_advisory"
+        assert "完整药材清单" in independent["response"]
+        assert "甘草" not in independent["response"]
+
+        with connection() as db:
+            db.execute("UPDATE messages SET plan=NULL WHERE thread_id=? AND role='assistant'", (thread,))
+        legacy = client.post("/api/chat", headers=headers,
+                             json={"message": "海藻能和这个方子一起用吗？", "thread_id": thread}).json()
+        assert legacy["intent_type"] == "safety_rejected"
+        assert "十八反·甘草" in legacy["response"]
+
+        direct = client.post("/api/chat", headers=headers,
+                             json={"message": "甘草和海藻可以一起用吗？"}).json()
+        assert direct["intent_type"] == "safety_rejected"
+        assert "十八反·甘草" in direct["response"]
+
+
 def test_bundled_classics_seed_is_complete_and_idempotent():
     from app.corpus_seed import BOOKS, seed_bundled_corpus
     from app.db import connection
@@ -161,3 +275,73 @@ def test_bundled_data_can_be_rebuilt_from_preserved_sources():
     saved_knowledge = json.loads(KNOWLEDGE_FILE.read_text(encoding="utf-8"))
     assert saved_knowledge == rebuild_knowledge()
     assert [len(saved_knowledge[key]) for key in ("herbs", "formulas", "contraindications")] == [33, 22, 14]
+
+
+def test_full_branching_flow_persists_trace_and_user_memory(monkeypatch):
+    from app import workflow
+
+    calls = []
+    def staged_retrieval(query: str):
+        calls.append(query)
+        if len(calls) == 1:
+            return [], ""
+        return [{"title": "测试古籍", "chapter": "测试章", "body": "失眠疲劳的测试片段。"}], ""
+    monkeypatch.setattr(workflow, "retrieve_with_status", staged_retrieval)
+    monkeypatch.setattr(workflow, "CONTEXT_CHAR_LIMIT", 1)
+    with TestClient(app) as client:
+        token, user_id = register(client, "branch_" + uuid4().hex[:6])
+        other, _ = register(client, "branch_" + uuid4().hex[:6])
+        headers = auth(token)
+        client.patch(f"/api/profiles/{user_id}", headers=headers, json={"allergies": "甘草"})
+        thread_id = client.post("/api/threads", headers=headers, json={"mode": "fixed"}).json()["id"]
+        result = client.post("/api/chat", headers=headers,
+                             json={"message": "最近失眠三天，白天疲劳", "thread_id": thread_id})
+        assert result.status_code == 200, result.text
+        assert "药材清单已隐藏" in result.json()["response"]
+        assert len(calls) == 2
+        saved = client.get(f"/api/threads/{thread_id}/messages", headers=headers).json()[-1]
+        stages = [item["stage"] for item in saved["trace"]["events"] if item["status"] == "start"]
+        assert stages[:5] == ["prepare", "document_parse", "memory_load", "pre_safety", "inquiry"]
+        assert stages.count("search") == 2
+        assert stages.count("revise_formula") == 2
+        assert stages.count("safety") == 3
+        assert "rewrite_query" in stages and "evaluate_retrieval" in stages
+        assert stages[-4:] == ["context_budget", "compress_context", "profile_write", "finish"]
+        profile = client.get(f"/api/profiles/{user_id}", headers=headers).json()
+        assert profile["allergies"] == "甘草"
+        assert profile["memories"][0]["thread_id"] == thread_id
+        assert client.delete(f"/api/profiles/{user_id}/memories/{thread_id}", headers=auth(other)).status_code == 403
+        assert client.delete(f"/api/profiles/{user_id}/memories/{thread_id}", headers=headers).status_code == 204
+        assert client.get(f"/api/profiles/{user_id}", headers=headers).json()["memories"] == []
+
+
+def test_skip_urgent_and_exhausted_retrieval_routes(monkeypatch):
+    from app import workflow
+
+    with TestClient(app) as client:
+        token, _ = register(client, "routes_" + uuid4().hex[:6])
+        headers = auth(token)
+        skipped = client.post("/api/chat", headers=headers,
+                              json={"message": "最近失眠三天，不用查古籍"}).json()
+        skipped_trace = client.get(f'/api/threads/{skipped["thread_id"]}/messages', headers=headers).json()[-1]["trace"]["events"]
+        skipped_stages = [event["stage"] for event in skipped_trace if event["status"] == "start"]
+        assert "rag_decision" in skipped_stages and "search" not in skipped_stages
+        assert "本轮按要求未检索古籍" in skipped["response"]
+
+        urgent = client.post("/api/chat", headers=headers,
+                             json={"message": "现在胸痛，呼吸困难"}).json()
+        urgent_trace = client.get(f'/api/threads/{urgent["thread_id"]}/messages', headers=headers).json()[-1]["trace"]["events"]
+        urgent_stages = [event["stage"] for event in urgent_trace if event["status"] == "start"]
+        assert urgent["intent_type"] == "safety_rejected"
+        assert "pre_safety" in urgent_stages and "inquiry" not in urgent_stages
+        assert "profile_write" in urgent_stages
+
+        monkeypatch.setattr(workflow, "retrieve_with_status", lambda query: ([], ""))
+        exhausted = client.post("/api/chat", headers=headers,
+                                json={"message": "最近咳嗽三天，伴有疲劳"}).json()
+        exhausted_trace = client.get(f'/api/threads/{exhausted["thread_id"]}/messages', headers=headers).json()[-1]["trace"]["events"]
+        exhausted_stages = [event["stage"] for event in exhausted_trace if event["status"] == "start"]
+        assert exhausted_stages.count("search") == 3
+        assert exhausted_stages.count("rewrite_query") == 2
+        assert "检索结果相关性不足" in exhausted["response"]
+        assert "当前没有可引用的古籍片段" in exhausted["response"]

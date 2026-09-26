@@ -56,9 +56,31 @@ def normalize(name: str) -> str:
     return ALIASES.get(name, name)
 
 
+def mentioned_herbs(text: str) -> list[str]:
+    """Find named herbs in a short follow-up, preferring longer aliases."""
+    spans: list[tuple[int, int]] = []
+    found: list[str] = []
+    for name in sorted(KNOWN | set(ALIASES), key=len, reverse=True):
+        for match in re.finditer(re.escape(name), text):
+            span = match.span()
+            if any(start < span[1] and span[0] < end for start, end in spans):
+                continue
+            spans.append(span)
+            canonical = normalize(name)
+            if canonical not in found:
+                found.append(canonical)
+    return found
+
+
+def contains_dosing(text: str) -> bool:
+    return bool(re.search(r"(?:\d+(?:\.\d+)?|[一二三四五六七八九十百半]+)\s*(?:克|毫克|毫升|钱|两|[gG](?![a-zA-Z])|mg|ml)|每日.{0,12}(?:服|煎)|水煎服", text))
+
+
 def check_herbs(herbs: list[str] | None) -> list[str]:
     if not herbs or any(not isinstance(item, str) or not item.strip() for item in herbs):
         return ["无法解析完整药材清单，不能判定配伍安全"]
+    if any(contains_dosing(item) for item in herbs):
+        return ["候选药材包含不允许展示的剂量或用法"]
     names = {normalize(item) for item in herbs}
     errors = []
     unknown = names - KNOWN

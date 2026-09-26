@@ -29,6 +29,7 @@ def connection():
 
 def init_db() -> None:
     with connection() as db:
+        permissions_existed = db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='user_permissions'").fetchone()
         db.executescript("""
         CREATE TABLE IF NOT EXISTS users (
           id TEXT PRIMARY KEY, username TEXT UNIQUE NOT NULL,
@@ -50,10 +51,42 @@ def init_db() -> None:
         CREATE TABLE IF NOT EXISTS messages (
           id TEXT PRIMARY KEY, thread_id TEXT NOT NULL REFERENCES threads(id) ON DELETE CASCADE,
           role TEXT NOT NULL, content TEXT NOT NULL,
-          intent_type TEXT, symptoms TEXT, notes TEXT,
+          intent_type TEXT, symptoms TEXT, notes TEXT, trace TEXT, plan TEXT,
           created_at TEXT NOT NULL
         );
         CREATE INDEX IF NOT EXISTS messages_thread_idx ON messages(thread_id, created_at);
+        CREATE TABLE IF NOT EXISTS chat_runs (
+          id TEXT PRIMARY KEY, thread_id TEXT NOT NULL REFERENCES threads(id) ON DELETE CASCADE,
+          user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          status TEXT NOT NULL, telemetry TEXT NOT NULL DEFAULT '{}',
+          created_at TEXT NOT NULL, updated_at TEXT NOT NULL
+        );
+        CREATE UNIQUE INDEX IF NOT EXISTS one_running_per_thread ON chat_runs(thread_id) WHERE status IN ('running','cancelling');
+        CREATE TABLE IF NOT EXISTS candidates (
+          id TEXT PRIMARY KEY, run_id TEXT NOT NULL REFERENCES chat_runs(id) ON DELETE CASCADE,
+          status TEXT NOT NULL, content TEXT NOT NULL DEFAULT '', plan TEXT, review TEXT,
+          created_at TEXT NOT NULL, updated_at TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS run_events (
+          run_id TEXT NOT NULL REFERENCES chat_runs(id) ON DELETE CASCADE,
+          sequence INTEGER NOT NULL, candidate_id TEXT, type TEXT NOT NULL, payload TEXT NOT NULL,
+          PRIMARY KEY(run_id,sequence)
+        );
+        CREATE TABLE IF NOT EXISTS dosage_evidence (
+          id TEXT PRIMARY KEY, herb_id TEXT NOT NULL, herb_name TEXT NOT NULL,
+          min_dose REAL, max_dose REAL, unit TEXT NOT NULL, raw_dosage TEXT NOT NULL,
+          preparation TEXT NOT NULL, source TEXT NOT NULL, source_locator TEXT NOT NULL,
+          data_version TEXT NOT NULL, verification_status TEXT NOT NULL DEFAULT 'unverified',
+          population TEXT NOT NULL DEFAULT 'unknown', reviewed_by TEXT, reviewed_at TEXT
+        );
+        CREATE TABLE IF NOT EXISTS user_permissions (
+          user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE, scope TEXT NOT NULL,
+          PRIMARY KEY(user_id,scope)
+        );
+        CREATE TABLE IF NOT EXISTS profile_access_audit (
+          id TEXT PRIMARY KEY, caller_id TEXT, patient_id TEXT, transport TEXT NOT NULL,
+          result TEXT NOT NULL, created_at TEXT NOT NULL
+        );
         CREATE TABLE IF NOT EXISTS uploads (
           id TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
           original_name TEXT NOT NULL, storage_name TEXT NOT NULL,
@@ -76,7 +109,25 @@ def init_db() -> None:
           kind TEXT NOT NULL, left_name TEXT NOT NULL, right_name TEXT NOT NULL,
           source TEXT NOT NULL, PRIMARY KEY(kind,left_name,right_name)
         );
+        CREATE TABLE IF NOT EXISTS profile_memories (
+          thread_id TEXT PRIMARY KEY REFERENCES threads(id) ON DELETE CASCADE,
+          user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          summary TEXT NOT NULL,
+          updated_at TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS profile_memories_user_idx
+          ON profile_memories(user_id, updated_at DESC);
         """)
+        if "trace" not in {row[1] for row in db.execute("PRAGMA table_info(messages)")}:
+            db.execute("ALTER TABLE messages ADD COLUMN trace TEXT")
+        if "plan" not in {row[1] for row in db.execute("PRAGMA table_info(messages)")}:
+            db.execute("ALTER TABLE messages ADD COLUMN plan TEXT")
+        if "prescription_review" not in {row[1] for row in db.execute("PRAGMA table_info(messages)")}:
+            db.execute("ALTER TABLE messages ADD COLUMN prescription_review TEXT")
+        if "candidate_id" not in {row[1] for row in db.execute("PRAGMA table_info(messages)")}:
+            db.execute("ALTER TABLE messages ADD COLUMN candidate_id TEXT")
+        if not permissions_existed:
+            db.execute("INSERT OR IGNORE INTO user_permissions SELECT id,'profile:read' FROM users")
         from .safety import GROUPS, KNOWN, PAIRS
         source = "DB4403/T 142-2021 附录 C"
         db.executemany(
@@ -100,6 +151,8 @@ def init_db() -> None:
         )
         from .knowledge_seed import seed_bundled_knowledge
         seed_bundled_knowledge(db)
+        from .knowledge_seed import seed_structured_dosage
+        seed_structured_dosage(db)
         from .corpus_seed import seed_bundled_corpus
         seed_bundled_corpus(db)
 
