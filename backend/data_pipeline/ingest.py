@@ -11,6 +11,7 @@ TCM 数据入库脚本 — 读取古籍文本，切分为 Chunk，输出 JSON �
 
 import argparse
 import asyncio
+import hashlib
 import json
 import logging
 import os
@@ -38,12 +39,18 @@ TCM_FILES: dict[str, str] = {
 }
 
 
+def source_path(directory: str | Path, book: str) -> Path:
+    """Accept both preserved upstream filenames and QiWen's book.txt names."""
+    preferred = Path(directory) / TCM_FILES[book]
+    return preferred if preferred.is_file() else Path(directory) / f"{book}.txt"
+
+
 def chunk_all_books(tcm_data_dir: str) -> dict[str, list[Chunk]]:
     """对所有古籍执行切分（各书 Chunker + 统一归一化后处理）。"""
     all_chunks: dict[str, list[Chunk]] = {}
 
     for book_name, filename in TCM_FILES.items():
-        filepath = os.path.join(tcm_data_dir, filename)
+        filepath = source_path(tcm_data_dir, book_name)
         if not os.path.exists(filepath):
             logger.warning("文件不存在: %s", filepath)
             continue
@@ -52,14 +59,11 @@ def chunk_all_books(tcm_data_dir: str) -> dict[str, list[Chunk]]:
         with open(filepath, encoding="utf-8") as f:
             text = f.read()
 
-        chunker = get_chunker(book_name)
-        chunks = _normalize_chunks(chunker.chunk(text), book_name)
+        chunks = chunk_text(text, book_name, deduplicate=False)
         all_chunks[book_name] = chunks
         logger.info("  %s: %d 个 chunk", book_name, len(chunks))
 
     # 全库内容去重（脉经底本存在整卷重复内容；重复 chunk 对检索无增益且浪费嵌入）
-    import hashlib
-
     seen_md5: set[str] = set()
     for book_name, chunks in all_chunks.items():
         unique: list[Chunk] = []
@@ -74,6 +78,57 @@ def chunk_all_books(tcm_data_dir: str) -> dict[str, list[Chunk]]:
         all_chunks[book_name] = unique
 
     return all_chunks
+
+
+def resolve_book(name: str) -> str | None:
+    name = name.strip().strip("《》").replace("·", "-").replace("—", "-")
+    if name in TCM_FILES:
+        return name
+    return next((book for book, filename in TCM_FILES.items() if name == Path(filename).stem), None)
+
+
+def _paragraph_chunks(text: str, title: str) -> list[Chunk]:
+    """Unknown books: headings and blank-line paragraphs, without overlap."""
+    chunks, lines = [], []
+    chapter = "未标章节"
+    def flush():
+        content = "\n".join(lines).strip()
+        if content:
+            chunks.append(Chunk(f"TEXT_{len(chunks) + 1:05d}", content,
+                                {"book": title, "chapter": chapter}))
+        lines.clear()
+    for line in text.splitlines():
+        heading = re.match(r"^#{1,6}[ \t]+(.+)$", line)
+        chinese_heading = re.match(r"^第[零〇一二三四五六七八九十百千\d]+[章卷篇].*$", line)
+        if heading or chinese_heading:
+            flush()
+            chapter = heading.group(1).strip() if heading else line.strip()
+        elif not line.strip():
+            flush()
+        else:
+            lines.append(line)
+    flush()
+    return chunks
+
+
+def chunk_text(text: str, title: str, *, book: str | None = None, deduplicate=True) -> list[Chunk]:
+    """Structure -> shared filtering -> ~500 characters -> content MD5 dedup."""
+    selected = resolve_book(book if book is not None else title)
+    if book is not None and selected is None:
+        raise ValueError(f"Unsupported book: {book}")
+    initial = get_chunker(selected).chunk(text) if selected else _paragraph_chunks(text, title)
+    if selected and text.strip() and not initial:
+        raise ValueError(f"未识别《{selected}》的章节/条目格式，请调整对应切分器")
+    normalized = _normalize_chunks(initial, selected or title)
+    if not deduplicate:
+        return normalized
+    result, seen = [], set()
+    for chunk in normalized:
+        fingerprint = hashlib.md5(chunk.content.encode()).hexdigest()
+        if fingerprint not in seen:
+            result.append(chunk)
+            seen.add(fingerprint)
+    return result
 
 
 # ==================== 归一化后处理（处理各书格式差异的共性问题）====================
@@ -92,7 +147,7 @@ _MAX_CHUNK_LEN = 500  # 超长 chunk 再切到条文级粒度（古籍原文单�
 def _split_long_chunk(c: Chunk, max_len: int) -> list[Chunk]:
     """超长 chunk 按句号边界再切（metadata 继承，id 加序号后缀）。
 
-    单句超长时降级按 ；，、 二级切分，仍超长则硬切窗口。
+    单句超长时按 ；，、 二级切分；无合适标点时允许超限，不做硬窗口。
     """
     # 二级切分：单句 > max_len 时按 ；，、 再切
     sentences: list[str] = []
@@ -119,7 +174,7 @@ def _split_long_chunk(c: Chunk, max_len: int) -> list[Chunk]:
         buf.append(s)
         # 阈值按 len+2 计（join 分隔符「。\n」占 2 字符），保证产出块不超 max_len
         if sum(len(x) + 2 for x in buf) > max_len:
-            content = "。\n".join(buf[:-1]) + "。"
+            content = "。\n".join(buf[:-1]) + "。" if len(buf) > 1 else ""
             if content.strip():
                 out.append(Chunk(
                     id=f"{c.id}_{part_no}",
@@ -255,58 +310,24 @@ def generate_mock_data(all_chunks: dict[str, list[Chunk]], output_path: str) -> 
     logger.info("Mock 数据已生成: %s", output_path)
 
 
-async def ingest_to_chroma(all_chunks: dict[str, list[Chunk]], settings) -> int:
-    """
-    将切分结果批量嵌入并写入 ChromaDB。
+async def ingest_to_chroma(all_chunks: dict[str, list[Chunk]]) -> int:
+    """Use QiWen's own SQLite, embedding API and resumable Chroma index."""
+    from app.config import API_BASE, API_KEY
+    if not API_BASE or not API_KEY or not os.getenv("QIWEN_EMBEDDING_MODEL"):
+        raise RuntimeError("请配置 QIWEN_MODEL_BASE_URL/API_KEY 和 QIWEN_EMBEDDING_MODEL")
 
-    使用 settings 中的 embedding 配置创建嵌入模型与 ChromaRAGClient，
-    分批 add_documents（每批 BATCH_SIZE 条），确保入库与查询嵌入空间一致。
-    """
-    from lingyi.models.factory import create_embeddings
-    from lingyi.rag.chroma import ChromaRAGClient
-    from tqdm import tqdm
+    def write():
+        from app.db import init_db, connection, all_rows
+        from app.corpus_seed import store_chunks
+        from app.retrieval import index_vectors
+        init_db()
+        with connection() as db:
+            for book, chunks in all_chunks.items():
+                store_chunks(db, book, chunks)
+        rows = all_rows("SELECT id,title,chapter,body,metadata FROM corpus ORDER BY id")
+        return index_vectors(rows)
 
-    BATCH_SIZE = 64
-    embedder = create_embeddings(settings)
-    client = ChromaRAGClient(
-        chroma_db_dir=settings.chroma_db_dir,
-        embedding_model=embedder,
-    )
-
-    total = 0
-    skipped = 0
-    # 断点续传：按内容指纹（md5）跳过已入库文档，中断后重跑只嵌入剩余部分
-    existing = await client.existing_ids()
-    logger.info("断点续传: 库中已有 %d 条，跳过重复", len(existing))
-
-    for book_name, chunks in all_chunks.items():
-        docs = [
-            {"content": c.content, "metadata": {"book": book_name, **c.metadata}}
-            for c in chunks
-        ]
-        # 分批入库，避免单批过大撑爆内存/embedding 请求
-        for i in tqdm(
-            range(0, len(docs), BATCH_SIZE),
-            desc=book_name,
-            unit="batch",
-        ):
-            batch = docs[i : i + BATCH_SIZE]
-            # 跳过本批中按内容指纹已入库的文档
-            import hashlib
-
-            new_docs = [
-                d for d in batch
-                if hashlib.md5(d["content"].encode()).hexdigest() not in existing
-            ]
-            if not new_docs:
-                skipped += len(batch)
-                continue
-            n = await client.add_documents(new_docs)
-            total += n
-        logger.info("%s: 入库 %d 条", book_name, len(docs))
-    if skipped:
-        logger.info("断点续传: 跳过已入库 %d 条", skipped)
-    return total
+    return await asyncio.to_thread(write)
 
 
 def main():
@@ -315,7 +336,7 @@ def main():
 
     parser = argparse.ArgumentParser(description="TCM 数据入库脚本")
     parser.add_argument("--mode", choices=["json", "chroma", "mock"], default="json")
-    parser.add_argument("--tcm-dir", default=str(_PROJECT_ROOT / "TCM_data"))
+    parser.add_argument("--tcm-dir", default=str(_PROJECT_ROOT / "resources" / "classics_source"))
     parser.add_argument("--output-dir", default=str(_PROJECT_ROOT / "storage" / "chunks"))
     args = parser.parse_args()
 
@@ -331,12 +352,9 @@ def main():
         generate_mock_data(all_chunks, mock_path)
         print(f"\nMock 数据已保存到: {mock_path}")
     elif args.mode == "chroma":
-        from lingyi.config import get_settings
-
-        settings = get_settings()
-        print(f"Embedding 模型: {settings.embedding_model_name} ({settings.embedding_mode})")
-        total = asyncio.run(ingest_to_chroma(all_chunks, settings))
-        print(f"\nChromaDB 入库完成: 共 {total} 条文档 -> {settings.chroma_db_dir}")
+        print(f"Embedding 模型: {os.getenv('QIWEN_EMBEDDING_MODEL') or '未配置'}（岐问兼容接口）")
+        total = asyncio.run(ingest_to_chroma(all_chunks))
+        print(f"\nChromaDB 索引完成: 新增 {total} 个向量，已存在的片段只刷新元数据")
 
 
 if __name__ == "__main__":

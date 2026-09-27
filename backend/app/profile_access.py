@@ -19,11 +19,14 @@ def read_profile(caller_id: str | None, patient_id: str | None, *, transport: st
         result = "forbidden"
         if caller_id != patient_id or not one("SELECT scope FROM user_permissions WHERE user_id=? AND scope='profile:read'", (caller_id,)):
             raise PermissionError("缺少本人画像的 profile:read 权限")
-        row = one("SELECT constitution,allergies,history FROM profiles WHERE user_id=?", (caller_id,))
+        row = one("SELECT user_id FROM profiles WHERE user_id=?", (caller_id,))
         result = "not_found"
         if row is None:
             raise PermissionError("画像不存在")
         result = "success"
-        return row
+        from .safety_store import effective_profile
+        with connection() as db:
+            profile = effective_profile(db, caller_id)
+        return {key: profile[key] for key in ("constitution", "allergies", "history")}
     finally:
         audit(caller_id, patient_id, transport, result)

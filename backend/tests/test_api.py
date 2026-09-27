@@ -130,8 +130,10 @@ def test_contextual_followup_preserves_denials_without_searching_them(monkeypatc
         ["舌苔白"], ["腹痛", "口干", "口苦"],
     )
     queries = []
-    monkeypatch.setattr(workflow, "retrieve_with_status",
-                        lambda query: (queries.append(query) or [], ""))
+    async def capture(plan):
+        queries.append(plan["keyword_query"])
+        return [], {"warning": ""}
+    monkeypatch.setattr(workflow, "retrieve_classics", capture)
     with TestClient(app) as client:
         token, _ = register(client, "followup_" + uuid4().hex[:6])
         headers = auth(token)
@@ -174,10 +176,16 @@ def test_upload_validation_and_retrieval(tmp_path, monkeypatch):
                                   files={"file": ("symptoms.docx", symptom_stream.getvalue())}).json()["id"]
         attached = client.post("/api/chat", headers=headers,
                                json={"message": "请看附件", "files": [symptom_file]}).json()
-        assert attached["intent_type"] == "diagnose"
-        assert "失眠" in attached["symptoms"]
+        assert attached["intent_type"] == "consult"
+        assert attached["trace"]["inquiry"]["pending"]["kind"] == "subject"
         attached_trace = client.get(f'/api/threads/{attached["thread_id"]}/messages', headers=headers).json()[-1]["trace"]["events"]
         assert any(event["stage"] == "document_parse" and event["status"] == "done" for event in attached_trace)
+        confirmed = client.post("/api/chat", headers=headers,
+                                json={"message": "附件是我本人的病历", "thread_id": attached["thread_id"]}).json()
+        assert confirmed["intent_type"] == "diagnose"
+        assert "失眠" in confirmed["symptoms"]
+        assert all(f["source"]["kind"] == "attachment" and f.get("ownership_confirmed_by")
+                   for f in confirmed["trace"]["inquiry"]["facts"])
         writer = PdfWriter()
         writer.add_blank_page(width=300, height=300)
         valid_pdf = io.BytesIO()
@@ -281,12 +289,12 @@ def test_full_branching_flow_persists_trace_and_user_memory(monkeypatch):
     from app import workflow
 
     calls = []
-    def staged_retrieval(query: str):
-        calls.append(query)
+    async def staged_retrieval(plan):
+        calls.append(plan["keyword_query"])
         if len(calls) == 1:
-            return [], ""
-        return [{"title": "测试古籍", "chapter": "测试章", "body": "失眠疲劳的测试片段。"}], ""
-    monkeypatch.setattr(workflow, "retrieve_with_status", staged_retrieval)
+            return [], {"warning": ""}
+        return [{"title": "测试古籍", "chapter": "测试章", "body": "失眠疲劳的测试片段。"}], {"warning": ""}
+    monkeypatch.setattr(workflow, "retrieve_classics", staged_retrieval)
     monkeypatch.setattr(workflow, "CONTEXT_CHAR_LIMIT", 1)
     with TestClient(app) as client:
         token, user_id = register(client, "branch_" + uuid4().hex[:6])
@@ -336,7 +344,9 @@ def test_skip_urgent_and_exhausted_retrieval_routes(monkeypatch):
         assert "pre_safety" in urgent_stages and "inquiry" not in urgent_stages
         assert "profile_write" in urgent_stages
 
-        monkeypatch.setattr(workflow, "retrieve_with_status", lambda query: ([], ""))
+        async def empty_retrieval(plan):
+            return [], {"warning": ""}
+        monkeypatch.setattr(workflow, "retrieve_classics", empty_retrieval)
         exhausted = client.post("/api/chat", headers=headers,
                                 json={"message": "最近咳嗽三天，伴有疲劳"}).json()
         exhausted_trace = client.get(f'/api/threads/{exhausted["thread_id"]}/messages', headers=headers).json()[-1]["trace"]["events"]

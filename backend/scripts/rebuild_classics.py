@@ -11,7 +11,7 @@ import ast
 import json
 from pathlib import Path
 
-from data_pipeline.ingest import TCM_FILES, chunk_all_books, save_chunks_json
+from data_pipeline.ingest import TCM_FILES, chunk_all_books, save_chunks_json, source_path
 
 ROOT = Path(__file__).resolve().parents[1]
 RAW_DIR = ROOT / "resources" / "classics_source"
@@ -77,7 +77,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--write", action="store_true", help="Regenerate the bundled JSON files")
     args = parser.parse_args()
-    missing = [name for name in TCM_FILES.values() if not (RAW_DIR / name).is_file()]
+    missing = [str(source_path(RAW_DIR, book).name) for book in TCM_FILES if not source_path(RAW_DIR, book).is_file()]
     if missing:
         parser.error(f"Missing original texts: {', '.join(missing)}")
 

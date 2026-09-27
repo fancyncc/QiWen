@@ -16,7 +16,7 @@ from .config import API_BASE, API_KEY, MODEL_MODE, MODEL_NAME
 from .prescription import CandidatePlan
 
 ROLES = ("inquiry", "safety_preflight", "summary", "profile_extraction", "retrieval_evaluation",
-         "query_rewrite", "bianzheng", "formula", "herb", "synthesis", "reviewer")
+         "query_rewrite", "bianzheng", "formula", "herb", "synthesis", "reviewer", "memory_rerank")
 
 
 @dataclass
@@ -45,13 +45,23 @@ def role_config(role: str) -> RoleConfig:
     if role not in ROLES:
         raise ValueError("未知模型角色")
     prefix = f"QIWEN_MODEL_{role.upper()}"
-    timeout = os.getenv(prefix + "_TIMEOUT", "").strip() or os.getenv("QIWEN_MODEL_TIMEOUT", "").strip() or "45"
-    retries = os.getenv(prefix + "_RETRIES", "").strip() or os.getenv("QIWEN_MODEL_RETRIES", "").strip() or "2"
+    timeout = os.getenv(prefix + "_TIMEOUT", "").strip() or os.getenv("QIWEN_MODEL_TIMEOUT", "").strip() or ("15" if role == "memory_rerank" else "45")
+    retries = os.getenv(prefix + "_RETRIES", "").strip() or os.getenv("QIWEN_MODEL_RETRIES", "").strip() or ("0" if role == "memory_rerank" else "2")
     return RoleConfig(
         os.getenv(prefix, "").strip() or MODEL_NAME,
         min(300, max(0.05, float(timeout))),
         min(5, max(0, int(retries))),
     )
+
+
+class SafetyObservation(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+    category: Literal["urgent", "pregnancy_lactation", "age", "medication", "allergy", "constitution", "history"]
+    entity: str = Field(min_length=1, max_length=80)
+    subject: str = Field(min_length=1, max_length=40)
+    assertion: Literal["present", "absent", "uncertain"]
+    temporal_scope: Literal["current", "past", "ended", "unknown"]
+    quote: str = Field(min_length=1, max_length=500)
 
 
 class SafetyPreflight(BaseModel):
@@ -60,6 +70,7 @@ class SafetyPreflight(BaseModel):
     risk_categories: list[str] = Field(max_length=12)
     reason: str = Field(min_length=1, max_length=1000)
     required_questions: list[str] = Field(max_length=8)
+    observations: list[SafetyObservation] = Field(default_factory=list, max_length=20)
 
 
 class ReviewResult(BaseModel):
@@ -82,7 +93,8 @@ async def acomplete(system: str, user: str, *, role: str = "inquiry", schema: ty
         context.calls.append(record)
     started = time.monotonic()
     try:
-        if MODEL_MODE != "openai_compatible" or not API_BASE or not API_KEY or not config.model:
+        rerank_enabled = role == "memory_rerank" and os.getenv("QIWEN_MEMORY_RERANK_MODE", "llm") == "llm"
+        if (MODEL_MODE != "openai_compatible" and not rerank_enabled) or not API_BASE or not API_KEY or not config.model:
             raise RuntimeError("真实模型配置不完整或未启用")
         url = API_BASE.rstrip("/")
         if not url.endswith("/chat/completions"):

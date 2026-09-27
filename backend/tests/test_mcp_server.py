@@ -32,7 +32,7 @@ def identities(tmp_path, monkeypatch):
     with db.connection() as conn:
         for user_id in ("alice", "bob"):
             conn.execute("INSERT INTO users VALUES(?,?,?,?)", (user_id, user_id, "not-used", db.now()))
-            conn.execute("INSERT INTO profiles VALUES(?,?,?,?,?)", (user_id, user_id + "体质", "", user_id + "病史", db.now()))
+            conn.execute("INSERT INTO profiles(user_id,constitution,allergies,history,updated_at) VALUES(?,?,?,?,?)", (user_id, user_id + "体质", "", user_id + "病史", db.now()))
             conn.execute("INSERT INTO user_permissions VALUES(?,'profile:read')", (user_id,))
     return db
 

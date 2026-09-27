@@ -1,0 +1,583 @@
+{
+  "version": 1,
+  "purpose": "检索扩展，不能作为医学等价关系或患者新增事实",
+  "entries": [
+    {
+      "canonical": "失眠",
+      "aliases": [
+        "失眠",
+        "睡不好"
+      ],
+      "expansions": [
+        {
+          "term": "不寐",
+          "relation": "retrieval_related",
+          "evidence": {
+            "id": "bdcb0b4f81a1567edc03cf80d9e51ca9f41e46e908bdc280426560840a9e89d2",
+            "book": "温病条辨",
+            "chapter": "条文四十",
+            "quote": "舌白滑，甚则灰，脉迟，不食，不寐，大便窒塞，浊阴凝聚，阳伤腹痛，痛甚"
+          }
+        },
+        {
+          "term": "不得眠",
+          "relation": "retrieval_related",
+          "evidence": {
+            "id": "847527f80085279338f7c63a9313f6bf340ae3b7d45c64c1bf44a5fe79d4d02d",
+            "book": "伤寒论",
+            "chapter": "辨太阳病脉证并治",
+            "quote": "\n汗多亡阳，遂虚，恶风烦躁，不得眠也。\n\n伤寒脉浮缓，身不疼但重，乍有"
+          }
+        }
+      ]
+    },
+    {
+      "canonical": "睡眠",
+      "aliases": [
+        "睡眠"
+      ],
+      "expansions": [
+        {
+          "term": "不寐",
+          "relation": "retrieval_related",
+          "evidence": {
+            "id": "bdcb0b4f81a1567edc03cf80d9e51ca9f41e46e908bdc280426560840a9e89d2",
+            "book": "温病条辨",
+            "chapter": "条文四十",
+            "quote": "舌白滑，甚则灰，脉迟，不食，不寐，大便窒塞，浊阴凝聚，阳伤腹痛，痛甚"
+          }
+        }
+      ]
+    },
+    {
+      "canonical": "咳嗽",
+      "aliases": [
+        "咳嗽"
+      ],
+      "expansions": [
+        {
+          "term": "咳",
+          "relation": "retrieval_related",
+          "evidence": {
+            "id": "289da7591e3ed3123b86c6503340a99ffd71cebaeeb7119eb77a5cd35e9e1482",
+            "book": "伤寒论",
+            "chapter": "辨脉法",
+            "quote": "热汗出者，此为不治。\n\n伤寒咳逆上气，其脉散者死，谓其形损故也。"
+          }
+        },
+        {
+          "term": "嗽",
+          "relation": "retrieval_related",
+          "evidence": {
+            "id": "94390a48ccd56658d1e00af79a17c313a463ea9c188da9557f98b4790b46a4e0",
+            "book": "伤寒论",
+            "chapter": "伤寒例",
+            "quote": "，秋必病疟；秋伤于湿，冬必咳嗽；冬伤于寒，春必病温。\n此必然之道，"
+          }
+        }
+      ]
+    },
+    {
+      "canonical": "头痛",
+      "aliases": [
+        "头痛",
+        "头疼"
+      ],
+      "expansions": [
+        {
+          "term": "头痛",
+          "relation": "retrieval_related",
+          "evidence": {
+            "id": "9f301f1cf6bde13d34d84a1d3c08f1685db37af7494da954272dfd8ffa6b9a2f",
+            "book": "伤寒论",
+            "chapter": "辨脉法",
+            "quote": "于阴也。\n阳中于邪，必发热、头痛、项强、颈挛、腰痛、胫酸，所为阳中雾"
+          }
+        },
+        {
+          "term": "头项强痛",
+          "relation": "retrieval_related",
+          "evidence": {
+            "id": "379b2699d8113b07e6498dcc53842ca94fda2adc2dbb63ad88a07fba0652c018",
+            "book": "伤寒论",
+            "chapter": "辨太阳病脉证并治法上",
+            "quote": "----\n太阳之为病，脉浮，头项强痛而恶寒。\n\n太阳病，发热，汗出，恶风"
+          }
+        }
+      ]
+    },
+    {
+      "canonical": "腹胀",
+      "aliases": [
+        "腹胀",
+        "肚子胀",
+        "肚胀",
+        "胃胀"
+      ],
+      "expansions": []
+    },
+    {
+      "canonical": "腹痛",
+      "aliases": [
+        "腹痛",
+        "肚子痛",
+        "肚子疼"
+      ],
+      "expansions": [
+        {
+          "term": "腹痛",
+          "relation": "retrieval_related",
+          "evidence": {
+            "id": "cf1a74cd2eccadf8d2328960c044a87e472f0d8f6ffeaea1184430912280beff",
+            "book": "伤寒论",
+            "chapter": "辨少阴病脉证并治",
+            "quote": "阴病，二三日不已，至四五日，腹痛，小便不利，四肢沉重疼痛，自下利者，"
+          }
+        }
+      ]
+    },
+    {
+      "canonical": "胃痛",
+      "aliases": [
+        "胃痛"
+      ],
+      "expansions": [
+        {
+          "term": "心下痛",
+          "relation": "retrieval_related",
+          "evidence": {
+            "id": "1878a11aab3cd168c6c6ddcef4014ff4c4927c8f4bfc2710cf652db8a4260f93",
+            "book": "伤寒论",
+            "chapter": "辨太阳脉证并治下",
+            "quote": "六七日，结胸热实，脉沉而紧，心下痛，按之石硬者，大陷胸汤主之。\n\n伤寒"
+          }
+        }
+      ]
+    },
+    {
+      "canonical": "大便稀",
+      "aliases": [
+        "大便稀",
+        "便稀",
+        "稀便",
+        "便溏"
+      ],
+      "expansions": []
+    },
+    {
+      "canonical": "怕冷",
+      "aliases": [
+        "怕冷"
+      ],
+      "expansions": [
+        {
+          "term": "恶寒",
+          "relation": "retrieval_related",
+          "evidence": {
+            "id": "3f363194a9a668f1fa2f874639e2096052bba04c7ee34a2f641878bf44ef92c6",
+            "book": "伤寒论",
+            "chapter": "辨脉法",
+            "quote": "四日当剧。\n\n问曰：病有洒淅恶寒，而复发热者何？荅曰：阴脉不足，阳往"
+          }
+        }
+      ]
+    },
+    {
+      "canonical": "发热",
+      "aliases": [
+        "发热",
+        "发烧"
+      ],
+      "expansions": [
+        {
+          "term": "发热",
+          "relation": "retrieval_related",
+          "evidence": {
+            "id": "3f363194a9a668f1fa2f874639e2096052bba04c7ee34a2f641878bf44ef92c6",
+            "book": "伤寒论",
+            "chapter": "辨脉法",
+            "quote": "\n\n问曰：病有洒淅恶寒，而复发热者何？荅曰：阴脉不足，阳往从之；阳脉"
+          }
+        },
+        {
+          "term": "身热",
+          "relation": "retrieval_related",
+          "evidence": {
+            "id": "fb2f4677adf9f2f49593108b007d68cc2f8d6d732b5dffb5e68fa8cb71b7b3bc",
+            "book": "伤寒论",
+            "chapter": "伤寒例",
+            "quote": "发。\n以其脉侠鼻、络于目，故身热、目疼、鼻干、不得卧。\n\n尺寸俱弦者"
+          }
+        }
+      ]
+    },
+    {
+      "canonical": "疲劳",
+      "aliases": [
+        "疲劳"
+      ],
+      "expansions": [
+        {
+          "term": "倦怠",
+          "relation": "retrieval_related",
+          "evidence": {
+            "id": "8ae16e12f6c49f2f0e188b7b273e9d199bfee17b53e64a06ac49a7b637fb1d44",
+            "book": "温病条辨",
+            "chapter": "条文七十",
+            "quote": "倦者，困劳而倦也，倦者，四肢倦怠也。\n脾主四肢，脾阳伤，则四肢倦而无"
+          }
+        }
+      ]
+    },
+    {
+      "canonical": "乏力",
+      "aliases": [
+        "乏力"
+      ],
+      "expansions": [
+        {
+          "term": "倦怠",
+          "relation": "retrieval_related",
+          "evidence": {
+            "id": "8ae16e12f6c49f2f0e188b7b273e9d199bfee17b53e64a06ac49a7b637fb1d44",
+            "book": "温病条辨",
+            "chapter": "条文七十",
+            "quote": "倦者，困劳而倦也，倦者，四肢倦怠也。\n脾主四肢，脾阳伤，则四肢倦而无"
+          }
+        }
+      ]
+    },
+    {
+      "canonical": "口干",
+      "aliases": [
+        "口干",
+        "嘴干"
+      ],
+      "expansions": []
+    },
+    {
+      "canonical": "口苦",
+      "aliases": [
+        "口苦"
+      ],
+      "expansions": []
+    },
+    {
+      "canonical": "舌苔白",
+      "aliases": [
+        "舌苔发白",
+        "舌苔白",
+        "白苔"
+      ],
+      "expansions": []
+    },
+    {
+      "canonical": "月经",
+      "aliases": [
+        "月经"
+      ],
+      "expansions": []
+    },
+    {
+      "canonical": "眩晕",
+      "aliases": [
+        "眩晕",
+        "头晕"
+      ],
+      "expansions": [
+        {
+          "term": "头眩",
+          "relation": "retrieval_related",
+          "evidence": {
+            "id": "2841bfbfb2b1e97bd50be63e158c8edc95a4390bdddbeac42773090122cccda4",
+            "book": "伤寒论",
+            "chapter": "辨太阳病脉证并治",
+            "quote": "后，心下逆满，气上冲胸，起则头眩，脉沉紧，发汗则动经，身为振振摇者，"
+          }
+        }
+      ]
+    },
+    {
+      "canonical": "鼻塞",
+      "aliases": [
+        "鼻塞"
+      ],
+      "expansions": []
+    },
+    {
+      "canonical": "食欲",
+      "aliases": [
+        "食欲"
+      ],
+      "expansions": []
+    },
+    {
+      "canonical": "耳鸣",
+      "aliases": [
+        "耳鸣",
+        "耳朵嗡嗡响"
+      ],
+      "expansions": []
+    },
+    {
+      "canonical": "耳聋",
+      "aliases": [
+        "耳聋"
+      ],
+      "expansions": []
+    },
+    {
+      "canonical": "便秘",
+      "aliases": [
+        "便秘",
+        "排便困难"
+      ],
+      "expansions": []
+    },
+    {
+      "canonical": "腹泻",
+      "aliases": [
+        "腹泻",
+        "拉肚子"
+      ],
+      "expansions": []
+    },
+    {
+      "canonical": "恶心",
+      "aliases": [
+        "恶心",
+        "想吐"
+      ],
+      "expansions": []
+    },
+    {
+      "canonical": "呕吐",
+      "aliases": [
+        "呕吐"
+      ],
+      "expansions": []
+    },
+    {
+      "canonical": "反酸",
+      "aliases": [
+        "反酸",
+        "泛酸"
+      ],
+      "expansions": []
+    },
+    {
+      "canonical": "嗳气",
+      "aliases": [
+        "嗳气"
+      ],
+      "expansions": []
+    },
+    {
+      "canonical": "盗汗",
+      "aliases": [
+        "盗汗"
+      ],
+      "expansions": []
+    },
+    {
+      "canonical": "自汗",
+      "aliases": [
+        "自汗"
+      ],
+      "expansions": []
+    },
+    {
+      "canonical": "多汗",
+      "aliases": [
+        "多汗",
+        "汗多"
+      ],
+      "expansions": []
+    },
+    {
+      "canonical": "口渴",
+      "aliases": [
+        "口渴"
+      ],
+      "expansions": []
+    },
+    {
+      "canonical": "胸闷",
+      "aliases": [
+        "胸闷"
+      ],
+      "expansions": []
+    },
+    {
+      "canonical": "心悸",
+      "aliases": [
+        "心悸",
+        "心慌"
+      ],
+      "expansions": []
+    },
+    {
+      "canonical": "腰痛",
+      "aliases": [
+        "腰痛",
+        "腰疼"
+      ],
+      "expansions": []
+    },
+    {
+      "canonical": "背痛",
+      "aliases": [
+        "背痛",
+        "背疼"
+      ],
+      "expansions": []
+    },
+    {
+      "canonical": "关节痛",
+      "aliases": [
+        "关节痛",
+        "关节疼"
+      ],
+      "expansions": []
+    },
+    {
+      "canonical": "皮疹",
+      "aliases": [
+        "皮疹",
+        "起疹子"
+      ],
+      "expansions": []
+    },
+    {
+      "canonical": "瘙痒",
+      "aliases": [
+        "瘙痒",
+        "发痒"
+      ],
+      "expansions": []
+    },
+    {
+      "canonical": "口臭",
+      "aliases": [
+        "口臭"
+      ],
+      "expansions": []
+    },
+    {
+      "canonical": "流涕",
+      "aliases": [
+        "流涕",
+        "流鼻涕"
+      ],
+      "expansions": []
+    },
+    {
+      "canonical": "咽痛",
+      "aliases": [
+        "咽痛",
+        "喉咙痛",
+        "喉咙疼"
+      ],
+      "expansions": []
+    },
+    {
+      "canonical": "声音嘶哑",
+      "aliases": [
+        "声音嘶哑",
+        "嗓子哑"
+      ],
+      "expansions": []
+    },
+    {
+      "canonical": "小便频",
+      "aliases": [
+        "小便频",
+        "尿频"
+      ],
+      "expansions": []
+    },
+    {
+      "canonical": "夜尿多",
+      "aliases": [
+        "夜尿多"
+      ],
+      "expansions": []
+    },
+    {
+      "canonical": "尿痛",
+      "aliases": [
+        "尿痛"
+      ],
+      "expansions": []
+    },
+    {
+      "canonical": "浮肿",
+      "aliases": [
+        "浮肿"
+      ],
+      "expansions": []
+    },
+    {
+      "canonical": "食欲不振",
+      "aliases": [
+        "食欲不振",
+        "没胃口",
+        "没有胃口"
+      ],
+      "expansions": []
+    },
+    {
+      "canonical": "手脚麻木",
+      "aliases": [
+        "手脚麻木"
+      ],
+      "expansions": []
+    },
+    {
+      "canonical": "眼干",
+      "aliases": [
+        "眼干",
+        "眼睛干"
+      ],
+      "expansions": []
+    },
+    {
+      "canonical": "眼痛",
+      "aliases": [
+        "眼痛",
+        "眼睛痛"
+      ],
+      "expansions": []
+    },
+    {
+      "canonical": "视物模糊",
+      "aliases": [
+        "视物模糊",
+        "看东西模糊"
+      ],
+      "expansions": []
+    },
+    {
+      "canonical": "牙痛",
+      "aliases": [
+        "牙痛",
+        "牙疼"
+      ],
+      "expansions": []
+    },
+    {
+      "canonical": "消瘦",
+      "aliases": [
+        "消瘦"
+      ],
+      "expansions": []
+    },
+    {
+      "canonical": "嗜睡",
+      "aliases": [
+        "嗜睡"
+      ],
+      "expansions": []
+    }
+  ]
+}

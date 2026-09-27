@@ -6,6 +6,7 @@ import asyncio
 import inspect
 import time
 from typing import TypedDict
+from uuid import uuid4
 
 from langgraph.graph import END, START, StateGraph
 from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
@@ -16,13 +17,24 @@ from .db import all_rows, one
 from .model import acomplete, acomplete_json, CandidatePlan, ReviewResult, invocation, current_node
 from .preflight import assess
 from .prescription import migrate_plan, legacy_plan, names, review_plan, fingerprint, patient_fingerprint, render_plan, knowledge_context
-from .retrieval import retrieve_with_status
+from .classics import passage_excerpt, retrieve_classics
+from .terms import CLASSIC_TERMS, search_plan as build_search_plan
+from .memory import build_query, retrieve_memories, rerank_memories, format_context
 from .safety import check_herbs, mentioned_herbs, normalize, contains_dosing
+from . import safety_store
+from .safety_context import make_context, applicable_facts, gate_context, response_for, profile_candidates, merge_facts, extract_facts, subject_of
+from . import symptoms as symptom_parser
+from .symptoms import SYMPTOM_ALIASES
 
 
 class FlowState(TypedDict, total=False):
     user_id: str
     preflight: dict
+    safety_state: dict
+    safety_state_version: int
+    profile_suggestions: list[dict]
+    source_message_id: str
+    run_id: str
     prescription_review: dict
     reviewed_hash: str
     reviewer_hash: str
@@ -32,6 +44,7 @@ class FlowState(TypedDict, total=False):
     file_text: str
     profile: dict
     memory_context: str
+    memory_retrieval: dict
     episode_text: str
     context_summary: str
     context_chars: int
@@ -39,6 +52,8 @@ class FlowState(TypedDict, total=False):
     compression_required: bool
     symptoms: list[str]
     denied_symptoms: list[str]
+    symptom_facts: list[dict]
+    symptom_pending: dict | None
     intent_type: str
     pending_question: str
     pending_context: str
@@ -48,6 +63,9 @@ class FlowState(TypedDict, total=False):
     retrieval_score: float
     search_required: bool
     retrieval_warning: str
+    retrieval_trace: dict
+    retrieval_history: list[dict]
+    search_plan: dict
     diagnosis: str
     treatment_plan: dict
     active_plan: dict
@@ -63,26 +81,11 @@ class FlowState(TypedDict, total=False):
     response: str
 
 
-SYMPTOM_ALIASES = {
-    "失眠": ("失眠", "睡不好"), "睡眠": ("睡眠",), "咳嗽": ("咳嗽",),
-    "头痛": ("头痛",), "腹胀": ("腹胀", "肚子胀", "肚胀", "胃胀"),
-    "腹痛": ("腹痛", "肚子痛", "肚子疼"), "胃痛": ("胃痛",),
-    "大便稀": ("大便稀", "便稀", "稀便", "便溏"),
-    "怕冷": ("怕冷",), "发热": ("发热",), "疲劳": ("疲劳",),
-    "乏力": ("乏力",), "口干": ("口干", "嘴干"), "口苦": ("口苦",),
-    "舌苔白": ("舌苔发白", "舌苔白", "白苔"),
-    "月经": ("月经",), "眩晕": ("眩晕",), "鼻塞": ("鼻塞",), "食欲": ("食欲",),
-}
 URGENT = ["胸痛", "呼吸困难", "昏厥", "大出血", "意识不清", "自杀"]
 MAX_SEARCH_ATTEMPTS = 3
 MAX_SAFETY_REVISIONS = 2
 CONTEXT_CHAR_LIMIT = 6000
 MAX_CONVERSATION_TURNS = 10
-CLASSIC_TERMS = {
-    "失眠": "不寐 不得眠", "睡眠": "不寐", "咳嗽": "咳 嗽", "疲劳": "倦怠 乏力",
-    "乏力": "倦怠", "怕冷": "恶寒", "发热": "发热 身热", "头痛": "头痛 头项强痛",
-    "腹痛": "腹痛", "胃痛": "心下痛", "眩晕": "眩晕 头眩",
-}
 
 
 def prepare(state: FlowState) -> FlowState:
@@ -92,11 +95,13 @@ def prepare(state: FlowState) -> FlowState:
         "bianzheng_note": "", "formula_note": "", "herb_note": "",
         "consultation_notes": [], "safety_errors": [], "safety_findings": [], "response": "",
         "prescription_review": {}, "reviewed_hash": "", "reviewer_hash": "", "reviewer_approved": True, "reviewer_retry_count": 0, "safety_retry_count": 0,
-        "memory_context": "", "episode_text": "", "context_summary": "",
+        "memory_context": "", "memory_retrieval": {}, "episode_text": "", "context_summary": "",
         "context_chars": 0, "compression_required": False,
         "conversation_turns": 0,
         "search_query": "", "search_attempts": 0, "retrieval_score": 0.0,
+        "search_plan": {}, "retrieval_trace": {}, "retrieval_history": [],
         "search_required": False, "intent_type": "", "symptoms": [], "denied_symptoms": [],
+        "profile_suggestions": [],
     }
 
 
@@ -106,27 +111,32 @@ def document_parse(state: FlowState) -> FlowState:
     return {"file_text": re.sub(r"\s+", " ", state.get("file_text", "")).strip()[:4000]}
 
 
-def memory_load(state: FlowState) -> FlowState:
+async def memory_load(state: FlowState) -> FlowState:
     user_id, thread_id = state["user_id"], state["thread_id"]
-    profile = one("SELECT constitution,allergies,history FROM profiles WHERE user_id=?", (user_id,)) or state.get("profile", {})
-    memories = all_rows(
-        "SELECT summary FROM profile_memories WHERE user_id=? ORDER BY updated_at DESC LIMIT 20",
-        (user_id,),
-    )
+    safety_state, profile = safety_store.load(user_id, thread_id)
     recent = all_rows(
-        "SELECT content FROM messages WHERE thread_id=? AND role='user' ORDER BY created_at DESC,id DESC LIMIT 5",
+        "SELECT id,content FROM messages WHERE thread_id=? AND role='user' ORDER BY created_at DESC,id DESC LIMIT 5",
         (thread_id,),
     )
-    prior = [row["content"][:180] for row in recent]
-    if prior and prior[0] == state.get("message", ""):
-        prior.pop(0)
-    query = state.get("message", "") + state.get("file_text", "")[:300]
-    def terms(value: str) -> set[str]:
-        chars = re.findall(r"[\u4e00-\u9fff]", value)
-        return {chars[index] + chars[index + 1] for index in range(len(chars) - 1)}
-    relevant = terms(query)
-    ranked = sorted(enumerate(memories), key=lambda item: (-len(relevant & terms(item[1]["summary"])), item[0]))
-    parts = [item["summary"] for _, item in ranked[:3]] + list(reversed(prior))
+    source_message_id = recent[0]["id"] if recent else ""
+    run_source = one("SELECT source_message_id,source_files FROM chat_runs WHERE id=? AND user_id=?", (state.get("run_id", ""), user_id))
+    if run_source and run_source["source_message_id"]:
+        source_message_id = run_source["source_message_id"]
+    if recent and recent[0]["content"] == state.get("message", ""):
+        recent.pop(0)
+    prior = [row["content"][:180] for row in reversed(recent)]
+    query = build_query(state, prior)
+    candidates, memory_retrieval = await asyncio.to_thread(retrieve_memories, query, user_id, thread_id, 10)
+    memories, memory_retrieval = await rerank_memories(query, candidates, memory_retrieval, user_id)
+    hints = []
+    for memory in memories:
+        for fact in extract_facts(memory["summary"], kind="summary", source_id=memory["thread_id"], thread_id=memory["thread_id"]):
+            fact["temporal_scope"] = "past"
+            fact["confirmation"] = "unconfirmed"
+            fact["source"]["collected_at"] = memory["updated_at"]
+            hints.append(fact)
+    # Historical hints never replace the submitted current safety state.
+    safety_state["facts"] = merge_facts(hints, safety_state["facts"])
     count = one("SELECT COUNT(*) AS total FROM messages WHERE thread_id=? AND role='user'", (thread_id,))
     saved_plan = one(
         "SELECT plan FROM messages WHERE thread_id=? AND role='assistant' AND plan IS NOT NULL "
@@ -144,7 +154,13 @@ def memory_load(state: FlowState) -> FlowState:
             (thread_id,),
         )
         active_plan = legacy_plan(legacy["content"] if legacy else "") or {}
-    return {"profile": profile, "manual_profile_hash": patient_fingerprint(profile), "memory_context": "\n".join(parts)[:1200],
+    return {"profile": profile, "manual_profile_hash": patient_fingerprint(profile),
+            "safety_state": safety_state, "safety_state_version": safety_state["version"],
+            "symptom_facts": safety_state.get("symptom_facts", []),
+            **{key: safety_state.get("clinical", {}).get(safety_state["subject"], {}).get(key, None if key == "symptom_pending" else "")
+               for key in ("pending_context", "pending_question", "symptom_pending")},
+            "source_message_id": source_message_id,
+            "memory_context": format_context(memories, prior, thread_id), "memory_retrieval": memory_retrieval,
             "conversation_turns": count["total"] if count else 0,
             "active_plan": migrate_plan(active_plan) if isinstance(active_plan, dict) else {}}
 
@@ -152,10 +168,10 @@ def memory_load(state: FlowState) -> FlowState:
 def rule_pre_safety(state: FlowState) -> FlowState:
     text = state.get("message", "")
     attached = state.get("file_text", "")
-    if any(word in text or word in attached for word in URGENT):
+    if gate_context(state.get("safety_state") or make_context({}, text, attached)[0])["decision"] == "block":
         return {
             "intent_type": "safety_rejected", "symptoms": [],
-            "pending_context": "", "pending_question": "", "episode_text": text,
+            "episode_text": text,
             "response": "你提供的信息中出现可能需要及时处理的情况。若症状正在发生，请尽快联系当地急救服务或就近医疗机构，不要等待在线问答。",
         }
     if re.search(r"加(?:入|上)?|添加|配伍|搭配|合用|同用|一起(?:用|服)|能(?:用|服)|可以用|相反|相克|冲突", text):
@@ -194,42 +210,69 @@ def rule_pre_safety(state: FlowState) -> FlowState:
                         "这不代表加药适合你或可以安全服用；请让开方医师或中药师结合完整处方与病史判断。"
                     )
                 return {"intent_type": "safety_rejected" if errors else "safety_advisory",
-                        "symptoms": [], "pending_context": "", "pending_question": "",
+                        "symptoms": [],
                         "episode_text": text, "safety_errors": errors, "response": response}
     return {"intent_type": ""}
 
 
 async def pre_safety(state: FlowState) -> FlowState:
-    # Current explicit allergy statements apply to this round without mutating the portrait.
     text = state.get("message", "") + "；" + state.get("file_text", "")
-    profile = dict(state.get("profile", {}))
-    allergies = []
-    for clause in re.split(r"[，,。；;\n]", text):
-        if "过敏" in clause and not re.search(r"没有|不过敏|无过敏|否认", clause):
-            allergies.extend(mentioned_herbs(clause))
+    previous = state["safety_state"]
+    safe, current = make_context(previous, state.get("message", ""), state.get("file_text", ""),
+                                 message_id=state.get("source_message_id", ""), thread_id=state["thread_id"])
+    source_run = one("SELECT source_files FROM chat_runs WHERE id=? AND user_id=?", (state.get("run_id", ""), state["user_id"]))
+    for fact in current:
+        if fact["source"]["kind"] == "attachment":
+            fact["source"]["upload_ids"] = json.loads(source_run["source_files"]) if source_run else []
+    # Keep regular inquiry state separately for each consultation subject.
+    clinical = safe.setdefault("clinical", {})
+    clinical[previous["subject"]] = {key: state.get(key) for key in ("pending_context", "pending_question", "symptom_pending")}
+    switched = safe["subject"] != previous["subject"]
+    followup = {"pending_context": "", "pending_question": "", "symptom_pending": None,
+                **clinical.get(safe["subject"], {})} if switched else {}
+    profile = dict(state.get("profile", {})) if safe["subject"] == "self" else {}
+    allergies = [f["entity"] for f in applicable_facts(safe)
+                 if f["category"] == "allergy" and f["assertion"] == "present" and f["subject"] == safe["subject"]]
     if allergies:
-        profile["allergies"] = str(profile.get("allergies", "")) + "；" + "、".join(allergies)
-    state = {**state, "profile": profile}
+        profile["allergies"] = "；".join([profile.get("allergies", ""), *allergies])
+    base = {"profile": profile, "safety_state": safe, "profile_suggestions": profile_candidates(current),
+            **followup}
+    if switched:
+        base.update(active_plan={}, memory_context="")
+    if safe["subject"] != "self":
+        base["memory_context"] = ""
+    state = {**state, **base}
     rules = rule_pre_safety(state)
     if rules.get("intent_type") in {"safety_rejected", "safety_advisory"}:
-        return {**rules, "profile": profile, "preflight": {
+        safe["status"] = "blocked" if rules["intent_type"] == "safety_rejected" else "restricted"
+        return {**base, **rules, "preflight": {
             "decision": "block" if rules["intent_type"] == "safety_rejected" else "clarify",
             "risk_categories": ["deterministic"], "reason": "确定性规则终止治疗路径",
             "required_questions": []}}
     try:
-        result = await assess(text, profile, mock=MODEL_MODE == "mock")
+        result = await assess(text, profile, mock=MODEL_MODE == "mock", context=safe)
+        additions = result.pop("observations", [])
+        for fact in additions:
+            fact["source"].update(id=state.get("source_message_id", ""), thread_id=state["thread_id"], extractor="model")
+            if fact["source"]["quote"] in state.get("message", ""):
+                fact["source"]["kind"] = "message"
+            else:
+                fact["source"]["kind"] = "attachment"
+        base["profile_suggestions"] += profile_candidates(additions)
+        safe["facts"] = merge_facts(safe["facts"], additions)
     except Exception:
         result = {"decision": "block", "risk_categories": ["preflight_unavailable"],
                   "reason": "预审超时、失败或结构无法校验", "required_questions": []}
     if result["decision"] != "allow":
-        # Never publish model-generated safety text, which may contain an unsafe instruction.
-        response = ("安全预审未通过，本轮不生成具体治疗建议。请由医师核对风险资料。"
-                    if result["decision"] == "block" else
-                    "需要先补充安全资料，本轮不生成方剂或治疗建议。请说明年龄、孕哺状态、过敏史和当前全部用药。")
-        return {"profile": profile, "preflight": result, "intent_type": "safety_rejected" if result["decision"] == "block" else "safety_advisory",
-                "pending_context": "", "pending_question": "", "episode_text": state.get("message", ""),
-                "response": response}
-    return {"profile": profile, "preflight": result, "intent_type": ""}
+        response = response_for(safe, result)
+        return {**base, "safety_state": safe, "preflight": result,
+                "intent_type": "safety_rejected" if result["decision"] == "block" else "safety_advisory",
+                "episode_text": safe.get("episode", state.get("message", "")), "response": response}
+    # Resume the original complaint after safety clarification without losing it.
+    if previous.get("status") in {"needs_info", "restricted", "blocked"} and not state.get("pending_context"):
+        base["pending_context"] = safe.get("episode", "")
+    safe.update(status="resolved", pending=None, episode="")
+    return {**base, "safety_state": safe, "preflight": result, "intent_type": ""}
 
 
 def pre_safety_route(state: FlowState) -> str:
@@ -237,20 +280,9 @@ def pre_safety_route(state: FlowState) -> str:
 
 
 def symptom_observations(text: str) -> tuple[list[str], list[str]]:
-    """Separate self-reported symptoms from explicitly denied symptoms."""
-    reported: set[str] = set()
-    denied: set[str] = set()
-    for clause in re.split(r"[，,。；;！？!?\n]|但是|不过|但", text):
-        if not clause.strip():
-            continue
-        negated_clause = bool(re.search(r"没有|无|否认|不伴|未见|并无", clause))
-        for symptom, aliases in SYMPTOM_ALIASES.items():
-            if any(alias in clause for alias in aliases):
-                explicitly_negated = negated_clause or any(f"不{alias}" in clause for alias in aliases)
-                (denied if explicitly_negated else reported).add(symptom)
-    reported.difference_update(denied)
-    return ([name for name in SYMPTOM_ALIASES if name in reported],
-            [name for name in SYMPTOM_ALIASES if name in denied])
+    """Legacy list interface, derived from source-backed current observations."""
+    positive, denied, _ = symptom_parser.view(symptom_parser.merge([], symptom_parser.extract(text)), "self")
+    return positive, denied
 
 
 def followup_question(symptoms: list[str], denied: list[str]) -> str:
@@ -274,18 +306,62 @@ def followup_question(symptoms: list[str], denied: list[str]) -> str:
 
 def inquire(state: FlowState) -> FlowState:
     text = state.get("message", "")
-    previous = state.get("pending_context", "")
+    previous = state.get("pending_context") or ""
     current = text + ("；附件：" + state["file_text"][:800] if state.get("file_text") else "")
     combined = f"{previous}；{current}" if previous else current
-    earlier_positive, earlier_denied = symptom_observations(previous)
-    current_positive, current_denied = symptom_observations(current)
-    positive = (set(earlier_positive) - set(earlier_denied) - set(current_denied)) | set(current_positive)
-    denied = (set(earlier_denied) | set(current_denied)) - set(current_positive)
-    symptoms = [name for name in SYMPTOM_ALIASES if name in positive]
-    denied_symptoms = [name for name in SYMPTOM_ALIASES if name in denied]
+    subject = state["safety_state"]["subject"]
+    facts = state.get("symptom_facts", [])
+    # Migrate an unfinished old inquiry once, without labelling it confirmed.
+    if previous and not facts:
+        facts = symptom_parser.extract(previous, subject=subject, kind="legacy", thread_id=state["thread_id"])
+        for fact in facts:
+            fact["subject"] = subject
+    source = {"subject": subject, "message_id": state.get("source_message_id", ""), "thread_id": state["thread_id"]}
+    pending = state.get("symptom_pending")
+    new = symptom_parser.extract(text, **source)
+    new += symptom_parser.bind_answer(facts, pending, text, **source)
+    new += symptom_parser.extract(state.get("file_text", "")[:800], **source, kind="attachment")
+    if state.get("file_text"):
+        uploaded = one("SELECT source_files FROM chat_runs WHERE id=? AND user_id=?", (state.get("run_id", ""), state["user_id"]))
+        for fact in new:
+            if fact["source"]["kind"] == "attachment":
+                fact["source"]["upload_ids"] = json.loads(uploaded["source_files"]) if uploaded else []
+    if pending and pending["kind"] in {"assertion", "time", "conflict", "mapping"}:
+        for fact in new:
+            if (fact["symptom"] == pending["symptom"] and fact["subject"] == subject
+                    and fact["assertion"] in {"present", "absent"} and fact["time_scope"] == "current"):
+                fact["correction"] = True
+    # Resolving patient ownership requires an explicit consultation target. It
+    # binds unknown records only; other people's named observations stay separate.
+    ownership_pending = pending or state["safety_state"].get("clinical", {}).get("unknown", {}).get("symptom_pending")
+    if (subject != "unknown" and subject_of(text) == subject and
+            ownership_pending and ownership_pending["kind"] == "subject"):
+        facts = json.loads(json.dumps(facts))
+        for fact in facts:
+            if fact["subject"] == "unknown":
+                fact["subject"] = subject
+                fact["ownership_confirmed_by"] = source["message_id"]
+    facts = symptom_parser.merge(facts, new)
+    symptoms, denied_symptoms, unresolved = symptom_parser.view(facts, subject)
+    if unresolved:
+        unresolved["id"] = (pending["id"] if pending and pending.get("id") and
+                            (pending["kind"], pending["symptom"]) == (unresolved["kind"], unresolved["symptom"])
+                            else str(uuid4()))
+    base = {"symptom_facts": facts, "symptom_pending": unresolved,
+            "symptoms": symptoms, "denied_symptoms": denied_symptoms, "episode_text": combined}
+    if unresolved:
+        return {**base, "intent_type": "consult", "pending_context": combined,
+                "pending_question": unresolved["question"], "response": unresolved["question"]}
+    if previous and re.fullmatch(r"(?:不知道|不清楚|跳过|不是|是|是的|有|没有|没有了)[。！! ]*", text.strip()) and not new:
+        question = state.get("pending_question") or followup_question(symptoms, denied_symptoms)
+        return {**base, "intent_type": "consult", "pending_context": combined,
+                "pending_question": question, "response": "这条回答还不能补全资料。" + question}
+    if not symptoms and (denied_symptoms or facts):
+        return {**base, "intent_type": "consult", "pending_context": "", "pending_question": "",
+                "response": "已记录你对当前症状的说明。若还有其他不适，请具体描述；既往记录仍保留。"}
     if not symptoms and not previous:
         return {
-            "intent_type": "chat", "symptoms": [], "denied_symptoms": denied_symptoms, "pending_context": "",
+            **base, "intent_type": "chat", "pending_context": "",
             "pending_question": "",
             "episode_text": combined,
             "response": "你好，我可以帮助整理症状信息，并展示中医知识检索与会诊流程。请描述主要不适、持续时间，以及有无过敏史。内容仅供学习研究参考。",
@@ -293,13 +369,13 @@ def inquire(state: FlowState) -> FlowState:
     if not previous and len(combined.strip()) < 18 and not re.search(r"\d|天|周|月|年|伴|同时", combined):
         question = followup_question(symptoms, denied_symptoms)
         return {
-            "intent_type": "consult", "symptoms": symptoms, "denied_symptoms": denied_symptoms,
+            **base, "intent_type": "consult",
             "episode_text": combined,
             "pending_context": combined, "pending_question": question,
             "response": "为了更好地整理信息，请补充：" + question,
         }
     return {
-        "intent_type": "diagnose", "symptoms": symptoms,
+        **base, "intent_type": "diagnose",
         "denied_symptoms": denied_symptoms,
         "episode_text": combined,
         "pending_context": "", "pending_question": "",
@@ -320,26 +396,20 @@ def rag_route(state: FlowState) -> str:
     return "search" if state.get("search_required") else "skip"
 
 
-def search(state: FlowState) -> FlowState:
-    # Negative findings remain in the model context, but must not become search terms.
-    query = state.get("search_query") or (" ".join(state.get("symptoms", [])) or state["message"])
-    docs, warning = retrieve_with_status(query)
-    return {"docs": docs, "retrieval_warning": warning, "search_query": query,
+async def search(state: FlowState) -> FlowState:
+    plan = state.get("search_plan") or build_search_plan(state)
+    docs, trace = await retrieve_classics(plan)
+    return {"docs": docs, "retrieval_warning": trace["warning"], "search_query": plan["keyword_query"],
+            "search_plan": plan, "retrieval_trace": trace,
+            "retrieval_history": [*state.get("retrieval_history", []), trace],
             "search_attempts": state.get("search_attempts", 0) + 1}
 
 
 def evaluate_retrieval(state: FlowState) -> FlowState:
     docs = state.get("docs", [])
-    symptoms = state.get("symptoms", [])
-    if not docs:
-        score = 0.0
-    elif not symptoms:
-        score = 0.5
-    else:
-        contents = "\n".join(doc["body"] for doc in docs)
-        matches = sum(any(term in contents for term in (symptom, *CLASSIC_TERMS.get(symptom, "").split()))
-                      for symptom in symptoms)
-        score = matches / len(symptoms)
+    # Each passage already passed its own admission check. Do not discard
+    # semantically relevant vector-only evidence for lacking an exact symptom word.
+    score = 1.0 if docs else 0.0
     warning = state.get("retrieval_warning", "")
     if score < 0.5 and state.get("search_attempts", 0) >= MAX_SEARCH_ATTEMPTS:
         warning = (warning + " " if warning else "") + "检索结果相关性不足，未引用古籍片段。"
@@ -354,14 +424,8 @@ def retrieval_route(state: FlowState) -> str:
 
 
 def rewrite_query(state: FlowState) -> FlowState:
-    terms = state.get("symptoms", [])
-    if state.get("search_attempts") == 1:
-        query = " ".join(terms + [CLASSIC_TERMS.get(term, "") for term in terms])
-    else:
-        query = " ".join(CLASSIC_TERMS.get(term, term) for term in terms)
-        if not query.strip():
-            query = state.get("episode_text", state.get("message", ""))[:100]
-    return {"search_query": query.strip()}
+    plan = build_search_plan(state, attempt=state.get("search_attempts", 0))
+    return {"search_query": plan["keyword_query"], "search_plan": plan}
 
 
 def evidence_ready(_state: FlowState) -> FlowState:
@@ -369,15 +433,16 @@ def evidence_ready(_state: FlowState) -> FlowState:
 
 
 def _context(state: FlowState) -> str:
-    docs = "\n".join(f'{d["title"]}：{d["body"][:240]}' for d in state.get("docs", []))
+    docs = "\n".join(f'{d["title"]} / {d["chapter"]}：{passage_excerpt(d)}' for d in state.get("docs", []))
     return (
         f'用户描述：{state.get("message","")}\n'
         f'本轮问诊整合：{state.get("episode_text", "")[:600]}\n'
         f'症状：{",".join(state.get("symptoms",[]))}\n'
         f'用户明确否认的症状：{",".join(state.get("denied_symptoms",[])) or "无"}\n'
+        f'症状事实（保留时间、程度与变化，不将既往当当前）：{symptom_parser.describe(state.get("symptom_facts", []), state.get("safety_state", {}).get("subject", "self"))}\n'
         f'病历摘要：{state.get("file_text","")[:1600]}\n'
         f'患者画像：{state.get("profile",{})}\n'
-        f'过往自述摘要：{state.get("memory_context", "")[:900]}\n'
+        f'过往自述摘要：{state.get("memory_context", "")}\n'
         f'检索片段：{docs or "无可用古籍片段"}'
     )
 
@@ -392,6 +457,7 @@ async def bianzheng(state: FlowState) -> FlowState:
     else:
         diagnosis = await acomplete(
             "你是中医知识辅助系统。区分用户报告的症状与明确否认的症状；后者不能作为阳性依据。"
+            "历史自述不是本轮已确认症状，保留时间和否定含义，不得覆盖当前明确说明。"
             "只解释可能的辨证思路和不确定性，不作确诊，不编造古籍出处或药物剂量。",
             _context(state), role="bianzheng",
         )
@@ -602,8 +668,8 @@ def finish(state: FlowState) -> FlowState:
     if docs:
         lines.extend(["", "## 检索出处"])
         lines.extend(f'- 《{d["title"]}》{d["chapter"]}：'
-                     + ("原文涉及古籍用药内容，摘录已省略。" if contains_dosing(d["body"][:110])
-                        else d["body"][:110] + "…") for d in docs)
+                     + ("原文涉及古籍用药内容，摘录已省略。" if contains_dosing(passage_excerpt(d))
+                        else passage_excerpt(d)) for d in docs)
     else:
         lines.extend(["", "本轮按要求未检索古籍。" if not state.get("search_required") else "当前没有可引用的古籍片段。"])
     errors = state.get("safety_errors", [])
@@ -754,7 +820,7 @@ async def run_flow(thread_id: str, mode: str, message: str, profile: dict, file_
         if not previous:
             prior = (await graph.aget_state({"configurable": {"thread_id": thread_id}})).values
         state = {**prior, "message": message, "profile": profile, "file_text": file_text,
-                 "thread_id": thread_id, "user_id": user_id}
+                 "thread_id": thread_id, "user_id": user_id, "run_id": run_id}
         config = {"configurable": {"thread_id": run_id}, "recursion_limit": 50}
         attempts = {}
         async for kind, data in graph.astream(state, config=config, stream_mode=["custom", "updates"]):

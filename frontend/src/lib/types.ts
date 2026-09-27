@@ -36,11 +36,40 @@ export interface UserProfile {
   constitution: string;
   allergies: string;
   past_history: string[];
+  revision?: number;
+  facts?: ProfileFact[];
+}
+
+export interface ProfileFact {
+  id: string;
+  category: string;
+  entity: string;
+  subject: string;
+  assertion: "present" | "absent" | "uncertain";
+  temporal_scope: string;
+  details: string;
+  source: { quote: string; thread_id?: string; collected_at: string };
+}
+export interface ProfileSuggestion {
+  id: string;
+  fact: ProfileFact;
+  conflict: boolean;
+  previous: string;
+}
+export interface SuggestionDecision {
+  id: string;
+  action: "accept" | "dismiss" | "other";
+  confirm_self?: boolean;
+  replace?: boolean;
+  entity?: string;
+  details?: string;
 }
 
 export interface ProfileUpdate {
   constitution?: string;
   allergies?: string;
+  history?: string;
+  revision?: number;
 }
 
 export interface TokenResponse {

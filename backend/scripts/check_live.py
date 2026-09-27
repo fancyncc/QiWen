@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+import asyncio
+
 from app.config import API_BASE, API_KEY, MODEL_MODE, MODEL_NAME, RAG_MODE
 from app.db import init_db
 from app.model import complete
-from app.retrieval import _collection, _embed, retrieve_with_status
+from app.retrieval import _collection, _embed
+from app.classics import retrieve_classics
 
 
 def main() -> int:
@@ -27,9 +30,13 @@ def main() -> int:
     vector_hits = collection.query(query_embeddings=[vector[0]], n_results=min(4, indexed))["ids"][0]
     if not vector_hits:
         raise RuntimeError("Chroma returned no vector matches.")
-    docs, warning = retrieve_with_status("桂枝汤", limit=4)
-    if warning or not docs:
-        raise RuntimeError(warning or "Retrieval returned no classical source.")
+    plan = {"keyword_query": "桂枝汤", "semantic_query": "桂枝汤的古籍出处", "primary": ["桂枝汤"],
+            "lexical_terms": ["桂枝汤"], "expansions": [], "unmapped": [], "attempt": 1, "catalog_version": 1}
+    docs, trace = asyncio.run(retrieve_classics(plan, limit=4))
+    if (trace["vector_status"] != "success" or trace["rerank"]["status"] != "success" or not docs or
+            trace["mmr"]["status"] not in {"success", "not_needed"} or
+            any(row["retrieval"]["rerank_score"] < 0.7 for row in docs)):
+        raise RuntimeError(trace["warning"] or "Full hybrid recall and rerank did not produce accepted sources.")
     print(f"Chat OK; embedding dimensions: {len(vector[0])}; indexed segments: {indexed}; vector hits: {len(vector_hits)}; fused results: {len(docs)}")
     print(f"Top source: {docs[0]['title']} / {docs[0]['chapter']}")
     return 0

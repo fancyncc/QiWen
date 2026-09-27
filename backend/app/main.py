@@ -8,6 +8,7 @@ import time
 from contextlib import asynccontextmanager
 from pathlib import Path
 from uuid import uuid4
+from typing import Literal
 
 from docx import Document
 from fastapi import Depends, FastAPI, File, HTTPException, Query, UploadFile, Request
@@ -21,6 +22,7 @@ from .auth import check_password, current_user, hash_password, make_token
 from .config import CHECKPOINT_PATH, CORS_ORIGINS, MAX_UPLOAD_BYTES, MODEL_MODE, RAG_MODE, UPLOAD_DIR
 from .db import all_rows, connection, init_db, now, one
 from . import runs
+from . import safety_store
 from .prescription import migrate_plan, legacy_plan, review_plan, fingerprint, patient_fingerprint
 
 @asynccontextmanager
@@ -54,6 +56,21 @@ class ProfilePatch(BaseModel):
     constitution: str | None = Field(default=None, max_length=500)
     allergies: str | None = Field(default=None, max_length=500)
     history: str | None = Field(default=None, max_length=1000)
+    revision: int | None = Field(default=None, ge=0)
+
+
+class SuggestionDecision(BaseModel):
+    id: str
+    action: Literal["accept", "dismiss", "other"]
+    confirm_self: bool = False
+    replace: bool = False
+    entity: str | None = Field(default=None, min_length=1, max_length=80)
+    details: str | None = Field(default=None, max_length=500)
+
+
+class ResolveSuggestions(BaseModel):
+    revision: int = Field(ge=0)
+    decisions: list[SuggestionDecision] = Field(min_length=1, max_length=30)
 
 
 class ChatRequest(BaseModel):
@@ -188,7 +205,10 @@ def thread_messages(thread_id: str, user: dict = Depends(current_user)):
 def get_profile(user_id: str, user: dict = Depends(current_user)):
     if user_id != user["id"]:
         raise HTTPException(403, "无权访问该画像")
-    profile = one("SELECT * FROM profiles WHERE user_id=?", (user_id,))
+    with connection() as db:
+        profile = safety_store.effective_profile(db, user_id)
+        profile["facts"] = [{**json.loads(row["fact"]), "id": row["id"]} for row in db.execute(
+            "SELECT id,fact FROM patient_safety_facts WHERE user_id=? AND status='active' ORDER BY created_at", (user_id,))]
     profile["memories"] = all_rows(
         "SELECT thread_id,summary,updated_at FROM profile_memories WHERE user_id=? ORDER BY updated_at DESC",
         (user_id,),
@@ -209,12 +229,42 @@ def patch_profile(user_id: str, body: ProfilePatch, user: dict = Depends(current
     if user_id != user["id"]:
         raise HTTPException(403, "无权修改该画像")
     changes = body.model_dump(exclude_unset=True)
+    revision = changes.pop("revision", None)
+    if any(value is None for value in changes.values()):
+        raise HTTPException(422, "画像字段不能为 null")
     if changes:
         assignments = ",".join(f"{field}=?" for field in changes)
         with connection() as db:
+            db.execute("BEGIN IMMEDIATE")
+            current = db.execute("SELECT safety_revision FROM profiles WHERE user_id=?", (user_id,)).fetchone()[0]
+            if revision is not None and revision != current:
+                raise HTTPException(409, "画像已变化，请刷新")
+            for category, field in safety_store.FIELD.items():
+                if field in changes:
+                    rows = db.execute("SELECT id FROM patient_safety_facts WHERE user_id=? AND category=? AND status='active'",
+                                      (user_id, category)).fetchall()
+                    for row in rows:
+                        db.execute("UPDATE patient_safety_facts SET status='superseded',updated_at=? WHERE id=?", (now(), row["id"]))
+                        safety_store.audit(db, user_id, row["id"], "manual_update", current + 1)
             db.execute(f"UPDATE profiles SET {assignments},updated_at=? WHERE user_id=?",
                        (*changes.values(), now(), user_id))
+            db.execute("UPDATE profiles SET safety_revision=safety_revision+1 WHERE user_id=?", (user_id,))
     return get_profile(user_id, user)
+
+
+@app.get("/api/profile-suggestions")
+def profile_suggestions(thread_id: str, user: dict = Depends(current_user)):
+    return safety_store.list_suggestions(user["id"], thread_id)
+
+
+@app.post("/api/profile-suggestions/resolve")
+def resolve_profile_suggestions(body: ResolveSuggestions, user: dict = Depends(current_user)):
+    return safety_store.resolve(user["id"], body.revision, body.decisions)
+
+
+@app.delete("/api/profile-facts/{fact_id}")
+def revoke_profile_fact(fact_id: str, revision: int = Query(ge=0), user: dict = Depends(current_user)):
+    return safety_store.revoke(user["id"], fact_id, revision)
 
 
 def extract_file(filename: str, data: bytes) -> tuple[str, str]:
@@ -299,8 +349,11 @@ def _prepare_chat(body: ChatRequest, user: dict) -> tuple[dict, dict, str]:
             "AND NOT EXISTS (SELECT 1 FROM messages WHERE thread_id=?)",
             (body.message.strip()[:28], thread["id"], thread["id"]),
         )
+        source_message_id = str(uuid4())
         db.execute("INSERT INTO messages(id,thread_id,role,content,created_at) VALUES(?,?,?,?,?)",
-                   (str(uuid4()), thread["id"], "user", body.message, now()))
+                   (source_message_id, thread["id"], "user", body.message, now()))
+        db.execute("UPDATE chat_runs SET source_message_id=?,source_files=? WHERE id=?",
+                   (source_message_id, json.dumps(body.files), body.run_id))
         db.execute("UPDATE threads SET updated_at=? WHERE id=?", (now(), thread["id"]))
     return thread, profile, "\n".join(file_texts)[:20000]
 
@@ -315,7 +368,8 @@ def _save_answer(run: runs.Run, result: dict, trace: dict):
         checked, latest_review = review_plan(candidate, result.get("profile", {}))
         stored = one("SELECT status,review FROM candidates WHERE id=? AND run_id=?", (run.candidate_id, run.id))
         stored_review = json.loads(stored["review"] or "{}") if stored else {}
-        manual = one("SELECT constitution,allergies,history FROM profiles WHERE user_id=?", (run.user_id,)) or {}
+        with connection() as db:
+            manual = safety_store.effective_profile(db, run.user_id)
         if (not latest_review["approved"] or fingerprint(candidate) != result.get("reviewed_hash")
             or result.get("manual_profile_hash") != patient_fingerprint(manual)
             or not stored or stored["status"] != "approved"
@@ -332,10 +386,20 @@ def _save_answer(run: runs.Run, result: dict, trace: dict):
               "prescription_review": review, "candidate_id": run.candidate_id}
     final = run.final_event(result, answer, trace)
     with connection() as db:
+        db.execute("BEGIN IMMEDIATE")
+        if result.get("manual_profile_hash") != patient_fingerprint(safety_store.effective_profile(db, run.user_id)):
+            raise RuntimeError("画像已变化，本轮需要重新预审")
         changed = db.execute("UPDATE chat_runs SET status='completed',telemetry=?,updated_at=? WHERE id=? AND status='running'",
                              (json.dumps(trace, ensure_ascii=False), now(), run.id)).rowcount
         if not changed or run.context.cancelled:
             raise asyncio.CancelledError
+        safe = result.get("safety_state", {})
+        if safe:
+            safe["symptom_facts"] = result.get("symptom_facts", [])
+            safe.setdefault("clinical", {})[safe["subject"]] = {
+                key: result.get(key) for key in ("pending_context", "pending_question", "symptom_pending")}
+            safety_store.commit_state(db, run.user_id, thread_id, safe, result.get("safety_state_version", 0))
+        safety_store.add_suggestions(db, run.user_id, thread_id, run.id, result.get("profile_suggestions", []))
         if result.get("context_summary"):
             db.execute("""INSERT INTO profile_memories(thread_id,user_id,summary,updated_at)
                 VALUES(?,?,?,?) ON CONFLICT(thread_id) DO UPDATE SET summary=excluded.summary,updated_at=excluded.updated_at

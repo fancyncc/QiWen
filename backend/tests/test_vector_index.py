@@ -8,6 +8,7 @@ from app import retrieval
 def test_vector_index_resume_only_embeds_missing_segments(monkeypatch):
     stored: dict[str, list[float]] = {}
     embedded: list[list[str]] = []
+    metadata = {}
 
     class Collection:
         def get(self, ids):
@@ -16,6 +17,11 @@ def test_vector_index_resume_only_embeds_missing_segments(monkeypatch):
         def upsert(self, ids, embeddings, documents, metadatas):
             assert len(ids) == len(embeddings) == len(documents) == len(metadatas)
             stored.update(zip(ids, embeddings))
+            metadata.update(zip(ids, metadatas))
+
+        def update(self, ids, metadatas):
+            assert all(item in stored for item in ids)
+            metadata.update(zip(ids, metadatas))
 
     def embed(texts):
         embedded.append(texts)
@@ -28,9 +34,11 @@ def test_vector_index_resume_only_embeds_missing_segments(monkeypatch):
         {"id": "b", "title": "金匮要略", "chapter": "2", "body": "酸枣仁汤"},
     ]
     assert retrieval.index_vectors(rows) == 2
+    rows[0]["metadata"] = '{"split_from":"SHL_001"}'
     assert retrieval.index_vectors(rows) == 0
     assert embedded == [["桂枝汤", "酸枣仁汤"]]
     assert set(stored) == {"a", "b"}
+    assert metadata["a"]["chunk_metadata"] == rows[0]["metadata"]
 
 
 def test_chroma_index_and_hybrid_retrieval(tmp_path, monkeypatch):

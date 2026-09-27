@@ -160,7 +160,14 @@ async def execute(run: Run, message: str, profile: dict, file_text: str, save):
             elif event["type"] == "result":
                 # No await between the cancellation fence and atomic result + memory commit.
                 run.set_phase("ready")
-                trace = {**run.telemetry(), "status": "completed", "preflight": event["data"].get("preflight", {})}
+                trace = {**run.telemetry(), "status": "completed", "preflight": event["data"].get("preflight", {}),
+                         "memory_retrieval": event["data"].get("memory_retrieval", {}),
+                         "classics_retrieval": {"attempts": event["data"].get("retrieval_history", []),
+                                                "final": event["data"].get("retrieval_trace", {})},
+                         "inquiry": {"facts": event["data"].get("symptom_facts", []),
+                                     "pending": event["data"].get("symptom_pending")},
+                         "safety": {key: event["data"].get("safety_state", {}).get(key)
+                                    for key in ("subject", "status", "pending", "version")}}
 
                 if run.candidate_status != "approved":
                     if run.candidate_status == "rejected":

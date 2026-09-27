@@ -6,7 +6,8 @@ services:
     build:
       context: ./backend
       args:
-        INSTALL_KNOWLEDGE: ${QIWEN_INSTALL_KNOWLEDGE:-false}
+        INSTALL_KNOWLEDGE: ${QIWEN_INSTALL_KNOWLEDGE:-true}
+        INSTALL_RERANK: ${QIWEN_INSTALL_RERANK:-true}
     environment:
       QIWEN_ENV: ${QIWEN_ENV:-development}
       QIWEN_SECRET_KEY: ${QIWEN_SECRET_KEY:-}
@@ -16,7 +17,7 @@ services:
       QIWEN_MODEL_BASE_URL: ${QIWEN_MODEL_BASE_URL:-}
       QIWEN_MODEL_API_KEY: ${QIWEN_MODEL_API_KEY:-}
       QIWEN_MODEL_NAME: ${QIWEN_MODEL_NAME:-}
-      QIWEN_RAG_MODE: ${QIWEN_RAG_MODE:-mock}
+      QIWEN_RAG_MODE: ${QIWEN_RAG_MODE:-hybrid}
       QIWEN_EMBEDDING_MODEL: ${QIWEN_EMBEDDING_MODEL:-}
     volumes:
       - qiwen_data:/app/.data
@@ -42,7 +43,8 @@ services:
       context: ./backend
       args:
         INSTALL_TOOLS: "true"
-        INSTALL_KNOWLEDGE: ${QIWEN_INSTALL_KNOWLEDGE:-false}
+        INSTALL_KNOWLEDGE: ${QIWEN_INSTALL_KNOWLEDGE:-true}
+        INSTALL_RERANK: ${QIWEN_INSTALL_RERANK:-true}
     env_file:
       - path: .env
         required: false

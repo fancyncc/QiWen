@@ -91,7 +91,7 @@ def fingerprint(plan: dict) -> str:
 
 
 def patient_fingerprint(profile: dict) -> str:
-    return hashlib.sha256(json.dumps({key: profile.get(key, "") for key in ("constitution", "allergies", "history")},
+    return hashlib.sha256(json.dumps({key: profile.get(key, "") for key in ("constitution", "allergies", "history", "_safety_revision")},
                                     sort_keys=True, ensure_ascii=False).encode()).hexdigest()
 
 

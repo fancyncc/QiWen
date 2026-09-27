@@ -13,7 +13,7 @@ def main() -> int:
     if not API_BASE or not API_KEY:
         raise SystemExit("Configure the embedding-compatible API base and key first.")
     init_db()
-    rows = all_rows("SELECT id,title,chapter,body FROM corpus ORDER BY id")
+    rows = all_rows("SELECT id,title,chapter,body,metadata FROM corpus ORDER BY id")
     added = index_vectors(rows)
     print(f"Corpus segments: {len(rows)}; newly indexed: {added}; already indexed: {len(rows) - added}")
     return 0

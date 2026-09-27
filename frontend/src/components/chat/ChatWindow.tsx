@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useChat } from "@/hooks/useChat";
 import { MessageBubble } from "./MessageBubble";
+import { ProfileSuggestions } from "./ProfileSuggestions";
+import { ProfileFacts } from "./ProfileFacts";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { api, ApiError } from "@/lib/api";
@@ -51,7 +53,7 @@ export function mergeAssistantMessages(msgs: MessageItem[]): MessageItem[] {
 }
 
 export function ChatWindow({ threadId }: { threadId: string }) {
-  const { messages, streaming, send, stop } = useChat(threadId);
+  const { messages, streaming, send, stop, currentThreadId } = useChat(threadId);
   const [input, setInput] = useState("");
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -95,6 +97,7 @@ export function ChatWindow({ threadId }: { threadId: string }) {
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col">
+      <ProfileSuggestions threadId={currentThreadId} streaming={streaming} refreshKey={messages.length} />
       <div className="min-h-0 flex-1 overflow-y-auto">
         <div className="mx-auto max-w-3xl space-y-4 px-4 py-6">
           {messages.length === 0 ? (
@@ -130,6 +133,7 @@ export function ChatWindow({ threadId }: { threadId: string }) {
       </div>
 
       <div className="px-4 pb-4 pt-3 sm:pb-6">
+        <div className="mx-auto mb-1 flex max-w-3xl justify-end"><ProfileFacts /></div>
         <div className="chat-composer mx-auto max-w-3xl rounded-2xl border border-border bg-card p-3 sm:p-4">
           {files.length > 0 && (
             <div className="mb-2 flex flex-wrap gap-2">

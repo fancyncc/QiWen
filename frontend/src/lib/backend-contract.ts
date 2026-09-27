@@ -1,4 +1,4 @@
-import type { ConsultationNote, MessageItem, Stage, ThreadInfo, UserProfile } from "./types";
+import type { ConsultationNote, MessageItem, Stage, ThreadInfo, UserProfile, ProfileFact } from "./types";
 
 /** 适配自有后端的存储字段，页面继续使用现有展示模型。 */
 export interface BackendThread {
@@ -28,6 +28,8 @@ export interface BackendProfile {
   constitution: string;
   allergies: string;
   history: string;
+  safety_revision?: number;
+  facts?: ProfileFact[];
 }
 
 export const mapThread = (value: BackendThread): ThreadInfo => ({
@@ -61,6 +63,8 @@ export const mapProfile = (value: BackendProfile): UserProfile => ({
   constitution: value.constitution,
   allergies: value.allergies,
   past_history: value.history ? [value.history] : [],
+  ...(value.safety_revision !== undefined ? { revision: value.safety_revision } : {}),
+  ...(value.facts ? { facts: value.facts } : {}),
 });
 
 export function errorMessage(detail: unknown, fallback: string): string {

@@ -101,6 +101,8 @@ def test_cancel_ownership_model_cleanup_no_memory_or_success(monkeypatch, blocke
         assert messages[-1]["intent_type"] == "cancelled"
         assert messages[-1]["trace"]["model_calls"][-1]["status"] == "cancelled"
         assert one("SELECT * FROM profile_memories WHERE thread_id=?", (thread,)) is None
+        assert one("SELECT * FROM thread_safety_state WHERE thread_id=?", (thread,)) is None
+        assert one("SELECT * FROM profile_suggestions WHERE run_id=?", (run_id,)) is None
         assert client.get(f"/api/profiles/{user_id}", headers=headers).json()["allergies"] == ""
         # A canceled partial checkpoint cannot affect the next turn.
         monkeypatch.setattr(workflow, "MODEL_MODE", "mock")
@@ -211,6 +213,7 @@ def test_cancel_before_summary_commit_preserves_previous_memory(monkeypatch):
         prior = client.post("/api/chat", headers=headers, json={"message": "最近失眠三天，白天疲劳"}).json()
         thread = prior["thread_id"]
         summary = one("SELECT summary FROM profile_memories WHERE thread_id=?", (thread,))["summary"]
+        symptom_state = one("SELECT state,version FROM thread_safety_state WHERE thread_id=?", (thread,))
         monkeypatch.setattr(workflow, "profile_write", wait_before_write)
         run_id = str(uuid4())
         future = executor.submit(client.post, "/api/chat", headers=headers,
@@ -219,6 +222,7 @@ def test_cancel_before_summary_commit_preserves_previous_memory(monkeypatch):
         client.post(f"/api/runs/{run_id}/cancel", headers=headers).raise_for_status()
         assert future.result(timeout=5).json()["cancelled"]
         assert one("SELECT summary FROM profile_memories WHERE thread_id=?", (thread,))["summary"] == summary
+        assert one("SELECT state,version FROM thread_safety_state WHERE thread_id=?", (thread,)) == symptom_state
         assert run_id not in runs.active
 
 
@@ -251,6 +255,10 @@ def test_successful_provider_pipeline_persists_role_node_usage(monkeypatch):
         content = json.dumps(replies[role]) if role in replies else "资料不足，不作确诊。"
         return output(content, {"prompt_tokens": 12, "completion_tokens": 3})
     configure(monkeypatch, handler)
+    from app import local_ranking
+    monkeypatch.setenv("QIWEN_RAG_RERANK_MODE", "cross_encoder")
+    monkeypatch.setattr(local_ranking, "score_logits", lambda query, texts, *args: [2.0] * len(texts))
+    monkeypatch.setattr(local_ranking, "candidate_embeddings", lambda rows, *args: [[1.0, 0.0] for _ in rows])
     monkeypatch.setattr(workflow, "MODEL_MODE", "openai_compatible")
     for role in model.ROLES:
         monkeypatch.setenv("QIWEN_MODEL_" + role.upper(), role)
@@ -261,9 +269,10 @@ def test_successful_provider_pipeline_persists_role_node_usage(monkeypatch):
         assert result.status_code == 200, result.text
         data = result.json()
         calls = data["trace"]["model_calls"]
-        assert {call["role"] for call in calls} == {"safety_preflight", "bianzheng", "formula", "reviewer"}
-        assert sum(call["input_tokens"] for call in calls) == 48
-        assert sum(call["output_tokens"] for call in calls) == 12
+        assert {call["role"] for call in calls} == {"safety_preflight", "cross_encoder", "bianzheng", "formula", "reviewer"}
+        assert sum(call["input_tokens"] or 0 for call in calls) == 48
+        assert sum(call["output_tokens"] or 0 for call in calls) == 12
+        assert data["trace"]["classics_retrieval"]["final"]["rerank"]["status"] == "success"
         assert all(call["node"] and call["status"] == "success" for call in calls)
         saved = client.get(f'/api/threads/{data["thread_id"]}/messages', headers=headers).json()[-1]
         assert saved["trace"]["model_calls"] == calls

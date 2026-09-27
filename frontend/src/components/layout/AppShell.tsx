@@ -211,11 +211,11 @@ function SidebarContent({
           <div className="flex items-center justify-between gap-1">
             <dt className="shrink-0 text-muted-foreground">过敏史</dt>
             <dd className="flex min-w-0 items-center gap-1 text-right">
-              <span className="min-w-0 truncate">{profile?.allergies ?? "无"}</span>
+              <span className="min-w-0 truncate">{profile?.allergies || "未填写"}</span>
               <button
                 className="shrink-0 rounded p-0.5 text-muted-foreground hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 onClick={() => {
-                  setAllergyInput(profile?.allergies ?? "无");
+                  setAllergyInput(profile?.allergies ?? "");
                   setEditingAllergies(true);
                 }}
                 aria-label="编辑过敏史"
@@ -301,7 +301,7 @@ function SidebarContent({
             <DialogTitle>编辑过敏史</DialogTitle>
           </DialogHeader>
           <p className="text-sm text-muted-foreground">
-            输入您的过敏药物或食物，用顿号分隔（如"青霉素、海鲜"）。输入"无"表示无过敏。
+            输入本人过敏药物或食物，用顿号分隔。明确无过敏时填写“无”；留空表示未知。保存会更正该字段的已确认资料。
           </p>
           <Input
             value={allergyInput}
@@ -315,9 +315,9 @@ function SidebarContent({
             <Button
               disabled={updateProfileMut.isPending}
               onClick={() => {
-                const trimmed = allergyInput.trim() || "无";
+                const trimmed = allergyInput.trim();
                 updateProfileMut.mutate(
-                  { user: username, data: { allergies: trimmed } },
+                  { user: username, data: { allergies: trimmed, revision: profile?.revision } },
                 );
                 setEditingAllergies(false);
               }}

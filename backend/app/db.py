@@ -95,7 +95,7 @@ def init_db() -> None:
         );
         CREATE TABLE IF NOT EXISTS corpus (
           id TEXT PRIMARY KEY, title TEXT NOT NULL, chapter TEXT NOT NULL,
-          body TEXT NOT NULL, created_at TEXT NOT NULL
+          body TEXT NOT NULL, created_at TEXT NOT NULL, metadata TEXT NOT NULL DEFAULT '{}'
         );
         CREATE TABLE IF NOT EXISTS herbs (
           name TEXT PRIMARY KEY, properties TEXT NOT NULL DEFAULT '',
@@ -117,7 +117,43 @@ def init_db() -> None:
         );
         CREATE INDEX IF NOT EXISTS profile_memories_user_idx
           ON profile_memories(user_id, updated_at DESC);
+        CREATE TABLE IF NOT EXISTS memory_embeddings (
+          thread_id TEXT NOT NULL REFERENCES profile_memories(thread_id) ON DELETE CASCADE,
+          user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          model_key TEXT NOT NULL, content_hash TEXT NOT NULL, embedding TEXT NOT NULL,
+          PRIMARY KEY(thread_id,model_key)
+        );
+        CREATE TABLE IF NOT EXISTS thread_safety_state (
+          thread_id TEXT PRIMARY KEY REFERENCES threads(id) ON DELETE CASCADE,
+          user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          version INTEGER NOT NULL DEFAULT 0, state TEXT NOT NULL, updated_at TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS patient_safety_facts (
+          id TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          category TEXT NOT NULL, entity TEXT NOT NULL, fact TEXT NOT NULL,
+          status TEXT NOT NULL DEFAULT 'active', created_at TEXT NOT NULL, updated_at TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS safety_facts_user_idx ON patient_safety_facts(user_id,status);
+        CREATE TABLE IF NOT EXISTS profile_suggestions (
+          id TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          thread_id TEXT NOT NULL REFERENCES threads(id) ON DELETE CASCADE,
+          run_id TEXT NOT NULL REFERENCES chat_runs(id) ON DELETE CASCADE,
+          dedup_key TEXT NOT NULL, fact TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'pending',
+          created_at TEXT NOT NULL, updated_at TEXT NOT NULL, UNIQUE(user_id,dedup_key)
+        );
+        CREATE TABLE IF NOT EXISTS safety_fact_events (
+          id TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          fact_id TEXT, operation TEXT NOT NULL, revision INTEGER NOT NULL, created_at TEXT NOT NULL
+        );
         """)
+        if "metadata" not in {row[1] for row in db.execute("PRAGMA table_info(corpus)")}:
+            db.execute("ALTER TABLE corpus ADD COLUMN metadata TEXT NOT NULL DEFAULT '{}'")
+        if "safety_revision" not in {row[1] for row in db.execute("PRAGMA table_info(profiles)")}:
+            db.execute("ALTER TABLE profiles ADD COLUMN safety_revision INTEGER NOT NULL DEFAULT 0")
+        if "source_message_id" not in {row[1] for row in db.execute("PRAGMA table_info(chat_runs)")}:
+            db.execute("ALTER TABLE chat_runs ADD COLUMN source_message_id TEXT")
+        if "source_files" not in {row[1] for row in db.execute("PRAGMA table_info(chat_runs)")}:
+            db.execute("ALTER TABLE chat_runs ADD COLUMN source_files TEXT NOT NULL DEFAULT '[]'")
         if "trace" not in {row[1] for row in db.execute("PRAGMA table_info(messages)")}:
             db.execute("ALTER TABLE messages ADD COLUMN trace TEXT")
         if "plan" not in {row[1] for row in db.execute("PRAGMA table_info(messages)")}:

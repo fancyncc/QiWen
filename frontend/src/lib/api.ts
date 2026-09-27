@@ -10,6 +10,8 @@ import type {
   TokenResponse,
   UploadResponse,
   UserProfile,
+  ProfileSuggestion,
+  SuggestionDecision,
 } from "./types";
 
 const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "") + "/api";
@@ -108,6 +110,13 @@ export const api = {
       body: JSON.stringify(data),
     }));
   },
+
+  getProfileSuggestions: (threadId: string) =>
+    request<{ revision: number; items: ProfileSuggestion[] }>("/profile-suggestions?thread_id=" + encodeURIComponent(threadId)),
+  resolveProfileSuggestions: (revision: number, decisions: SuggestionDecision[]) =>
+    request("/profile-suggestions/resolve", { method: "POST", body: JSON.stringify({ revision, decisions }) }),
+  revokeProfileFact: (id: string, revision: number) =>
+    request("/profile-facts/" + encodeURIComponent(id) + "?revision=" + revision, { method: "DELETE" }),
 
   // 对话（非流式，流式见 lib/stream.ts）
   chat: (req: ChatRequest) =>

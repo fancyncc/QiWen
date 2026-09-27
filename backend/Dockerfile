@@ -19,6 +19,13 @@ RUN if [ "$INSTALL_TOOLS" = "true" ]; then \
       python -m pip install --no-cache-dir 'mcp>=2,<3'; \
     fi
 
+ARG INSTALL_RERANK=false
+COPY requirements.rerank.txt ./
+RUN if [ "$INSTALL_RERANK" = "true" ]; then \
+      python -m pip install --no-cache-dir 'torch==2.10.0' --index-url https://download.pytorch.org/whl/cpu \
+      && python -m pip install --no-cache-dir -r requirements.rerank.txt; \
+    fi
+
 COPY . ./
 RUN groupadd --system qiwen && useradd --system --gid qiwen --home-dir /app qiwen \
     && mkdir -p /app/.data && chown -R qiwen:qiwen /app
