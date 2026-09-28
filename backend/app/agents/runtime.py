@@ -1,0 +1,159 @@
+from __future__ import annotations
+
+import asyncio
+import inspect
+import json
+from collections import Counter
+from dataclasses import dataclass
+from typing import Any, Awaitable, Callable
+
+from pydantic import BaseModel, ConfigDict
+
+from .. import model
+
+
+class EmptyArgs(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+
+
+ToolHandler = Callable[[dict, BaseModel], Any | Awaitable[Any]]
+MockPlanner = Callable[[int, list[dict]], dict]
+
+
+@dataclass(frozen=True)
+class ToolSpec:
+    name: str
+    description: str
+    args_schema: type[BaseModel]
+    handler: ToolHandler
+    timeout: float = 10.0
+
+    def openai_schema(self) -> dict:
+        return {"type": "function", "function": {
+            "name": self.name,
+            "description": self.description,
+            "parameters": self.args_schema.model_json_schema(),
+        }}
+
+
+@dataclass
+class AgentRun:
+    output: dict
+    trace: list[dict]
+    observations: list[dict]
+
+
+class AgentLoopError(RuntimeError):
+    pass
+
+
+def _brief(value: Any, limit: int = 1800) -> Any:
+    raw = json.dumps(value, ensure_ascii=False, default=str)
+    if len(raw) <= limit:
+        return value
+    return {"truncated": True, "preview": raw[:limit]}
+
+
+async def _execute_tool(spec: ToolSpec, state: dict, arguments: dict) -> Any:
+    parsed = spec.args_schema.model_validate(arguments)
+    result = spec.handler(state, parsed)
+    if inspect.isawaitable(result):
+        async with asyncio.timeout(spec.timeout):
+            return await result
+    return result
+
+
+async def run_react_agent(
+    *,
+    name: str,
+    role: str,
+    task: str,
+    state: dict,
+    tools: list[ToolSpec],
+    output_schema: type[BaseModel],
+    mock_planner: MockPlanner,
+    max_steps: int,
+) -> AgentRun:
+    """Run a bounded observe/act loop and return a validated artifact.
+
+    Raw chain-of-thought is neither requested nor stored.  The durable trace
+    contains only selected actions, tool observations and the stop reason.
+    """
+    registry = {tool.name: tool for tool in tools}
+    schemas = [tool.openai_schema() for tool in tools]
+    system = (
+        f"你是{name}。围绕任务自主选择允许的工具。每次收到工具结果后判断证据是否足够；"
+        "不足时继续调用工具，需要用户补充时在最终 JSON 中返回 need_user_input。"
+        "不得编造工具结果、出处、剂量或安全结论。不要输出思维链。"
+        "结束时只输出符合以下 JSON Schema 的对象："
+        + json.dumps(output_schema.model_json_schema(), ensure_ascii=False)
+    )
+    messages = [{"role": "system", "content": system}, {"role": "user", "content": task}]
+    observations: list[dict] = []
+    trace: list[dict] = []
+    repeats: Counter[str] = Counter()
+    context = model.invocation.get()
+
+    for step in range(1, max_steps + 1):
+        if context:
+            context.check()
+        if model.MODEL_MODE == "mock":
+            decision = mock_planner(step, observations)
+        else:
+            decision = await model.achat_tools(messages, schemas, role=role)
+
+        calls = decision.get("tool_calls") or []
+        if decision.get("tool"):
+            calls = [{"id": f"mock-{name}-{step}", "name": decision["tool"],
+                      "arguments": decision.get("arguments", {})}]
+
+        if calls:
+            assistant_calls = []
+            for call in calls:
+                assistant_calls.append({"id": call["id"], "type": "function", "function": {
+                    "name": call["name"], "arguments": json.dumps(call.get("arguments", {}), ensure_ascii=False)}})
+            messages.append({"role": "assistant", "content": decision.get("content") or None,
+                             "tool_calls": assistant_calls})
+            for call in calls:
+                tool_name = call["name"]
+                arguments = call.get("arguments") or {}
+                action = {"step": step, "tool": tool_name, "arguments": arguments}
+                if context and context.emit:
+                    context.emit("agent.action", {"agent": name, **action})
+                key = tool_name + ":" + json.dumps(arguments, sort_keys=True, ensure_ascii=False)
+                repeats[key] += 1
+                try:
+                    if tool_name not in registry:
+                        raise ValueError("工具不在当前 Agent 的允许列表中")
+                    if repeats[key] > 2:
+                        raise ValueError("同一工具和参数重复次数超过限制")
+                    result = await _execute_tool(registry[tool_name], state, arguments)
+                    observation = {**action, "status": "success", "result": result}
+                except asyncio.CancelledError:
+                    raise
+                except Exception as exc:
+                    observation = {**action, "status": "failed", "error": type(exc).__name__}
+                observations.append(observation)
+                public_observation = _brief(observation)
+                trace.append(public_observation)
+                if context and context.emit:
+                    context.emit("agent.observation", {"agent": name, "observation": public_observation})
+                messages.append({"role": "tool", "tool_call_id": call["id"], "content":
+                                 json.dumps(public_observation, ensure_ascii=False, default=str)})
+            continue
+
+        final_value = decision.get("final")
+        if final_value is None:
+            final_value = decision.get("content", "")
+        try:
+            artifact = (output_schema.model_validate(final_value) if isinstance(final_value, dict)
+                        else output_schema.model_validate_json(final_value)).model_dump()
+        except Exception as exc:
+            raise AgentLoopError(f"{name}未返回有效的结构化结果") from exc
+        completed = {"step": step, "status": "completed", "stop_reason": artifact.get("status", "completed")}
+        trace.append(completed)
+        if context and context.emit:
+            context.emit("agent.completed", {"agent": name, **completed})
+        return AgentRun(artifact, trace, observations)
+
+    raise AgentLoopError(f"{name}达到最大行动步数仍未完成任务")

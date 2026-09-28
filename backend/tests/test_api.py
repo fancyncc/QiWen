@@ -78,14 +78,18 @@ def test_followup_sse_multi_and_history():
             events = [json.loads(line[6:]) for line in response.iter_lines() if line.startswith("data: ")]
         assert response.status_code == 200
         assert any(item.get("stage") == "herb" for item in events)
+        assert {item["payload"].get("agent") for item in events if item["type"] == "agent.action"} == {
+            "辨证 Agent", "方剂 Agent", "本草 Agent"
+        }
         def at(stage: str, status: str) -> int:
             return next(i for i, event in enumerate(events)
                         if event.get("stage") == stage and event.get("status") == status)
-        for stage in ("inquiry", "search", "bianzheng", "formula", "herb", "synthesis", "reviewer", "safety"):
+        for stage in ("inquiry", "bianzheng", "formula", "herb", "synthesis", "reviewer", "safety"):
             assert at(stage, "start") < at(stage, "done")
         assert at("synthesis", "start") > max(at(stage, "done") for stage in ("bianzheng", "formula", "herb"))
         assert any(item["type"] == "candidate.delta" for item in events)
         assert events[-1]["done"] is True
+        assert set(events[-1]["trace"]["agents"]["artifacts"]) == {"bianzheng", "formula", "herb"}
         assert len(events[-1]["notes"]) == 3
         assert [note["expert"] for note in events[-1]["notes"]] == ["辨证", "方剂", "本草"]
         assert all(note.get("evidence") and note.get("reasoning") for note in events[-1]["notes"])
@@ -125,6 +129,7 @@ def test_multi_expert_cards_are_persisted_after_safety_review():
 
 def test_contextual_followup_preserves_denials_without_searching_them(monkeypatch):
     from app import workflow
+    from app.agents import tools as agent_tools
 
     assert workflow.symptom_observations("没有口干口苦、腹痛，舌苔发白") == (
         ["舌苔白"], ["腹痛", "口干", "口苦"],
@@ -133,7 +138,7 @@ def test_contextual_followup_preserves_denials_without_searching_them(monkeypatc
     async def capture(plan):
         queries.append(plan["keyword_query"])
         return [], {"warning": ""}
-    monkeypatch.setattr(workflow, "retrieve_classics", capture)
+    monkeypatch.setattr(agent_tools, "retrieve_classics", capture)
     with TestClient(app) as client:
         token, _ = register(client, "followup_" + uuid4().hex[:6])
         headers = auth(token)

@@ -184,3 +184,29 @@ def test_streaming_usage_and_partial_stream_is_not_retried(monkeypatch, partial_
         finally:
             model.invocation.reset(token)
     asyncio.run(run())
+
+
+def test_tool_decision_parses_openai_compatible_calls(monkeypatch):
+    received = []
+    def handler(request):
+        received.append(json.loads(request.content))
+        return httpx.Response(200, json={"choices": [{"message": {
+            "content": None,
+            "tool_calls": [{"id": "call-1", "type": "function", "function": {
+                "name": "search_classics", "arguments": '{"query":"失眠"}'}}],
+        }}], "usage": {"prompt_tokens": 9, "completion_tokens": 2}})
+    configure(monkeypatch, handler)
+
+    async def run():
+        result = await model.achat_tools(
+            [{"role": "user", "content": "查找证据"}],
+            [{"type": "function", "function": {"name": "search_classics", "description": "检索",
+                                                   "parameters": {"type": "object"}}}],
+            role="bianzheng",
+        )
+        assert result == {"content": "", "tool_calls": [
+            {"id": "call-1", "name": "search_classics", "arguments": {"query": "失眠"}}
+        ]}
+    asyncio.run(run())
+    assert received[0]["tool_choice"] == "auto"
+    assert received[0]["tools"][0]["function"]["name"] == "search_classics"

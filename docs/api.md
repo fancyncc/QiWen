@@ -22,6 +22,8 @@
 
 SSE 信封包含 run_id、candidate_id、sequence、type、payload。后端独立保存候选与审查；当前页面接收 stage 进度，answer.final 将正文与会话 id 交给聊天状态管理，再加载历史。run.failed 显示错误，run.cancelled 显示已停止。协议细节见[扩展设计](结构化剂量与候选协议.md)。
 
+`multi` 模式还返回 `agent.action`、`agent.observation`、`agent.completed`。事件只包含 Agent 名称、工具选择、结构化参数、裁剪后的 Observation 与停止原因，不包含模型思维链。最终 `trace.agents` 保存三个 Agent 的结构化产物和可审计工具轨迹。
+
 页面仍用 thread_id、patient_id 等展示字段，backend-contract.ts 转换；expert/content 转为 specialist/reasoning，trace.events 与 elapsedMs 恢复阶段与耗时。新增画像确认、来源和撤销入口，侧栏手填过敏史。画像包含 safety_revision、facts；PATCH 可携带 revision，空白表示未知，明确“无”表示自述否认。
 
 确认、去重、主体和事务协议见[安全预审与画像确认](安全预审与画像确认.md)。trace.safety 保存咨询对象、状态、待追问字段和版本；restricted 不表示放行。

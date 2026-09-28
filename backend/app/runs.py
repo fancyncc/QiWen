@@ -166,6 +166,8 @@ async def execute(run: Run, message: str, profile: dict, file_text: str, save):
                                                 "final": event["data"].get("retrieval_trace", {})},
                          "inquiry": {"facts": event["data"].get("symptom_facts", []),
                                      "pending": event["data"].get("symptom_pending")},
+                         "agents": {"traces": event["data"].get("agent_traces", {}),
+                                    "artifacts": event["data"].get("agent_artifacts", {})},
                          "safety": {key: event["data"].get("safety_state", {}).get(key)
                                     for key in ("subject", "status", "pending", "version")}}
 

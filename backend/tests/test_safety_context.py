@@ -270,7 +270,8 @@ def test_portrait_change_during_generation_prevents_commit(monkeypatch):
         token, user_id = register(client, "race_" + uuid4().hex[:8])
         h = auth(token)
         tid = client.post("/api/threads", headers=h, json={}).json()["id"]
-        future = pool.submit(client.post, "/api/chat", headers=h, json={"message": "最近失眠三天，白天疲劳", "thread_id": tid})
+        future = pool.submit(client.post, "/api/chat", headers=h,
+                             json={"message": "最近失眠三天，白天疲劳，不用查古籍", "thread_id": tid})
         try:
             assert entered.wait(8)
             assert client.patch(f"/api/profiles/{user_id}", headers=h, json={"allergies": "甘草"}).status_code == 200

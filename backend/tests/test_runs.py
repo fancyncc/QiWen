@@ -83,7 +83,8 @@ def test_cancel_ownership_model_cleanup_no_memory_or_success(monkeypatch, blocke
         thread = client.post("/api/threads", headers=headers, json={"mode": "fixed"}).json()["id"]
         run_id = str(uuid4())
         future = executor.submit(client.post, "/api/chat", headers=headers,
-                                 json={"run_id": run_id, "thread_id": thread, "message": "最近失眠三天，白天疲劳"})
+                                 json={"run_id": run_id, "thread_id": thread,
+                                       "message": "最近失眠三天，白天疲劳，不用查古籍"})
         assert entered.wait(5)
         assert client.post(f"/api/runs/{run_id}/cancel", headers=auth(other)).status_code == 404
         assert client.get(f"/api/runs/{run_id}", headers=auth(other)).status_code == 404
@@ -210,14 +211,16 @@ def test_cancel_before_summary_commit_preserves_previous_memory(monkeypatch):
     with TestClient(app) as client, ThreadPoolExecutor() as executor:
         token, _ = register(client, "memory_" + uuid4().hex[:8])
         headers = auth(token)
-        prior = client.post("/api/chat", headers=headers, json={"message": "最近失眠三天，白天疲劳"}).json()
+        prior = client.post("/api/chat", headers=headers,
+                            json={"message": "最近失眠三天，白天疲劳，不用查古籍"}).json()
         thread = prior["thread_id"]
         summary = one("SELECT summary FROM profile_memories WHERE thread_id=?", (thread,))["summary"]
         symptom_state = one("SELECT state,version FROM thread_safety_state WHERE thread_id=?", (thread,))
         monkeypatch.setattr(workflow, "profile_write", wait_before_write)
         run_id = str(uuid4())
         future = executor.submit(client.post, "/api/chat", headers=headers,
-                                 json={"run_id": run_id, "thread_id": thread, "message": "最近鼻塞三天，伴有怕冷"})
+                                 json={"run_id": run_id, "thread_id": thread,
+                                       "message": "最近鼻塞三天，伴有怕冷，不用查古籍"})
         assert entered.wait(5)
         client.post(f"/api/runs/{run_id}/cancel", headers=headers).raise_for_status()
         assert future.result(timeout=5).json()["cancelled"]
@@ -244,7 +247,8 @@ def test_restart_recovers_interrupted_run():
 
 def test_successful_provider_pipeline_persists_role_node_usage(monkeypatch):
     def handler(request):
-        role = json.loads(request.content)["model"]
+        payload = json.loads(request.content)
+        role = payload["model"]
         replies = {
             "safety_preflight": {"decision": "allow", "risk_categories": [], "reason": "stub", "required_questions": []},
             "formula": {"name": "酸枣仁汤", "herbs": []},
@@ -252,7 +256,22 @@ def test_successful_provider_pipeline_persists_role_node_usage(monkeypatch):
         }
         from app.prescription import structured_herb
         replies["formula"]["herbs"] = [structured_herb(name) for name in ["酸枣仁", "茯苓", "知母", "川芎", "甘草"]]
-        content = json.dumps(replies[role]) if role in replies else "资料不足，不作确诊。"
+        if payload.get("tools") and role == "bianzheng":
+            if not any(message.get("role") == "tool" for message in payload["messages"]):
+                return httpx.Response(200, json={"choices": [{"message": {"content": None, "tool_calls": [{
+                    "id": "classic-call", "type": "function", "function": {
+                        "name": "search_classics", "arguments": '{"query":"失眠"}'}}
+                ]}}], "usage": {"prompt_tokens": 12, "completion_tokens": 3}})
+            content = json.dumps({"status": "completed", "conclusion": "资料不足，不作确诊。",
+                                  "evidence_ids": [], "uncertainties": ["缺少面诊"], "question": ""})
+        elif payload.get("tools") and role == "formula":
+            content = json.dumps({"status": "completed", "plan": replies["formula"],
+                                  "evidence_ids": [], "uncertainties": ["剂量需复核"], "question": ""})
+        elif payload.get("tools") and role == "herb":
+            content = json.dumps({"status": "approved", "problems": [], "required_actions": [],
+                                  "evidence_ids": [], "question": ""})
+        else:
+            content = json.dumps(replies[role]) if role in replies else "资料不足，不作确诊。"
         return output(content, {"prompt_tokens": 12, "completion_tokens": 3})
     configure(monkeypatch, handler)
     from app import local_ranking
@@ -269,9 +288,9 @@ def test_successful_provider_pipeline_persists_role_node_usage(monkeypatch):
         assert result.status_code == 200, result.text
         data = result.json()
         calls = data["trace"]["model_calls"]
-        assert {call["role"] for call in calls} == {"safety_preflight", "cross_encoder", "bianzheng", "formula", "reviewer"}
-        assert sum(call["input_tokens"] or 0 for call in calls) == 48
-        assert sum(call["output_tokens"] or 0 for call in calls) == 12
+        assert {call["role"] for call in calls} == {"safety_preflight", "cross_encoder", "bianzheng", "formula", "herb", "reviewer"}
+        assert sum(call["input_tokens"] or 0 for call in calls) == 72
+        assert sum(call["output_tokens"] or 0 for call in calls) == 18
         assert data["trace"]["classics_retrieval"]["final"]["rerank"]["status"] == "success"
         assert all(call["node"] and call["status"] == "success" for call in calls)
         saved = client.get(f'/api/threads/{data["thread_id"]}/messages', headers=headers).json()[-1]

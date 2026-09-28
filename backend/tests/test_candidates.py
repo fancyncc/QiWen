@@ -67,7 +67,7 @@ def test_real_sse_deltas_precede_completion_and_cancel_blocks_late_events(monkey
         headers = auth(token)
         run_id = str(uuid4())
         future = executor.submit(client.post, "/api/chat", headers=headers,
-                                 json={"run_id": run_id, "message": "最近失眠三天，白天疲劳"})
+                                 json={"run_id": run_id, "message": "最近失眠三天，白天疲劳，不用查古籍"})
         assert entered.wait(5)
         before = client.get(f"/api/runs/{run_id}/events", headers=headers).json()
         delta = next(event for event in before if event["type"] == "candidate.delta")

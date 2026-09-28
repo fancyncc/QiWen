@@ -79,6 +79,10 @@ class FlowState(TypedDict, total=False):
     reviewer_retry_count: int
     safety_retry_count: int
     response: str
+    agent_stop: str
+    agent_traces: dict
+    agent_artifacts: dict
+    herb_review: dict
 
 
 URGENT = ["胸痛", "呼吸困难", "昏厥", "大出血", "意识不清", "自杀"]
@@ -102,6 +106,7 @@ def prepare(state: FlowState) -> FlowState:
         "search_plan": {}, "retrieval_trace": {}, "retrieval_history": [],
         "search_required": False, "intent_type": "", "symptoms": [], "denied_symptoms": [],
         "profile_suggestions": [],
+        "agent_stop": "", "agent_traces": {}, "agent_artifacts": {}, "herb_review": {},
     }
 
 
@@ -704,7 +709,7 @@ def instrument(name: str, function):
 
         try:
             if context and context.emit:
-                if name == "revise_formula":
+                if name == "revise_formula" or (name == "formula" and state.get("safety_errors")):
                     context.emit("candidate.started", {"text": state.get("diagnosis", ""), "revision": True})
                 if name == "reviewer":
                     context.emit("candidate.completed", {"text": state.get("diagnosis", "") + "\n\n## 候选方剂\n" + render_plan(state["treatment_plan"]),
@@ -744,10 +749,6 @@ def build_graph(mode: str):
     graph.add_node("pre_safety", instrument("pre_safety", pre_safety))
     graph.add_node("inquiry", instrument("inquiry", inquire))
     graph.add_node("main_route", instrument("main_route", evidence_ready))
-    graph.add_node("rag_decision", instrument("rag_decision", rag_decision))
-    graph.add_node("search", instrument("search", search))
-    graph.add_node("evaluate_retrieval", instrument("evaluate_retrieval", evaluate_retrieval))
-    graph.add_node("rewrite_query", instrument("rewrite_query", rewrite_query))
     graph.add_node("evidence_ready", instrument("evidence_ready", evidence_ready))
     graph.add_node("context_budget", instrument("context_budget", context_budget))
     graph.add_node("compress_context", instrument("compress_context", compress_context))
@@ -760,37 +761,51 @@ def build_graph(mode: str):
     graph.add_conditional_edges("pre_safety", pre_safety_route,
                                 {"blocked": "context_budget", "allowed": "inquiry"})
     graph.add_edge("inquiry", "main_route")
-    graph.add_conditional_edges("main_route", main_route,
-                                {"diagnose": "rag_decision", "end": "finish"})
-    graph.add_conditional_edges("rag_decision", rag_route,
-                                {"search": "search", "skip": "evidence_ready"})
-    graph.add_edge("search", "evaluate_retrieval")
-    graph.add_conditional_edges("evaluate_retrieval", retrieval_route,
-                                {"rewrite": "rewrite_query", "ready": "evidence_ready"})
-    graph.add_edge("rewrite_query", "search")
-    graph.add_node("bianzheng", instrument("bianzheng", bianzheng))
-    graph.add_node("formula", instrument("formula", formula))
-    graph.add_node("revise_formula", instrument("revise_formula", revise_formula))
     graph.add_node("safety", instrument("safety", safety))
-    graph.add_node("reviewer", instrument("reviewer", reviewer))
     if mode == "multi":
-        graph.add_node("herb", instrument("herb", herb_expert))
-        graph.add_node("synthesis", instrument("synthesis", synthesize))
-        graph.add_edge("evidence_ready", "bianzheng")
-        graph.add_edge("evidence_ready", "formula")
-        graph.add_edge("evidence_ready", "herb")
-        graph.add_edge(["bianzheng", "formula", "herb"], "synthesis")
-        graph.add_edge("synthesis", "reviewer")
-        graph.add_edge("reviewer", "safety")
-        graph.add_edge("revise_formula", "reviewer")
+        from .agents.multi import (bianzheng_agent, bianzheng_route, formula_agent, formula_route,
+                                   herb_agent, review_agents, synthesize_agents)
+        graph.add_node("bianzheng_agent", instrument("bianzheng", bianzheng_agent))
+        graph.add_node("formula_agent", instrument("formula", formula_agent))
+        graph.add_node("herb_agent", instrument("herb", herb_agent))
+        graph.add_node("synthesis", instrument("synthesis", synthesize_agents))
+        graph.add_node("multi_reviewer", instrument("reviewer", review_agents))
+        graph.add_conditional_edges("main_route", main_route,
+                                    {"diagnose": "evidence_ready", "end": "finish"})
+        graph.add_edge("evidence_ready", "bianzheng_agent")
+        graph.add_conditional_edges("bianzheng_agent", bianzheng_route,
+                                    {"continue": "formula_agent", "stop": "context_budget"})
+        graph.add_conditional_edges("formula_agent", formula_route,
+                                    {"continue": "herb_agent", "stop": "context_budget"})
+        graph.add_edge("herb_agent", "synthesis")
+        graph.add_edge("synthesis", "multi_reviewer")
+        graph.add_edge("multi_reviewer", "safety")
+        graph.add_conditional_edges("safety", safety_route,
+                                    {"revise": "formula_agent", "finish": "context_budget"})
     else:
+        graph.add_node("rag_decision", instrument("rag_decision", rag_decision))
+        graph.add_node("search", instrument("search", search))
+        graph.add_node("evaluate_retrieval", instrument("evaluate_retrieval", evaluate_retrieval))
+        graph.add_node("rewrite_query", instrument("rewrite_query", rewrite_query))
+        graph.add_node("bianzheng", instrument("bianzheng", bianzheng))
+        graph.add_node("formula", instrument("formula", formula))
+        graph.add_node("revise_formula", instrument("revise_formula", revise_formula))
+        graph.add_node("reviewer", instrument("reviewer", reviewer))
+        graph.add_conditional_edges("main_route", main_route,
+                                    {"diagnose": "rag_decision", "end": "finish"})
+        graph.add_conditional_edges("rag_decision", rag_route,
+                                    {"search": "search", "skip": "evidence_ready"})
+        graph.add_edge("search", "evaluate_retrieval")
+        graph.add_conditional_edges("evaluate_retrieval", retrieval_route,
+                                    {"rewrite": "rewrite_query", "ready": "evidence_ready"})
+        graph.add_edge("rewrite_query", "search")
         graph.add_edge("evidence_ready", "bianzheng")
         graph.add_edge("bianzheng", "formula")
         graph.add_edge("formula", "reviewer")
         graph.add_edge("reviewer", "safety")
         graph.add_edge("revise_formula", "reviewer")
-    graph.add_conditional_edges("safety", safety_route,
-                                {"revise": "revise_formula", "finish": "context_budget"})
+        graph.add_conditional_edges("safety", safety_route,
+                                    {"revise": "revise_formula", "finish": "context_budget"})
     graph.add_conditional_edges("context_budget", compression_route,
                                 {"compress": "compress_context", "write": "profile_write"})
     graph.add_edge("compress_context", "profile_write")
@@ -808,6 +823,7 @@ LABELS = {
     "synthesis": "会诊综合", "reviewer": "独立审查", "safety": "处方安全校验",
     "context_budget": "上下文预算", "compress_context": "上下文压缩",
     "profile_write": "准备会话摘要", "finish": "最终答复检查",
+    "bianzheng_agent": "辨证 Agent", "formula_agent": "方剂 Agent", "herb_agent": "本草 Agent",
 }
 
 
