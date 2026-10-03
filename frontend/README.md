@@ -8,4 +8,4 @@
 
 淡蓝主题、登录页和参考布局保留。新增 ProfileSuggestions 合并确认弹窗和 ProfileFacts 来源查看、撤销入口；侧栏过敏史支持版本校验，空白表示未知。当前没有模式选择器和摘要管理面板。
 
-执行 `npm test`、`npm run build` 验证。Docker 交付需按根目录 AGENTS.md 重建并检查服务健康。字段见[接口约定](../docs/api.md)，范围见[回退记录](../docs/回退记录.md)。
+执行 `npm test`、`npm run build` 验证。Docker 交付需按根目录 AGENTS.md 重建并检查服务健康。字段见[接口约定](../docs/api.md)，范围见[架构与运行边界](../docs/architecture.md)。

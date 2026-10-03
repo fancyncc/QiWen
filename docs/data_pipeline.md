@@ -1,6 +1,14 @@
-# 岐问古籍结构切片流程
+# 岐问数据管线
 
-2026-09-27。本文依据当前项目实现编写，采用结构规则切分、统一清理、约 500 字符细分及内容 MD5 去重。
+古籍原文、知识种子与术语表用于学习和检索演示。本文说明来源、结构切片、入库与复现；检索排序见 [rag.md](rag.md)，运行配置和备份见 [deployment.md](deployment.md)。
+
+## 资料来源与种子
+
+`backend/resources/classics_source/` 保存六部古籍 TXT，`classics_segments/` 保存派生 JSON，原始资料于 2026-09-24 从 gstaryu/LingYi 的 `TCM_data/` 与 `storage/chunks/` 获取。资料来源和许可说明见 [resources/README.md](../backend/resources/README.md) 与 [Apache-2.0 许可](../backend/resources/Apache-2.0-LICENSE.txt)。TXT 保留“中国哲学书电子化计划 / Chinese Text Project”标记，数字底本再分发条件需与上游及原始来源分别核对。
+
+`knowledge_seed.json` 转换自上游手工种子，含 33 味本草、22 首方剂和 14 条禁忌说明；没有复制上游运行数据库、2015 版药典扩充数据或其他方剂提取产物。剂量默认未核验，结构及审查边界见 [agent.md](agent.md)。
+
+`symptom_terms.json` 为项目自有版本化词表，记录现代症状、别名及带片段 ID、书名、章节、原文摘录的扩展词。`relation=retrieval_related` 仅表示检索关联，不表示医学等价，不回写患者事实。
 
 ## 数据流
 
@@ -55,14 +63,10 @@
 ..\.venv\Scripts\python.exe -m data_pipeline.ingest --mode chroma
 ~~~
 
-Chroma 需要 QIWEN_MODEL_BASE_URL、QIWEN_MODEL_API_KEY、QIWEN_EMBEDDING_MODEL；当前缺少这些配置，实际问答仍使用 BM25 召回。本地 CrossEncoder、MMR 和 0.7 门槛沿用已有实现。
+## 复现与验证
 
-## 验证
+内置基线为六部书、1537 个唯一片段。`scripts.rebuild_classics` 默认只读比较生成结果与内置 JSON；只有主动重生成资料时才使用 `--write` 并审阅 diff。服务启动幂等读取片段 JSON，问答不会重新切整本书，也不会覆盖用户自行导入的资料。
 
-复现核对验证六部书的 1537 个片段与原 JSON 相同；专项验证结构边界、清理、近似长度、split_from、全库去重、旧数据库迁移、检索来源元数据以及 Chroma 断点续建/元数据刷新。真实嵌入未配置时，只能验证索引协议及工程行为，不能报告真实向量链路成功。
+Chroma 入库需兼容接口基址、服务端凭据与 `QIWEN_EMBEDDING_MODEL`。向量集合按接口、模型和距离版本隔离；逐批跳过已有 ID 并更新来源元数据。更换嵌入模型后重新建立对应索引，见 [deployment.md](deployment.md)。
 
-本轮开始曾在数据卷 `/app/.data/backups/20260927-before-structure-chunking/` 创建 SQLite 在线备份。随后用户确认重置了 Docker，镜像、容器和数据卷被清空，该卷内备份也随之清除；宿主机 `.replica-backup/20260927-before-crossencoder-upgrade/` 等此前保存的备份仍在。本次重建使用新数据卷，内置古籍自动初始化，旧账号和会话不由切片升级自动恢复。
-
-2026-09-27 验证：完整后端回归 208 项通过，切片/向量/古籍排序专项 47 项通过；只读复现与实际 JSON CLI 输出均核对为 1537 个片段，与内置 JSON 相同。Docker Hub 连接失败后，从 [Docker 官方镜像的 ECR 公共分发源](https://aws.amazon.com/blogs/containers/docker-official-images-now-available-on-amazon-elastic-container-registry-public/)取得 Python/Node 镜像，开始以本地镜像重建，未修改项目基础镜像配置。
-
-后端镜像构建及镜像内 1537 片段复现核对成功。用户随后确认正在调整 Docker，构建期间引擎退出，前端 TypeScript 构建、容器内追加验证和本地模型缓存准备被中断；服务更新及前后端健康检查尚未完成，不能将后端构建成功等同于服务已更新。当前 /api/health 与 /chat 不可访问，待 Docker 调整结束后继续执行 compose 构建和服务检查。
+工程检查覆盖分书结构边界、正文清理、长度、split_from、全库去重、迁移、检索来源元数据、索引续建与元数据刷新。真实嵌入未配置时，只能验证协议和模拟结果。历史复现与部署记录统一见 [evaluation_report.md](evaluation_report.md)，不能沿用旧文档中的中断状态判断当前服务。

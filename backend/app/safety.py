@@ -92,6 +92,7 @@ def check_herbs(herbs: list[str] | None) -> list[str]:
                 if a in names and b in names:
                     errors.append(f"{label}：{a}与{b}")
     for a, b in PAIRS:
-        if a in names and b in names:
+        normalized_a, normalized_b = normalize(a), normalize(b)
+        if normalized_a in names and normalized_b in names:
             errors.append(f"十九畏：{a}与{b}")
     return errors

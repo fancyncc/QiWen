@@ -1,0 +1,46 @@
+{"id": "RAG-001", "query": "女子从七岁到四十九岁的生长节律，古籍怎样概括？", "expected_books": ["黄帝内经-素问"], "keywords": ["女子七岁"], "expected_chapter": "上古天真论"}
+{"id": "RAG-002", "query": "《四气调神大论》如何描述春三月？", "expected_books": ["黄帝内经-素问"], "keywords": ["春三月", "发陈"], "expected_chapter": "四气调神大论"}
+{"id": "RAG-003", "query": "《素问》所说阳气与天日的关系是什么？", "expected_books": ["黄帝内经-素问"], "keywords": ["阳气者", "天与日"], "expected_chapter": "生气通天论"}
+{"id": "RAG-004", "query": "阴阳为什么被称为天地之道？", "expected_books": ["黄帝内经-素问"], "keywords": ["阴阳者", "天地之道"], "expected_chapter": "阴阳应象大论"}
+{"id": "RAG-005", "query": "为什么五藏六府都可能令人咳？", "expected_books": ["黄帝内经-素问"], "keywords": ["五藏六府", "皆令人咳"], "expected_chapter": "咳论"}
+{"id": "RAG-006", "query": "《素问》如何解释怒、喜、悲、恐等气机变化？", "expected_books": ["黄帝内经-素问"], "keywords": ["百病生于气"], "expected_chapter": "举痛论"}
+{"id": "RAG-007", "query": "风寒湿三气合而为痹的原文是什么？", "expected_books": ["黄帝内经-素问"], "keywords": ["风寒湿三气", "合而为痹"], "expected_chapter": "痹论"}
+{"id": "RAG-008", "query": "上古制作汤液醪醴使用什么原料？", "expected_books": ["黄帝内经-素问"], "keywords": ["汤液醪醴", "稻米"], "expected_chapter": "汤液醪醴论"}
+{"id": "RAG-009", "query": "胸痹喘息咳唾、胸背痛时，金匮记载什么方？", "expected_books": ["金匮要略"], "keywords": ["括蒌薤白白酒汤", "胸痹"], "expected_chapter": "胸痹心痛短气病脉证治"}
+{"id": "RAG-010", "query": "《金匮要略》治疗痰饮的总原则是什么？", "expected_books": ["金匮要略"], "keywords": ["病痰饮者", "温药和之"], "expected_chapter": "痰饮咳嗽病脉证并治"}
+{"id": "RAG-011", "query": "湿家身烦疼时为何慎用火攻？", "expected_books": ["金匮要略"], "keywords": ["湿家，身烦疼", "慎不可以火攻"], "expected_chapter": "痓湿暍病脉证治"}
+{"id": "RAG-012", "query": "谷疸有哪些典型表现？", "expected_books": ["金匮要略"], "keywords": ["谷疸"], "expected_chapter": "黄疸病脉证并治"}
+{"id": "RAG-013", "query": "中风邪在于络时会出现什么表现？", "expected_books": ["金匮要略"], "keywords": ["邪在于络", "肌肤不仁"], "expected_chapter": "中风历节病脉证并治"}
+{"id": "RAG-014", "query": "男子消渴、小便反多时金匮如何论治？", "expected_books": ["金匮要略"], "keywords": ["男子消渴", "小便反多"], "expected_chapter": "消渴小便利淋病脉证并治"}
+{"id": "RAG-015", "query": "妇人宿有癥病、妊娠漏下时记载何方？", "expected_books": ["金匮要略"], "keywords": ["桂枝茯苓丸"], "expected_chapter": "妇人妊娠病脉证并治"}
+{"id": "RAG-016", "query": "百合病为何说百脉一宗，悉致其病？", "expected_books": ["金匮要略"], "keywords": ["百脉一宗", "悉致其病"], "expected_chapter": "百合狐惑阴阳毒病脉证治"}
+{"id": "RAG-017", "query": "《脉经》如何描述浮脉的指下形状？", "expected_books": ["脉经"], "keywords": ["浮脉"], "expected_chapter": "脉形状指下秘诀第一"}
+{"id": "RAG-018", "query": "脉有阴阳时，阳脉和阴脉各有哪些形态？", "expected_books": ["脉经"], "keywords": ["脉有阴阳", "名曰阳", "名曰阴"], "expected_chapter": "辨脉阴阳大法第九"}
+{"id": "RAG-019", "query": "寸关尺三部各候哪些脏腑？", "expected_books": ["脉经"], "keywords": ["寸", "关", "尺"], "expected_chapter": "分别三关境界脉候所主第三"}
+{"id": "RAG-020", "query": "《脉经》如何说明春季肝脉与四时王相顺脉？", "expected_books": ["脉经"], "keywords": ["春三月木王", "肝脉当先至"], "expected_chapter": "诊四时相反脉证第四"}
+{"id": "RAG-021", "query": "《脉经》所列病可发汗证有哪些判断？", "expected_books": ["脉经"], "keywords": ["春夏宜发汗", "脉浮而紧"], "expected_chapter": "病可发汗证第二"}
+{"id": "RAG-022", "query": "哪些脉证属于病不可发汗？", "expected_books": ["脉经"], "keywords": ["不可发其汗", "不可发汗"], "expected_chapter": "病不可发汗证第一"}
+{"id": "RAG-023", "query": "《脉经》如何凭脉判断妇人妊娠？", "expected_books": ["脉经"], "keywords": ["妊娠"], "expected_chapter": "平妊娠分别男女将产诸证第一"}
+{"id": "RAG-024", "query": "《脉经》关于小儿杂病脉证有哪些记载？", "expected_books": ["脉经"], "keywords": ["小儿脉", "呼吸八至"], "expected_chapter": "平小儿杂病证第九"}
+{"id": "RAG-025", "query": "太阳病的提纲证是什么？", "expected_books": ["伤寒论"], "keywords": ["太阳之为病", "脉浮", "恶寒"], "expected_chapter": "辨太阳病脉证并治"}
+{"id": "RAG-026", "query": "太阳中风、汗出恶风时桂枝汤条文如何说？", "expected_books": ["伤寒论"], "keywords": ["桂枝汤", "汗出", "恶风"], "expected_chapter": "辨太阳病脉证并治法上"}
+{"id": "RAG-027", "query": "太阳伤寒无汗而喘时用什么方？", "expected_books": ["伤寒论"], "keywords": ["麻黄汤", "无汗而喘"], "expected_chapter": "辨太阳病脉证并治"}
+{"id": "RAG-028", "query": "伤寒少阳证何时用小柴胡汤？", "expected_books": ["伤寒论"], "keywords": ["小柴胡汤"], "expected_chapter": "辨少阳病脉证并治"}
+{"id": "RAG-029", "query": "阳明病提纲为何称胃家实？", "expected_books": ["伤寒论"], "keywords": ["阳明之为病", "胃家实"], "expected_chapter": "辨阳明脉证并治"}
+{"id": "RAG-030", "query": "少阴病脉微细、但欲寐的原文是什么？", "expected_books": ["伤寒论"], "keywords": ["少阴之为病", "但欲寐"], "expected_chapter": "辨少阴病脉证并治"}
+{"id": "RAG-031", "query": "厥阴病消渴、气上撞心的提纲是什么？", "expected_books": ["伤寒论"], "keywords": ["厥阴之为病", "气上撞心"], "expected_chapter": "辨厥阴病脉证并治"}
+{"id": "RAG-032", "query": "霍乱吐利、头痛发热身疼时如何辨治？", "expected_books": ["伤寒论"], "keywords": ["霍乱", "吐利"], "expected_chapter": "辨霍乱病脉证并治"}
+{"id": "RAG-033", "query": "《神农本草经》记载人参主治什么？", "expected_books": ["神农本草经"], "keywords": ["人参"], "expected_chapter": ""}
+{"id": "RAG-034", "query": "《神农本草经》怎样记载甘草的功效？", "expected_books": ["神农本草经"], "keywords": ["甘草"], "expected_chapter": ""}
+{"id": "RAG-035", "query": "黄耆在《神农本草经》中主治什么？", "expected_books": ["神农本草经"], "keywords": ["黄耆"], "expected_chapter": ""}
+{"id": "RAG-036", "query": "麻黄在《神农本草经》中有哪些主治？", "expected_books": ["神农本草经"], "keywords": ["麻黄"], "expected_chapter": ""}
+{"id": "RAG-037", "query": "防风在《神农本草经》中有哪些主治？", "expected_books": ["神农本草经"], "keywords": ["防风"], "expected_chapter": ""}
+{"id": "RAG-038", "query": "茯苓在《神农本草经》中有哪些主治？", "expected_books": ["神农本草经"], "keywords": ["茯苓"], "expected_chapter": ""}
+{"id": "RAG-039", "query": "龙骨在《神农本草经》中有哪些主治？", "expected_books": ["神农本草经"], "keywords": ["龙骨"], "expected_chapter": ""}
+{"id": "RAG-040", "query": "温病初起、邪在肺卫时银翘散如何立法？", "expected_books": ["温病条辨"], "keywords": ["银翘散"], "expected_chapter": ""}
+{"id": "RAG-041", "query": "风温咳嗽初起为何使用桑菊饮？", "expected_books": ["温病条辨"], "keywords": ["桑菊饮"], "expected_chapter": ""}
+{"id": "RAG-042", "query": "热入营分时清营汤的适用条文是什么？", "expected_books": ["温病条辨"], "keywords": ["清营汤"], "expected_chapter": ""}
+{"id": "RAG-043", "query": "湿温初起、头痛恶寒身重时三仁汤如何应用？", "expected_books": ["温病条辨"], "keywords": ["三仁汤"], "expected_chapter": ""}
+{"id": "RAG-044", "query": "津液亏耗、大便不下时增液汤如何立法？", "expected_books": ["温病条辨"], "keywords": ["增液汤"], "expected_chapter": ""}
+{"id": "RAG-045", "query": "温病后期邪伏阴分为何用青蒿鳖甲汤？", "expected_books": ["温病条辨"], "keywords": ["青蒿鳖甲汤"], "expected_chapter": ""}
+{"id": "RAG-046", "query": "温病神昏谵语时安宫牛黄丸如何使用？", "expected_books": ["温病条辨"], "keywords": ["安宫牛黄丸"], "expected_chapter": ""}

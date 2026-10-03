@@ -10,7 +10,8 @@ from uuid import uuid4
 from .db import now
 from .safety import mentioned_herbs, normalize, KNOWN, ALIASES
 
-URGENT = ("胸痛", "呼吸困难", "昏厥", "大出血", "意识不清", "自杀")
+URGENT = ("胸痛", "呼吸困难", "昏厥", "大出血", "意识不清", "自杀",
+          "咯血", "咳血", "惊厥", "脑梗", "嘴歪", "半身不遂", "硬得像板")
 FAMILY = r"母亲|妈妈|父亲|爸爸|朋友|妻子|老婆|丈夫|老公|孩子|宝宝|儿子|女儿|同事"
 CONSTITUTIONS = r"气虚|阳虚|阴虚|湿热|痰湿|血瘀|气郁|特禀|平和"
 DISEASES = r"高血压|糖尿病|肾病|肝病|哮喘|心脏病"
@@ -61,7 +62,7 @@ def extract_facts(text: str, *, subject="unknown", source_id="", kind="message",
             result[-1]["source"]["quote"] += "；" + clause
         if re.search(r"如果|假如|假设|例如|举例|听说|书上|文章说|有人说|原文|引用|他说|她说|你说|你认为|系统判断|模型判断", clause):
             continue
-        if re.search(r"了解|解释|科普|介绍|什么是|怎么理解|是什么意思", clause) and not re.search(r"我(?:现在|目前|最近)?(?:有|出现|发生|感觉|正在)|现在.{0,4}(?:胸痛|呼吸困难)", clause):
+        if re.search(r"了解|解释|科普|介绍|什么是|怎么理解|是什么意思|有什么作用|为什么", clause) and not re.search(r"我(?:现在|目前|最近)?(?:有|出现|发生|感觉|正在)|现在.{0,4}(?:胸痛|呼吸困难)", clause):
             continue
         who = subject_of(clause, inherited)
         if who != "unknown":

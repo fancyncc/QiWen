@@ -85,7 +85,8 @@ class FlowState(TypedDict, total=False):
     herb_review: dict
 
 
-URGENT = ["胸痛", "呼吸困难", "昏厥", "大出血", "意识不清", "自杀"]
+URGENT = ["胸痛", "呼吸困难", "昏厥", "大出血", "意识不清", "自杀",
+          "咯血", "咳血", "惊厥", "脑梗", "嘴歪", "半身不遂", "硬得像板"]
 MAX_SEARCH_ATTEMPTS = 3
 MAX_SAFETY_REVISIONS = 2
 CONTEXT_CHAR_LIMIT = 6000
@@ -179,7 +180,19 @@ def rule_pre_safety(state: FlowState) -> FlowState:
             "episode_text": text,
             "response": "你提供的信息中出现可能需要及时处理的情况。若症状正在发生，请尽快联系当地急救服务或就近医疗机构，不要等待在线问答。",
         }
-    if re.search(r"加(?:入|上)?|添加|配伍|搭配|合用|同用|一起(?:用|服)|能(?:用|服)|可以用|相反|相克|冲突", text):
+    dangerous = r"夹竹桃|砒霜|雷公藤|马钱子|生川乌|生草乌|川乌|草乌|附子"
+    unsafe_self_use = (
+        (contains_dosing(text) and bool(mentioned_herbs(text)))
+        or bool(re.search(rf"(?:{dangerous}).{{0,18}}(?:大量|加倍|磨粉|吞服|偏方|煮水|长期服)", text))
+        or bool(re.search(r"(?:不认识|不知道名字|来源不明).{0,12}(?:草药|药材).{0,12}(?:一起|混合|煎服|服用)", text))
+    )
+    if unsafe_self_use:
+        return {
+            "intent_type": "safety_rejected", "symptoms": [], "episode_text": text,
+            "safety_errors": ["高风险药材、剂量或来源不明的自行用药请求"],
+            "response": "## 安全警告\n该请求涉及高风险药材、异常剂量或来源不明的自行用药。请勿自行尝试；如已服用或出现不适，请立即联系急救、就近医疗机构或当地中毒咨询机构。",
+        }
+    if re.search(r"加(?:入|上)?|添加|配(?:伍)?|搭配|合用|同用|同服|一起(?:用|服)|能(?:用|服|配)|可以用|相反|相克|冲突|安全吗", text):
         requested = mentioned_herbs(text)
         if requested:
             plan = state.get("active_plan", {})
@@ -371,7 +384,17 @@ def inquire(state: FlowState) -> FlowState:
             "episode_text": combined,
             "response": "你好，我可以帮助整理症状信息，并展示中医知识检索与会诊流程。请描述主要不适、持续时间，以及有无过敏史。内容仅供学习研究参考。",
         }
-    if not previous and len(combined.strip()) < 18 and not re.search(r"\d|天|周|月|年|伴|同时", combined):
+    has_duration = bool(re.search(r"\d|[一二两三四五六七八九十半]+(?:个)?(?:小时|天|周|月|年)", combined))
+    has_detail = bool(re.search(
+        r"伴|同时|并|没有|无|加重|减轻|反复|常|不用查古籍|不需要查文献|无需检索",
+        combined,
+    ))
+    has_time_of_day = bool(re.search(r"白天|早上|晨起|中午|下午|晚上|夜间|夜里|睡前", combined))
+    has_enough_context = (
+        (has_duration and (len(symptoms) >= 2 or has_detail))
+        or (len(symptoms) >= 2 and has_time_of_day)
+    )
+    if not previous and len(combined.strip()) < 18 and not has_enough_context:
         question = followup_question(symptoms, denied_symptoms)
         return {
             **base, "intent_type": "consult",

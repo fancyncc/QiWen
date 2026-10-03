@@ -578,6 +578,31 @@
         "嗜睡"
       ],
       "expansions": []
+    },
+    {
+      "canonical": "胃部不适",
+      "aliases": [
+        "胃部不适",
+        "胃不舒服",
+        "胃难受"
+      ],
+      "expansions": []
+    },
+    {
+      "canonical": "腰酸",
+      "aliases": [
+        "腰酸",
+        "腰有点酸"
+      ],
+      "expansions": []
+    },
+    {
+      "canonical": "出汗",
+      "aliases": [
+        "出汗",
+        "容易出汗"
+      ],
+      "expansions": []
     }
   ]
 }

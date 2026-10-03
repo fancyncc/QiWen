@@ -1,0 +1,30 @@
+{"id": "FA-001", "question": "女子从七岁到四十九岁的生长节律，古籍怎样概括？", "expected_books": ["黄帝内经-素问"], "reference_keywords": ["女子七岁"]}
+{"id": "FA-002", "question": "《四气调神大论》如何描述春三月？", "expected_books": ["黄帝内经-素问"], "reference_keywords": ["春三月", "发陈"]}
+{"id": "FA-003", "question": "《素问》所说阳气与天日的关系是什么？", "expected_books": ["黄帝内经-素问"], "reference_keywords": ["阳气者", "天与日"]}
+{"id": "FA-004", "question": "阴阳为什么被称为天地之道？", "expected_books": ["黄帝内经-素问"], "reference_keywords": ["阴阳者", "天地之道"]}
+{"id": "FA-005", "question": "为什么五藏六府都可能令人咳？", "expected_books": ["黄帝内经-素问"], "reference_keywords": ["五藏六府", "皆令人咳"]}
+{"id": "FA-006", "question": "《素问》如何解释怒、喜、悲、恐等气机变化？", "expected_books": ["黄帝内经-素问"], "reference_keywords": ["百病生于气"]}
+{"id": "FA-007", "question": "风寒湿三气合而为痹的原文是什么？", "expected_books": ["黄帝内经-素问"], "reference_keywords": ["风寒湿三气", "合而为痹"]}
+{"id": "FA-008", "question": "上古制作汤液醪醴使用什么原料？", "expected_books": ["黄帝内经-素问"], "reference_keywords": ["汤液醪醴", "稻米"]}
+{"id": "FA-009", "question": "胸痹喘息咳唾、胸背痛时，金匮记载什么方？", "expected_books": ["金匮要略"], "reference_keywords": ["括蒌薤白白酒汤", "胸痹"]}
+{"id": "FA-010", "question": "《金匮要略》治疗痰饮的总原则是什么？", "expected_books": ["金匮要略"], "reference_keywords": ["病痰饮者", "温药和之"]}
+{"id": "FA-011", "question": "湿家身烦疼时为何慎用火攻？", "expected_books": ["金匮要略"], "reference_keywords": ["湿家，身烦疼", "慎不可以火攻"]}
+{"id": "FA-012", "question": "谷疸有哪些典型表现？", "expected_books": ["金匮要略"], "reference_keywords": ["谷疸"]}
+{"id": "FA-013", "question": "中风邪在于络时会出现什么表现？", "expected_books": ["金匮要略"], "reference_keywords": ["邪在于络", "肌肤不仁"]}
+{"id": "FA-014", "question": "男子消渴、小便反多时金匮如何论治？", "expected_books": ["金匮要略"], "reference_keywords": ["男子消渴", "小便反多"]}
+{"id": "FA-015", "question": "妇人宿有癥病、妊娠漏下时记载何方？", "expected_books": ["金匮要略"], "reference_keywords": ["桂枝茯苓丸"]}
+{"id": "FA-016", "question": "百合病为何说百脉一宗，悉致其病？", "expected_books": ["金匮要略"], "reference_keywords": ["百脉一宗", "悉致其病"]}
+{"id": "FA-017", "question": "《脉经》如何描述浮脉的指下形状？", "expected_books": ["脉经"], "reference_keywords": ["浮脉"]}
+{"id": "FA-018", "question": "脉有阴阳时，阳脉和阴脉各有哪些形态？", "expected_books": ["脉经"], "reference_keywords": ["脉有阴阳", "名曰阳", "名曰阴"]}
+{"id": "FA-019", "question": "寸关尺三部各候哪些脏腑？", "expected_books": ["脉经"], "reference_keywords": ["寸", "关", "尺"]}
+{"id": "FA-020", "question": "《脉经》如何说明春季肝脉与四时王相顺脉？", "expected_books": ["脉经"], "reference_keywords": ["春三月木王", "肝脉当先至"]}
+{"id": "FA-021", "question": "《脉经》所列病可发汗证有哪些判断？", "expected_books": ["脉经"], "reference_keywords": ["春夏宜发汗", "脉浮而紧"]}
+{"id": "FA-022", "question": "哪些脉证属于病不可发汗？", "expected_books": ["脉经"], "reference_keywords": ["不可发其汗", "不可发汗"]}
+{"id": "FA-023", "question": "《脉经》如何凭脉判断妇人妊娠？", "expected_books": ["脉经"], "reference_keywords": ["妊娠"]}
+{"id": "FA-024", "question": "《脉经》关于小儿杂病脉证有哪些记载？", "expected_books": ["脉经"], "reference_keywords": ["小儿脉", "呼吸八至"]}
+{"id": "FA-025", "question": "太阳病的提纲证是什么？", "expected_books": ["伤寒论"], "reference_keywords": ["太阳之为病", "脉浮", "恶寒"]}
+{"id": "FA-026", "question": "太阳中风、汗出恶风时桂枝汤条文如何说？", "expected_books": ["伤寒论"], "reference_keywords": ["桂枝汤", "汗出", "恶风"]}
+{"id": "FA-027", "question": "太阳伤寒无汗而喘时用什么方？", "expected_books": ["伤寒论"], "reference_keywords": ["麻黄汤", "无汗而喘"]}
+{"id": "FA-028", "question": "伤寒少阳证何时用小柴胡汤？", "expected_books": ["伤寒论"], "reference_keywords": ["小柴胡汤"]}
+{"id": "FA-029", "question": "阳明病提纲为何称胃家实？", "expected_books": ["伤寒论"], "reference_keywords": ["阳明之为病", "胃家实"]}
+{"id": "FA-030", "question": "少阴病脉微细、但欲寐的原文是什么？", "expected_books": ["伤寒论"], "reference_keywords": ["少阴之为病", "但欲寐"]}

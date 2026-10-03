@@ -176,7 +176,8 @@ def test_prior_self_identity_does_not_answer_new_attachment_ownership():
 
 
 @pytest.mark.parametrize("text,positive", [("我耳朵嗡嗡响三天", ["耳鸣"]), ("我没有胃口", ["食欲不振"]),
-                                          ("腰疼，不咳嗽", ["腰痛"])])
+                                          ("腰疼，不咳嗽", ["腰痛"]), ("最近胃不舒服", ["胃部不适"]),
+                                          ("腰有点酸", ["腰酸"]), ("晚上容易出汗", ["出汗"])])
 def test_expanded_catalog_aliases_keep_original_evidence(text, positive):
     facts = symptoms.extract(text)
     assert symptoms.view(facts, "self")[0] == positive
