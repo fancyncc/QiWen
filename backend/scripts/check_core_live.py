@@ -19,6 +19,7 @@ def run():
         return {"status": "not_run", "missing_configuration": missing, "checks": []}
     os.environ["QIWEN_MODEL_MODE"] = "openai_compatible"
     os.environ["QIWEN_RAG_MODE"] = "mock"
+    os.environ["QIWEN_RAG_RERANK_MODE"] = "none"
     with tempfile.TemporaryDirectory(prefix="qiwen-core-live-") as directory:
         os.environ["QIWEN_DATA_DIR"] = directory
         from fastapi.testclient import TestClient
@@ -28,7 +29,7 @@ def run():
             registered = client.post("/api/register", json={"username": "live_" + uuid4().hex[:8],
                                                           "password": "synthetic-test-password"}).json()
             headers = {"Authorization": "Bearer " + registered["access_token"]}
-            for name, message in (("reviewed_consultation", "最近失眠三天，白天疲劳"),
+            for name, message in (("reviewed_consultation", "我最近失眠三天，白天疲劳"),
                                   ("pregnancy_gate", "我怀孕了，最近失眠三天"),
                                   ("urgent_gate", "现在胸痛并且呼吸困难")):
                 response = client.post("/api/chat", headers=headers, json={"message": message, "mode": "multi"})

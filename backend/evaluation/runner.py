@@ -28,7 +28,8 @@ def run(real: bool = False) -> dict:
         os.environ["QIWEN_MODEL_MODE"] = "openai_compatible"
     else:
         os.environ["QIWEN_MODEL_MODE"] = "mock"
-        os.environ["QIWEN_RAG_MODE"] = "mock"
+        os.environ["QIWEN_RAG_MODE"] = "bm25"
+    os.environ["QIWEN_RAG_RERANK_MODE"] = "none"
 
     with tempfile.TemporaryDirectory(prefix="qiwen-evaluation-") as temporary:
         os.environ["QIWEN_DATA_DIR"] = temporary
@@ -46,8 +47,11 @@ def run(real: bool = False) -> dict:
                 callback()
                 checks[name] = {"passed": True, "elapsed_ms": round((time.monotonic() - start) * 1000)}
             except Exception as exc:
+                import traceback
+                location = traceback.extract_tb(exc.__traceback__)[-1]
                 checks[name] = {"passed": False, "elapsed_ms": round((time.monotonic() - start) * 1000),
-                                "error": str(exc)[:300]}
+                                "error_type": type(exc).__name__,
+                                "failure_location": f"{Path(location.filename).name}:{location.lineno}"}
 
         with TestClient(app) as client:
             def register() -> tuple[str, str]:
@@ -125,10 +129,13 @@ def run(real: bool = False) -> dict:
             check("allergy_and_final_history", allergy)
 
             def multi_stream() -> None:
-                created = client.post("/api/threads", headers=headers, json={"mode": "multi"})
+                # Independent acceptance checks must not inherit the allergy case's profile.
+                stream_token, _ = register()
+                stream_headers = {"Authorization": f"Bearer {stream_token}"}
+                created = client.post("/api/threads", headers=stream_headers, json={"mode": "multi"})
                 created.raise_for_status()
                 thread_id = created.json()["id"]
-                with client.stream("POST", "/api/chat?stream=true", headers=headers, json={
+                with client.stream("POST", "/api/chat?stream=true", headers=stream_headers, json={
                     "thread_id": thread_id, "message": baseline["multi_stream_and_final_version"]["input"],
                 }) as response:
                     response.raise_for_status()
@@ -141,12 +148,11 @@ def run(real: bool = False) -> dict:
                     done = next(i for i, event in enumerate(events)
                                 if event.get("stage") == stage and event.get("status") == "done")
                     assert start < done, f"{stage} was marked done before it started"
-                synthesis = next(i for i, event in enumerate(events)
-                                 if event.get("stage") == "synthesis" and event.get("status") == "start")
-                assert synthesis > max(i for i, event in enumerate(events)
-                                       if event.get("stage") in {"bianzheng", "formula", "herb"}
-                                       and event.get("status") == "done"), "synthesis started before experts completed"
-                saved = client.get(f"/api/threads/{thread_id}/messages", headers=headers)
+                # LangGraph may revise a candidate after review. Check each synthesis
+                # against its own completed experts, including subsequent iterations.
+                from .supplement import dependency_errors
+                assert not dependency_errors(events, "multi"), "expert_dependency_order"
+                saved = client.get(f"/api/threads/{thread_id}/messages", headers=stream_headers)
                 saved.raise_for_status()
                 shown = events[-1]["payload"]["response"]
                 assert saved.json()[-1]["content"] == shown, "streamed text differs from saved final answer"

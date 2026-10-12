@@ -21,37 +21,10 @@ export async function streamChat(req: ChatRequest, opts: StreamOptions): Promise
   const token = useAuthStore.getState().token;
   const url = (process.env.NEXT_PUBLIC_API_URL || "") + "/api/chat?stream=true";
   const runId = crypto.randomUUID();
-  const res = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    body: JSON.stringify({ ...req, run_id: runId }),
-    signal: opts.signal,
-  });
-
-  if (res.status === 401) {
-    useAuthStore.getState().logout();
-    if (typeof window !== "undefined") window.location.href = "/login";
-    opts.onError?.(new Error("未登录或登录已过期"));
-    return;
-  }
-  if (!res.ok || !res.body) {
-    let msg = `请求失败 (${res.status})`;
-    try {
-      const d = await res.json();
-      msg = errorMessage(d.detail, msg);
-    } catch {
-      /* ignore */
-    }
-    opts.onError?.(new Error(msg));
-    return;
-  }
-
-  const reader = res.body.getReader();
-  const decoder = new TextDecoder();
-  let buffer = "";
+  let reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
+  let terminalSeen = false;
+  const emit = (event: ChatStreamEvent) => { if (!opts.signal?.aborted) opts.onEvent(event); };
+  if (opts.signal?.aborted) return;
   const cancelRun = () => {
     void fetch((process.env.NEXT_PUBLIC_API_URL || "") + `/api/runs/${runId}/cancel`, {
       method: "POST",
@@ -62,9 +35,43 @@ export async function streamChat(req: ChatRequest, opts: StreamOptions): Promise
   opts.signal?.addEventListener("abort", cancelRun, { once: true });
 
   try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify({ ...req, run_id: runId }),
+      signal: opts.signal,
+    });
+
+    if (res.status === 401) {
+      if (opts.signal?.aborted || useAuthStore.getState().token !== token) return;
+      useAuthStore.getState().logout();
+      if (typeof window !== "undefined") window.location.href = "/login";
+      opts.onError?.(new Error("未登录或登录已过期"));
+      return;
+    }
+    if (!res.ok || !res.body) {
+      let msg = `请求失败 (${res.status})`;
+      try {
+        const d = await res.json();
+        msg = errorMessage(d.detail, msg);
+      } catch {
+        /* ignore */
+      }
+      opts.onError?.(new Error(msg));
+      return;
+    }
+
+    reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+
+
     while (true) {
       const { done, value } = await reader.read();
-      if (done) break;
+      if (done || opts.signal?.aborted) break;
       buffer += decoder.decode(value, { stream: true });
 
       // SSE 以双换行分隔事件
@@ -82,7 +89,7 @@ export async function streamChat(req: ChatRequest, opts: StreamOptions): Promise
           const parsed = JSON.parse(dataLine);
           const payload = parsed.payload ?? parsed;
           if (parsed.type === "stage") {
-            opts.onEvent({
+            emit({
               type: "stage",
               ...mapStage({
                 stage: payload.stage ?? "", label: payload.label ?? "",
@@ -90,21 +97,25 @@ export async function streamChat(req: ChatRequest, opts: StreamOptions): Promise
               }),
             });
           } else if (parsed.type === "answer.final") {
-            opts.onEvent({ type: "token", content: payload.message?.content ?? payload.response ?? "" });
-            opts.onEvent({
+            terminalSeen = true;
+            emit({ type: "token", content: payload.message?.content ?? payload.response ?? "" });
+            emit({
               type: "done", thread_id: payload.thread_id ?? "",
               notes: Array.isArray(payload.notes) ? payload.notes.map(mapNote) : undefined,
               elapsed_ms: payload.elapsed_ms,
             });
           } else if (parsed.type === "run.cancelled") {
-            opts.onEvent({ type: "token", content: "已停止，本轮没有生成最终答复。" });
-            opts.onEvent({ type: "done", thread_id: payload.thread_id ?? "" });
+            terminalSeen = true;
+            emit({ type: "token", content: "已停止，本轮没有生成最终答复。" });
+            emit({ type: "done", thread_id: payload.thread_id ?? "" });
           } else if (parsed.type === "run.failed") {
-            opts.onEvent({ type: "error", message: payload.error ?? "问答暂不可用，请稍后重试" });
+            terminalSeen = true;
+            emit({ type: "error", message: payload.error ?? "问答暂不可用，请稍后重试" });
           } else if (parsed.token !== undefined) {
-            opts.onEvent({ type: "token", content: parsed.token });
+            emit({ type: "token", content: parsed.token });
           } else if (parsed.done) {
-            opts.onEvent({
+            terminalSeen = true;
+            emit({
               type: "done",
               thread_id: parsed.thread_id ?? "",
               notes: Array.isArray(parsed.notes) ? parsed.notes : undefined,
@@ -112,20 +123,22 @@ export async function streamChat(req: ChatRequest, opts: StreamOptions): Promise
               elapsed_ms: typeof parsed.elapsed_ms === "number" ? parsed.elapsed_ms : undefined,
             });
           } else if (parsed.error) {
-            opts.onEvent({ type: "error", message: parsed.error });
+            terminalSeen = true;
+            emit({ type: "error", message: parsed.error });
           }
         } catch {
           /* 跳过无法解析的块 */
         }
       }
     }
+    if (!terminalSeen && !opts.signal?.aborted) opts.onError?.(new Error("连接已中断，尚未收到最终答复，请刷新会话查看运行状态。"));
   } catch (err) {
     // AbortError 属正常中止，不报错
-    if ((err as Error).name !== "AbortError") {
+    if (!opts.signal?.aborted && (err as Error).name !== "AbortError") {
       opts.onError?.(err as Error);
     }
   } finally {
     opts.signal?.removeEventListener("abort", cancelRun);
-    reader.releaseLock();
+    reader?.releaseLock();
   }
 }

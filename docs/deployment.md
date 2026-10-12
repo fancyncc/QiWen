@@ -1,5 +1,13 @@
 # 岐问部署与运行配置
 
+## 上下文、病程和记忆上限
+
+`QIWEN_MODEL_CONTEXT_LIMIT` 默认 32768、`QIWEN_MODEL_OUTPUT_RESERVE` 默认 4096；可用 `QIWEN_MODEL_<ROLE>_CONTEXT_LIMIT/OUTPUT_RESERVE` 分角色覆盖。数值应按实际提供商容量配置，上限需大于输出预留及 512 安全余量。输入以 UTF-8 字节上界保守估算，轨迹标注估算方式，并另存提供商实际 usage；必要资料过长会请求分批处理，不删除关键风险信息。
+
+`QIWEN_EPISODE_RECHECK_DAYS` 默认 14，是同一会话重开旧问诊时的续问确认阈值，不表示事实医学上失效。`QIWEN_CHECKPOINT_SUCCESS_KEEP` 默认 3，`QIWEN_CHECKPOINT_STOPPED_KEEP` 默认 2，按会话保留运行检查点，正在执行的运行不清理。
+
+前端使用系统字体，无构建时 Google 字体下载依赖。新增表及中文记忆索引在启动时幂等升级；数据库备份流程继续适用。
+
 以下 PowerShell 命令从项目根目录执行。依赖与入口按当前 `compose.yaml`、Dockerfile 和配置代码整理；每次部署的实际结果需重新验证，不能沿用历史记录。
 
 ## Docker 启动
@@ -26,7 +34,7 @@ Invoke-RestMethod http://127.0.0.1:23000/api/health
 | `QIWEN_MODEL_MODE` | `mock` 演示；`openai_compatible` 使用真实聊天接口 |
 | `QIWEN_MODEL_BASE_URL` | 兼容接口基址 |
 | `QIWEN_MODEL_API_KEY` | 服务端凭据，仅在本地配置 |
-| `QIWEN_MODEL_NAME` | 默认模型名称 |
+| `QIWEN_MODEL_NAME` | 默认 `qwen-plus`，对应青云接口请求的 `model` 字段 |
 | `QIWEN_MODEL_<ROLE>` | 角色模型，空值回退默认模型 |
 | `QIWEN_MODEL_TIMEOUT`、`QIWEN_MODEL_RETRIES` | 默认单次 45 秒、额外重试 2 次 |
 | `QIWEN_MODEL_<ROLE>_TIMEOUT / _RETRIES` | 角色覆盖；超时范围 0.05～300 秒，重试 0～5 次 |
@@ -34,7 +42,9 @@ Invoke-RestMethod http://127.0.0.1:23000/api/health
 | `QIWEN_CORS_ORIGINS` | 允许的浏览器来源 |
 | `QIWEN_DATA_DIR` | 本地默认根目录 `.data/`；Docker 为 `/app/.data` |
 
-角色入口包括问诊、安全预审、摘要、画像提取、检索评估、查询重写、辨证、方剂、本草、综合、独立审查和记忆重排；注册配置入口不代表每个规则节点都已切换为模型实现，以 `trace.model_calls` 为准。兼容接口失败会明确报错，不将 Mock 当作真实答复。
+角色入口包括问诊、安全预审、摘要、画像提取、检索评估、查询重写、辨证、方剂、本草、综合、独立审查；注册配置入口不代表每个规则节点都已切换为模型实现，以 `trace.model_calls` 为准。兼容接口失败会明确报错，不将 Mock 当作真实答复。
+
+纯知识问答使用 `QIWEN_MODEL_KNOWLEDGE`，未配置时回退默认模型；同样支持 `_TIMEOUT` 与 `_RETRIES`。Mock 仅展示实际检索结果，不模拟无来源的知识解释。
 
 ## 古籍检索与本地模型
 
@@ -76,17 +86,11 @@ docker compose exec backend python -m scripts.check_live
 
 缺少聊天或嵌入配置不能完成该验收。健康接口的 `rag_mode=hybrid` 不证明实际向量与重排成功，需检查检索轨迹，见 [rag.md](rag.md)。
 
-## 会话记忆配置
+## 会话记忆边界
 
-| 变量 | 默认与用途 |
-| --- | --- |
-| `QIWEN_MEMORY_MODE` | hybrid；bm25 显式只用关键词 |
-| `QIWEN_MEMORY_MIN_SIMILARITY` | 必须按真实嵌入模型标注样例确定的余弦门槛 |
-| `QIWEN_MEMORY_RERANK_MODE` | llm；none 明确禁用 |
-| `QIWEN_MODEL_MEMORY_RERANK` | 空时回退 `QIWEN_MODEL_NAME` |
-| `QIWEN_MODEL_MEMORY_RERANK_TIMEOUT / RETRIES` | 角色默认 15 秒 / 0，可被全局或角色配置覆盖 |
+会话内保留事实与病程摘要，跨会话只参考用户画像。跨会话症状检索、嵌入及记忆重排已移除；`QIWEN_MEMORY_*` 和 `QIWEN_MODEL_MEMORY_RERANK*` 不再生效，无需为了此次升级修改或展示本地凭据配置。古籍 RAG 及其嵌入、重排配置继续使用。
 
-记忆嵌入复用兼容基址、凭据与 `QIWEN_EMBEDDING_MODEL`，不需要 Chroma。记忆重排可以独立于 Mock 问答调用真实模型；未配置时跳过并记录状态，不能声称已经模型重排。
+旧摘要与控制状态留在数据库，不自动清空或重新开启；后续咨询不会发布跨会话症状摘要。数据库初始化不再回填旧摘要关键词索引。
 
 ## 本地开发
 

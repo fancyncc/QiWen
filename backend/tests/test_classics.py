@@ -28,7 +28,9 @@ def corpus(monkeypatch, tmp_path):
         def count(self):
             return 4
         def query(self, **kwargs):
-            return {"ids": [["c", "b", "d", "a"]], "distances": [[0.01, 0.1, 0.4, 0.5]]}
+            count = len(kwargs["query_embeddings"])
+            return {"ids": [["c", "b", "d", "a"] for _ in range(count)],
+                    "distances": [[0.01, 0.1, 0.4, 0.5] for _ in range(count)]}
     monkeypatch.setattr(retrieval, "_collection", Collection)
     monkeypatch.setenv("QIWEN_RAG_MIN_SIMILARITY", "")
     monkeypatch.setenv("QIWEN_RAG_RERANK_MODE", "cross_encoder")
@@ -41,7 +43,8 @@ def corpus(monkeypatch, tmp_path):
 
 
 def test_rrf_preserves_independent_ranks_and_deduplicates_ids(corpus):
-    rows, info = retrieval.retrieve_candidates(corpus)
+    from app.query_plan import make_plan
+    rows, info = retrieval.retrieve_candidates(make_plan("头痛", "头痛", ["头痛"]))
     assert info["active_mode"] == "hybrid" and info["candidate_count"] == 4
     by_id = {row["id"]: row["retrieval"] for row in rows}
     assert by_id["c"]["bm25_rank"] is None and by_id["c"]["vector_rank"] == 1

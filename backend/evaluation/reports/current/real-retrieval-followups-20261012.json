@@ -1,0 +1,126 @@
+{
+  "source_report": "full-live-rag-20261012T102305935367Z.json",
+  "count": 9,
+  "scope": "engineering_failure_triage; independent_semantics_pending",
+  "items": [
+    {
+      "case_id": "RAG-001",
+      "question": "女子从七岁到四十九岁的生长节律，古籍怎样概括？",
+      "status": "pending",
+      "label_status": "proxy_pending_expert_review",
+      "evidence_status": "missing_evidence",
+      "retrieval_outcome": "no_match",
+      "highest_rerank_score": 0.3767500584734631,
+      "threshold": 0.7,
+      "references": []
+    },
+    {
+      "case_id": "RAG-008",
+      "question": "上古制作汤液醪醴使用什么原料？",
+      "status": "pending",
+      "label_status": "proxy_pending_expert_review",
+      "evidence_status": "missing_evidence",
+      "retrieval_outcome": "no_match",
+      "highest_rerank_score": 0.22249104546840484,
+      "threshold": 0.7,
+      "references": []
+    },
+    {
+      "case_id": "RAG-012",
+      "question": "谷疸有哪些典型表现？",
+      "status": "pending",
+      "label_status": "proxy_pending_expert_review",
+      "evidence_status": "missing_evidence",
+      "retrieval_outcome": "no_match",
+      "highest_rerank_score": 0.45923380315034107,
+      "threshold": 0.7,
+      "references": []
+    },
+    {
+      "case_id": "RAG-017",
+      "question": "《脉经》如何描述浮脉的指下形状？",
+      "status": "pending",
+      "label_status": "proxy_pending_expert_review",
+      "evidence_status": "irrelevant_evidence",
+      "retrieval_outcome": "success",
+      "highest_rerank_score": 0.9176615520901668,
+      "threshold": 0.7,
+      "references": [
+        {
+          "id": "1df8f6bbf72681aed406f1285c8ce2ad599380d6fa3ec1306873e2d33d669c51",
+          "title": "脉经",
+          "chapter": "脉形状指下秘诀第一",
+          "quote": "一曰手下无，两傍有\n洪脉，极大在指下。\n\n"
+        },
+        {
+          "id": "f358cff697873988981ba819e678cccaf5d09682a7d13a0ae52dc8b769e46a5a",
+          "title": "脉经",
+          "chapter": "脉形状指下秘诀第一",
+          "quote": "软，一作濡，曰濡者，如帛衣在水中，轻手相得\n弱脉，极软而沉细，按之欲绝指下。\n\n"
+        }
+      ]
+    },
+    {
+      "case_id": "RAG-018",
+      "question": "脉有阴阳时，阳脉和阴脉各有哪些形态？",
+      "status": "pending",
+      "label_status": "proxy_pending_expert_review",
+      "evidence_status": "missing_evidence",
+      "retrieval_outcome": "no_match",
+      "highest_rerank_score": 0.5343846242481345,
+      "threshold": 0.7,
+      "references": []
+    },
+    {
+      "case_id": "RAG-019",
+      "question": "寸关尺三部各候哪些脏腑？",
+      "status": "pending",
+      "label_status": "proxy_pending_expert_review",
+      "evidence_status": "missing_evidence",
+      "retrieval_outcome": "no_match",
+      "highest_rerank_score": 0.39308956135417056,
+      "threshold": 0.7,
+      "references": []
+    },
+    {
+      "case_id": "RAG-024",
+      "question": "《脉经》关于小儿杂病脉证有哪些记载？",
+      "status": "pending",
+      "label_status": "proxy_pending_expert_review",
+      "evidence_status": "missing_evidence",
+      "retrieval_outcome": "timeout",
+      "highest_rerank_score": null,
+      "threshold": 0.7,
+      "references": []
+    },
+    {
+      "case_id": "RAG-025",
+      "question": "太阳病的提纲证是什么？",
+      "status": "pending",
+      "label_status": "proxy_pending_expert_review",
+      "evidence_status": "missing_evidence",
+      "retrieval_outcome": "no_match",
+      "highest_rerank_score": 0.6153795167604436,
+      "threshold": 0.7,
+      "references": []
+    },
+    {
+      "case_id": "RAG-044",
+      "question": "津液亏耗、大便不下时增液汤如何立法？",
+      "status": "pending",
+      "label_status": "proxy_pending_expert_review",
+      "evidence_status": "irrelevant_evidence",
+      "retrieval_outcome": "success",
+      "highest_rerank_score": 0.709498536465394,
+      "threshold": 0.7,
+      "references": [
+        {
+          "id": "2762a3afba5c333d95ba3d50657bc88dd8c0ff171019f43bdffcc0190860077d",
+          "title": "温病条辨",
+          "chapter": "条文十",
+          "quote": "再此条亦系三焦俱急，当与前第九条用承气、陷胸合法者参看。\n其因阳明太热，津液枯燥，水不足以行舟，而结粪不下者，非增液不可。\n服增液两剂，法当自下，其或脏燥太甚之人，竟有不下者，则以增液合调胃承气汤，缓缓与服，约二时服半杯沃之，此一腑中气血合治法也。\n\n"
+        }
+      ]
+    }
+  ]
+}

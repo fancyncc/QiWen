@@ -18,7 +18,7 @@ MODEL_MODE = os.getenv("QIWEN_MODEL_MODE", "mock")
 RAG_MODE = os.getenv("QIWEN_RAG_MODE", "hybrid")
 API_BASE = os.getenv("QIWEN_MODEL_BASE_URL", "")
 API_KEY = os.getenv("QIWEN_MODEL_API_KEY", "")
-MODEL_NAME = os.getenv("QIWEN_MODEL_NAME", "")
+MODEL_NAME = os.getenv("QIWEN_MODEL_NAME", "").strip() or "qwen-plus"
 if os.getenv("QIWEN_ENV") == "production" and not os.getenv("QIWEN_SECRET_KEY"):
     raise RuntimeError("Production requires QIWEN_SECRET_KEY")
 

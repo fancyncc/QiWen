@@ -107,7 +107,7 @@ export function ChatWindow({ threadId }: { threadId: string }) {
               </div>
               <h2 className="text-2xl font-semibold tracking-wide">岐问问诊</h2>
               <p className="mt-3 max-w-md text-sm leading-7 text-muted-foreground">
-                请描述您的症状，我将按中医"理法方药"为您分析。可上传病历文件辅助诊断。
+                请描述您的症状，我将按中医“理法方药”为您分析。可上传病历文件辅助诊断。
               </p>
               <div className="mt-6 flex flex-wrap justify-center gap-2.5">
                 {examplePrompts.map((p) => (
@@ -133,7 +133,9 @@ export function ChatWindow({ threadId }: { threadId: string }) {
       </div>
 
       <div className="px-4 pb-4 pt-3 sm:pb-6">
-        <div className="mx-auto mb-1 flex max-w-3xl justify-end"><ProfileFacts /></div>
+        <div className="mx-auto mb-1 flex max-w-3xl flex-wrap justify-end">
+          <ProfileFacts />
+        </div>
         <div className="chat-composer mx-auto max-w-3xl rounded-2xl border border-border bg-card p-3 sm:p-4">
           {files.length > 0 && (
             <div className="mb-2 flex flex-wrap gap-2">
@@ -173,7 +175,7 @@ export function ChatWindow({ threadId }: { threadId: string }) {
               onClick={() => fileInputRef.current?.click()}
               disabled={uploading || streaming}
               aria-label="上传病历文件"
-              title="上传病历文件（PDF/DOCX/TXT）"
+              title="上传病历文件（PDF/DOCX/TXT，单文件文本不超过 20000 字符）"
             >
               <Paperclip className="h-4 w-4" />
             </Button>

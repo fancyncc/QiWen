@@ -1,0 +1,64 @@
+name: Checks
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      QIWEN_MODEL_MODE: mock
+      QIWEN_RAG_MODE: bm25
+      QIWEN_RAG_RERANK_MODE: none
+      HF_HUB_OFFLINE: "1"
+      TRANSFORMERS_OFFLINE: "1"
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements.lock.txt
+      - run: python -m pip install -r backend/requirements.lock.txt
+      - run: python -m pytest backend/tests -q --tb=no -p no:cacheprovider
+      - name: Evaluation contracts
+        working-directory: backend
+        run: |
+          python -m evaluation.datasets --output evaluation/reports/ci-datasets.json
+          python -m evaluation.runner --output evaluation/reports/ci-baseline.json
+          python -m evaluation.benchmark --profile mock_contract --reports evaluation/reports/ci
+          python -m evaluation.supplement --repeat 1 --reports evaluation/reports/ci
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: evaluation-contracts
+          path: backend/evaluation/reports/ci*
+
+  frontend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run lint -- --max-warnings 0
+      - run: npm test
+      - run: npm run build

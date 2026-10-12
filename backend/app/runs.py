@@ -115,6 +115,7 @@ class Run:
 
     def telemetry(self):
         return {"run_id": self.id, "events": self.events, "model_calls": self.context.calls,
+                "context_usage": self.context.contexts,
                 "elapsedMs": round((time.monotonic() - self.started) * 1000), "mode": self.mode,
                 "phases_ms": self.phases_ms}
 
@@ -158,18 +159,22 @@ async def execute(run: Run, message: str, profile: dict, file_text: str, save):
                                (json.dumps(run.telemetry(), ensure_ascii=False), now(), run.id))
                 run.emit("stage", event)
             elif event["type"] == "result":
-                # No await between the cancellation fence and atomic result + memory commit.
+                # No await between the cancellation fence and atomic result + episode commit.
                 run.set_phase("ready")
                 trace = {**run.telemetry(), "status": "completed", "preflight": event["data"].get("preflight", {}),
-                         "memory_retrieval": event["data"].get("memory_retrieval", {}),
                          "classics_retrieval": {"attempts": event["data"].get("retrieval_history", []),
                                                 "final": event["data"].get("retrieval_trace", {})},
                          "inquiry": {"facts": event["data"].get("symptom_facts", []),
                                      "pending": event["data"].get("symptom_pending")},
                          "agents": {"traces": event["data"].get("agent_traces", {}),
                                     "artifacts": event["data"].get("agent_artifacts", {})},
+                         "identity_scope": event["data"].get("identity_scope", ""),
+                         "episode_id": event["data"].get("episode_id", ""),
+                         "identity_mode": event["data"].get("identity_mode", ""),
+                         "answer_citations": (event["data"].get("knowledge_citations", [])
+                                              if event["data"].get("identity_mode") == "knowledge" else None),
                          "safety": {key: event["data"].get("safety_state", {}).get(key)
-                                    for key in ("subject", "status", "pending", "version")}}
+                                    for key in ("subject", "subject_confirmed", "subject_epoch", "subject_evidence", "status", "pending", "version")}}
 
                 if run.candidate_status != "approved":
                     if run.candidate_status == "rejected":
@@ -177,7 +182,7 @@ async def execute(run: Run, message: str, profile: dict, file_text: str, save):
                     run.emit("candidate.completed", {"text": event["data"]["response"]})
                     run.emit("review.started", {"restricted": True})
                     run.emit("review.approved", {"review": {"approved": True, "restricted": True}, "plan": None})
-                # The final event, candidate, answer and memory commit together.
+                # The final event, candidate, answer and episode commit together.
                 run.terminal = save(run, event["data"], trace)
                 run.sequence = run.terminal["sequence"]
                 run.candidate_status = "final"
@@ -192,15 +197,24 @@ async def execute(run: Run, message: str, profile: dict, file_text: str, save):
         run.terminal = {"cancelled": True, "run_id": run.id, "thread_id": run.thread_id}
         run.terminal = run.emit("run.cancelled", run.terminal, force=True)
         raise
-    except Exception:
+    except Exception as exc:
         run.set_phase("failed")
         run.close_nodes("failed")
         persist_stop(run, "failed")
-        run.terminal = {"error": "问答暂不可用，本轮未提供治疗建议，请稍后重试。", "run_id": run.id}
+        from .context import ContextBudgetError
+        message = exc.public_message if isinstance(exc, ContextBudgetError) else "问答暂不可用，本轮未提供治疗建议，请稍后重试。"
+        run.terminal = {"error": message, "run_id": run.id}
         run.terminal = run.emit("run.failed", run.terminal, force=True)
     finally:
         invocation.reset(token)
-        active.pop(run.id, None)
+        from .checkpoint_retention import prune
+        try:
+            await asyncio.to_thread(prune)
+        except Exception:
+            # Maintenance never changes a committed answer; retry next completed run.
+            pass
+        finally:
+            active.pop(run.id, None)
 
 
 async def cancel(run_id: str):

@@ -13,7 +13,7 @@
           "term": "不寐",
           "relation": "retrieval_related",
           "evidence": {
-            "id": "bdcb0b4f81a1567edc03cf80d9e51ca9f41e46e908bdc280426560840a9e89d2",
+            "id": "7565ce4d5f90778b9fb92f4e29b8edada2eb2c009ded0c6814ecfe52e2aa7a03",
             "book": "温病条辨",
             "chapter": "条文四十",
             "quote": "舌白滑，甚则灰，脉迟，不食，不寐，大便窒塞，浊阴凝聚，阳伤腹痛，痛甚"
@@ -26,7 +26,7 @@
             "id": "847527f80085279338f7c63a9313f6bf340ae3b7d45c64c1bf44a5fe79d4d02d",
             "book": "伤寒论",
             "chapter": "辨太阳病脉证并治",
-            "quote": "\n汗多亡阳，遂虚，恶风烦躁，不得眠也。\n\n伤寒脉浮缓，身不疼但重，乍有"
+            "quote": "汗多亡阳，遂虚，恶风烦躁，不得眠也。\n\n伤寒脉浮缓，身不疼但重，乍有"
           }
         }
       ]
@@ -41,7 +41,7 @@
           "term": "不寐",
           "relation": "retrieval_related",
           "evidence": {
-            "id": "bdcb0b4f81a1567edc03cf80d9e51ca9f41e46e908bdc280426560840a9e89d2",
+            "id": "7565ce4d5f90778b9fb92f4e29b8edada2eb2c009ded0c6814ecfe52e2aa7a03",
             "book": "温病条辨",
             "chapter": "条文四十",
             "quote": "舌白滑，甚则灰，脉迟，不食，不寐，大便窒塞，浊阴凝聚，阳伤腹痛，痛甚"
@@ -98,10 +98,10 @@
           "term": "头项强痛",
           "relation": "retrieval_related",
           "evidence": {
-            "id": "379b2699d8113b07e6498dcc53842ca94fda2adc2dbb63ad88a07fba0652c018",
+            "id": "81db9b82631edda16304459300588602f01a47fa3e01fa058639807aeecf6c6f",
             "book": "伤寒论",
             "chapter": "辨太阳病脉证并治法上",
-            "quote": "----\n太阳之为病，脉浮，头项强痛而恶寒。\n\n太阳病，发热，汗出，恶风"
+            "quote": "太阳之为病，脉浮，头项强痛而恶寒。\n\n太阳病，发热，汗出，恶风"
           }
         }
       ]
@@ -174,7 +174,7 @@
           "term": "恶寒",
           "relation": "retrieval_related",
           "evidence": {
-            "id": "3f363194a9a668f1fa2f874639e2096052bba04c7ee34a2f641878bf44ef92c6",
+            "id": "462dd2e1855c1adb551259ac493aa5c0da5a6b985730ebfdf6de89ad44ed537f",
             "book": "伤寒论",
             "chapter": "辨脉法",
             "quote": "四日当剧。\n\n问曰：病有洒淅恶寒，而复发热者何？荅曰：阴脉不足，阳往"
@@ -193,10 +193,10 @@
           "term": "发热",
           "relation": "retrieval_related",
           "evidence": {
-            "id": "3f363194a9a668f1fa2f874639e2096052bba04c7ee34a2f641878bf44ef92c6",
+            "id": "462dd2e1855c1adb551259ac493aa5c0da5a6b985730ebfdf6de89ad44ed537f",
             "book": "伤寒论",
             "chapter": "辨脉法",
-            "quote": "\n\n问曰：病有洒淅恶寒，而复发热者何？荅曰：阴脉不足，阳往从之；阳脉"
+            "quote": "问曰：病有洒淅恶寒，而复发热者何？荅曰：阴脉不足，阳往从之；阳脉"
           }
         },
         {
@@ -221,7 +221,7 @@
           "term": "倦怠",
           "relation": "retrieval_related",
           "evidence": {
-            "id": "8ae16e12f6c49f2f0e188b7b273e9d199bfee17b53e64a06ac49a7b637fb1d44",
+            "id": "7c2285c33fe8d2e6247abb63cb18ac3f799a30bbe7f39e7bd6f0b44e60e1f394",
             "book": "温病条辨",
             "chapter": "条文七十",
             "quote": "倦者，困劳而倦也，倦者，四肢倦怠也。\n脾主四肢，脾阳伤，则四肢倦而无"
@@ -239,7 +239,7 @@
           "term": "倦怠",
           "relation": "retrieval_related",
           "evidence": {
-            "id": "8ae16e12f6c49f2f0e188b7b273e9d199bfee17b53e64a06ac49a7b637fb1d44",
+            "id": "7c2285c33fe8d2e6247abb63cb18ac3f799a30bbe7f39e7bd6f0b44e60e1f394",
             "book": "温病条辨",
             "chapter": "条文七十",
             "quote": "倦者，困劳而倦也，倦者，四肢倦怠也。\n脾主四肢，脾阳伤，则四肢倦而无"

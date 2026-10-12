@@ -29,7 +29,7 @@ describe("恢复后端接口适配", () => {
         user_id: "user-id", constitution: "", allergies: "", history: "既往记录",
       }) });
     vi.stubGlobal("fetch", fetchMock);
-    expect((await api.getProfile("coco")).past_history).toEqual(["既往记录"]);
+    expect((await api.getProfile()).past_history).toEqual(["既往记录"]);
     expect(fetchMock.mock.calls[1][0]).toBe("/api/profiles/user-id");
   });
   it("上传把记录 id 作为附件引用，保留文件名", async () => {
@@ -50,5 +50,14 @@ describe("恢复后端接口适配", () => {
       json: async () => ({ detail: "用户名或密码错误" }) }));
     await expect(api.login("coco", "wrongpassword")).rejects.toThrow("用户名或密码错误");
     expect(useAuthStore.getState().token).toBe("original-token");
+  });
+  it("上一账号迟到的 401 不得退出当前账号", async () => {
+    let complete!: (response: object) => void;
+    vi.stubGlobal("fetch", vi.fn(() => new Promise((resolve) => { complete = resolve; })));
+    const pending = api.listThreads();
+    useAuthStore.getState().setAuth("new-account-token", "new-account");
+    complete({ status: 401, ok: false });
+    await expect(pending).rejects.toMatchObject({ status: 401 });
+    expect(useAuthStore.getState().username).toBe("new-account");
   });
 });

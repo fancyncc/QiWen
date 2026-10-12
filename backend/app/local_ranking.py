@@ -8,15 +8,25 @@ import threading
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
+from contextlib import contextmanager
+from contextvars import ContextVar
 
 from .config import DATA_DIR
 from .retrieval import validate_vectors
+from .blocking import check_cancelled, remaining_timeout, deadline
+from .retrieval_budget import timed_stage
 
 MIN_RELEVANCE = 0.7
+score_audit = ContextVar("cross_encoder_score_audit", default=None)
 _inference_lock = threading.RLock()
+_worker_slots = threading.BoundedSemaphore(4)
 
 
 class ModelUnavailable(RuntimeError):
+    pass
+
+
+class InferenceBusy(RuntimeError):
     pass
 
 
@@ -60,7 +70,7 @@ def settings():
         cache=str(Path(os.getenv("QIWEN_LOCAL_MODEL_CACHE", "").strip() or str(DATA_DIR / "models")).resolve()),
         max_length=integer("QIWEN_CROSS_ENCODER_MAX_LENGTH", 512, 32, 8192),
         batch_size=integer("QIWEN_CROSS_ENCODER_BATCH_SIZE", 2, 1, 32),
-        threads=integer("QIWEN_LOCAL_MODEL_THREADS", 2, 1, 16),
+        threads=integer("QIWEN_LOCAL_MODEL_THREADS", min(4, os.cpu_count() or 2), 1, 16),
         timeout=finite_number("QIWEN_CROSS_ENCODER_TIMEOUT", 120, 1, 600),
         mmr_weight=finite_number("QIWEN_RAG_MMR_LAMBDA", 0.7, 0, 1),
         embedding_backend=os.getenv("QIWEN_RAG_MMR_EMBEDDING_BACKEND", "local"),
@@ -79,6 +89,22 @@ def sigmoid(logit):
 def check_stop(stop):
     if stop.is_set():
         raise asyncio.CancelledError()
+    check_cancelled()
+
+
+@contextmanager
+def inference_slot(stop, name):
+    acquired = False
+    try:
+        with timed_stage(name + "_queue"):
+            while not acquired:
+                check_stop(stop)
+                acquired = _inference_lock.acquire(timeout=min(.05, remaining_timeout(.05)))
+        check_stop(stop)
+        yield
+    finally:
+        if acquired:
+            _inference_lock.release()
 
 
 @lru_cache(maxsize=2)
@@ -109,20 +135,30 @@ def _load(kind, config: Settings, local_only: bool):
 
 def score_logits(query: str, texts: list[str], config: Settings, stop: threading.Event):
     """Identity activation here; sigmoid is applied exactly once by the caller."""
-    with _inference_lock:
+    with inference_slot(stop, "cross_encoder"):
         check_stop(stop)
-        encoder = _load("cross_encoder", config, True)
+        with timed_stage("cross_encoder_load"):
+            encoder = _load("cross_encoder", config, True)
         output = []
-        for start in range(0, len(texts), config.batch_size):
-            check_stop(stop)
-            pairs = [(query, text) for text in texts[start:start + config.batch_size]]
-            values = encoder.predict(pairs, batch_size=config.batch_size, show_progress_bar=False,
-                                     apply_softmax=False, convert_to_numpy=True).tolist()
-            if not isinstance(values, list) or len(values) != len(pairs):
-                raise ValueError("CrossEncoder output shape mismatch")
-            for value in values:
-                sigmoid(value)
-            output.extend(values)
+        with timed_stage("cross_encoder_inference"):
+            for start in range(0, len(texts), config.batch_size):
+                check_stop(stop)
+                pairs = [(query, text) for text in texts[start:start + config.batch_size]]
+                audit = score_audit.get()
+                tokenizer = getattr(encoder, "tokenizer", None)
+                if audit is not None and tokenizer is not None:
+                    for question, passage in pairs:
+                        check_stop(stop)
+                        count = len(tokenizer(question, passage, truncation=False)["input_ids"])
+                        audit.append({"status": "measured", "input_token_count": count,
+                                      "max_length": config.max_length, "truncated": count > config.max_length})
+                values = encoder.predict(pairs, batch_size=config.batch_size, show_progress_bar=False,
+                                         apply_softmax=False, convert_to_numpy=True).tolist()
+                if not isinstance(values, list) or len(values) != len(pairs):
+                    raise ValueError("CrossEncoder output shape mismatch")
+                for value in values:
+                    sigmoid(value)
+                output.extend(values)
         check_stop(stop)
         return output
 
@@ -131,17 +167,20 @@ def candidate_embeddings(rows: list[dict], config: Settings, stop: threading.Eve
     check_stop(stop)
     if config.embedding_backend == "api":
         from .retrieval import _embed
-        vectors = _embed([row["body"] for row in rows])
+        with timed_stage("mmr_embedding_api"):
+            vectors = _embed([row["body"] for row in rows])
     elif config.embedding_backend == "local":
-        with _inference_lock:
+        with inference_slot(stop, "mmr"):
             check_stop(stop)
-            encoder = _load("embedding", config, True)
+            with timed_stage("mmr_model_load"):
+                encoder = _load("embedding", config, True)
             vectors = []
-            for start in range(0, len(rows), config.batch_size):
-                check_stop(stop)
-                batch = [row["body"] for row in rows[start:start + config.batch_size]]
-                vectors.extend(encoder.encode(batch, batch_size=config.batch_size, show_progress_bar=False,
-                                              normalize_embeddings=True, convert_to_numpy=True).tolist())
+            with timed_stage("mmr_inference"):
+                for start in range(0, len(rows), config.batch_size):
+                    check_stop(stop)
+                    batch = [row["body"] for row in rows[start:start + config.batch_size]]
+                    vectors.extend(encoder.encode(batch, batch_size=config.batch_size, show_progress_bar=False,
+                                                  normalize_embeddings=True, convert_to_numpy=True).tolist())
     else:
         raise ValueError("Invalid MMR embedding backend")
     check_stop(stop)
@@ -151,10 +190,51 @@ def candidate_embeddings(rows: list[dict], config: Settings, stop: threading.Eve
 async def bounded_worker(function, *args, timeout):
     """Cancellation fences batches; an in-progress tensor operation may finish."""
     stop = threading.Event()
+    if not _worker_slots.acquire(blocking=False):
+        raise InferenceBusy("Local inference capacity exhausted")
+    def execute():
+        try:
+            check_stop(stop)
+            return function(*args, stop)
+        finally:
+            _worker_slots.release()
+    worker = asyncio.create_task(asyncio.to_thread(execute))
+    def consume(task):
+        try:
+            task.exception()
+        except BaseException:
+            pass
+    worker.add_done_callback(consume)
     try:
-        return await asyncio.wait_for(asyncio.to_thread(function, *args, stop), timeout=timeout)
+        return await asyncio.wait_for(asyncio.shield(worker), timeout=timeout)
     finally:
         stop.set()
+
+
+async def warm_models(timeout=30):
+    """Warm cached local weights in the serving process, never download them."""
+    import time
+    started = time.monotonic()
+    token = deadline.set(started + timeout)
+    checks = {}
+    try:
+        config = settings()
+        kinds = ["cross_encoder"] + (["embedding"] if config.embedding_backend == "local" else [])
+        def load(kind, config, stop):
+            with inference_slot(stop, "warmup_" + kind):
+                _load(kind, config, True)
+                check_stop(stop)
+        for kind in kinds:
+            await bounded_worker(load, kind, config, timeout=remaining_timeout(timeout))
+            checks[kind] = "available"
+        return {"status": "available", "checks": checks, "elapsed_ms": round((time.monotonic() - started) * 1000)}
+    except asyncio.CancelledError:
+        raise
+    except Exception as exc:
+        return {"status": "unavailable", "checks": checks, "error_type": type(exc).__name__,
+                "elapsed_ms": round((time.monotonic() - started) * 1000)}
+    finally:
+        deadline.reset(token)
 
 
 def mmr_select(rows: list[dict], vectors: list[list[float]], limit: int, weight: float):

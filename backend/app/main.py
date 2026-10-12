@@ -5,6 +5,7 @@ import io
 import json
 import sqlite3
 import time
+import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 from uuid import uuid4
@@ -19,19 +20,30 @@ from pypdf import PdfReader
 from pypdf.errors import PdfReadError
 
 from .auth import check_password, current_user, hash_password, make_token
-from .config import CHECKPOINT_PATH, CORS_ORIGINS, MAX_UPLOAD_BYTES, MODEL_MODE, RAG_MODE, UPLOAD_DIR
+from .config import CORS_ORIGINS, MAX_UPLOAD_BYTES, MODEL_MODE, RAG_MODE, UPLOAD_DIR
 from .db import all_rows, connection, init_db, now, one
 from . import runs
 from . import safety_store
+from . import episodes
 from .prescription import migrate_plan, legacy_plan, review_plan, fingerprint, patient_fingerprint
+from .documents import MAX_FILE_TEXT_CHARS
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     init_db()
     runs.recover_interrupted()
+    if (RAG_MODE == "hybrid" and os.getenv("QIWEN_RAG_RERANK_MODE", "cross_encoder") == "cross_encoder"
+            and os.getenv("QIWEN_RAG_WARMUP", "true").lower() == "true"):
+        from .local_ranking import warm_models
+        _app.state.retrieval_warmup = await warm_models()
+    else:
+        _app.state.retrieval_warmup = {"status": "not_run"}
     yield
+    pending = [run.task for run in runs.active.values() if run.task is not None]
     for run_id in list(runs.active):
         await runs.cancel(run_id)
+    if pending:
+        await asyncio.gather(*pending, return_exceptions=True)
 
 
 app = FastAPI(title="岐问 API", version="0.1.0", lifespan=lifespan)
@@ -57,6 +69,11 @@ class ProfilePatch(BaseModel):
     allergies: str | None = Field(default=None, max_length=500)
     history: str | None = Field(default=None, max_length=1000)
     revision: int | None = Field(default=None, ge=0)
+
+
+class MemoryControlPatch(BaseModel):
+    enabled: bool
+    revision: int = Field(ge=0)
 
 
 class SuggestionDecision(BaseModel):
@@ -104,6 +121,44 @@ def new_thread(user_id: str, title: str, mode: str) -> dict:
 @app.get("/api/health")
 def health():
     return {"status": "ok", "version": app.version, "rag_mode": RAG_MODE, "model_mode": MODEL_MODE}
+
+
+@app.get("/api/readiness")
+async def readiness():
+    """Read-only retrieval diagnostics; no provider calls or model downloads."""
+    from . import classics, retrieval
+    from .blocking import run_blocking
+    checks = {}
+    checks["startup_models"] = getattr(app.state, "retrieval_warmup", {"status": "not_run"})
+    ids = [row["id"] for row in all_rows("SELECT id FROM corpus")]
+    checks["corpus"] = {"count": len(ids)}
+    if RAG_MODE == "hybrid":
+        checks["embedding_configuration"] = {"configured": bool(retrieval.API_BASE and retrieval.API_KEY and os.getenv("QIWEN_EMBEDDING_MODEL"))}
+        try:
+            async with asyncio.timeout(5):
+                def coverage():
+                    collection = retrieval._collection()
+                    return collection.count(), len(set(collection.get(ids=ids, include=[])["ids"]) & set(ids)) if ids else 0
+                count, covered = await run_blocking(coverage)
+            checks["vector_index"] = {"count": count, "covered_count": covered,
+                                      "status": "covered" if covered == len(ids) > 0 else "empty" if not count else "incomplete"}
+        except Exception as exc:
+            checks["vector_index"] = {"status": "unavailable", "error_type": type(exc).__name__}
+    recent = dict(classics.last_observation)
+    if recent and time.time() - recent["observed_at"] <= 300:
+        checks["last_retrieval"] = recent
+    else:
+        checks["last_retrieval"] = {"outcome": "not_probed"}
+    unavailable = (checks["startup_models"]["status"] == "unavailable"
+                   or not checks["corpus"]["count"] or checks.get("vector_index", {}).get("status", "covered") != "covered"
+                   or not checks.get("embedding_configuration", {}).get("configured", True)
+                   or checks["last_retrieval"]["outcome"] not in {"success", "no_match", "not_probed"}
+                   or checks["last_retrieval"].get("mmr_status") == "failed"
+                   or RAG_MODE == "hybrid" and recent and recent.get("vector_status") not in {"success", "disabled"})
+    unprobed = (checks["last_retrieval"]["outcome"] == "not_probed"
+                or RAG_MODE == "hybrid" and checks["last_retrieval"].get("vector_status") != "success")
+    return {"status": "degraded" if unavailable else "not_probed" if unprobed else "ready",
+            "scope": "retrieval_prerequisites_and_recent_execution_not_answer_quality", "checks": checks}
 
 
 @app.get("/api/knowledge/sources/{source_id}")
@@ -176,12 +231,10 @@ async def delete_thread(thread_id: str, user: dict = Depends(current_user)):
         await runs.cancel(run_id)
     with connection() as db:
         db.execute("DELETE FROM threads WHERE id=?", (thread_id,))
-    if CHECKPOINT_PATH.exists():
-        with sqlite3.connect(CHECKPOINT_PATH) as db:
-            for table in ("checkpoints", "writes"):
-                exists = db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name=?", (table,)).fetchone()
-                if exists:
-                    db.executemany(f"DELETE FROM {table} WHERE thread_id=?", [(item,) for item in [thread_id, *run_ids]])
+    # A synchronous busy wait here blocks the aiosqlite writer's event loop,
+    # preventing that writer from releasing the very lock deletion needs.
+    from .checkpoint_retention import delete_thread_checkpoints
+    await asyncio.to_thread(delete_thread_checkpoints, thread_id, run_ids)
 
 
 @app.get("/api/threads/{thread_id}/messages")
@@ -209,10 +262,6 @@ def get_profile(user_id: str, user: dict = Depends(current_user)):
         profile = safety_store.effective_profile(db, user_id)
         profile["facts"] = [{**json.loads(row["fact"]), "id": row["id"]} for row in db.execute(
             "SELECT id,fact FROM patient_safety_facts WHERE user_id=? AND status='active' ORDER BY created_at", (user_id,))]
-    profile["memories"] = all_rows(
-        "SELECT thread_id,summary,updated_at FROM profile_memories WHERE user_id=? ORDER BY updated_at DESC",
-        (user_id,),
-    )
     return profile
 
 
@@ -220,8 +269,31 @@ def get_profile(user_id: str, user: dict = Depends(current_user)):
 def delete_profile_memory(user_id: str, thread_id: str, user: dict = Depends(current_user)):
     if user_id != user["id"]:
         raise HTTPException(403, "无权修改该画像")
+    owned_thread(thread_id, user_id)
+    from .memory import bump_control
     with connection() as db:
-        db.execute("DELETE FROM profile_memories WHERE user_id=? AND thread_id=?", (user_id, thread_id))
+        db.execute("BEGIN IMMEDIATE")
+        bump_control(db, user_id, thread_id)
+
+
+@app.patch("/api/threads/{thread_id}/memory")
+def patch_memory_control(thread_id: str, body: MemoryControlPatch, user: dict = Depends(current_user)):
+    owned_thread(thread_id, user["id"])
+    from .memory import bump_control, control
+    with connection() as db:
+        db.execute("BEGIN IMMEDIATE")
+        if control(user["id"], thread_id)["revision"] != body.revision:
+            raise HTTPException(409, "记忆设置已变化，请刷新")
+        return bump_control(db, user["id"], thread_id, body.enabled)
+
+
+@app.delete("/api/threads/{thread_id}/memory", status_code=204)
+def delete_thread_memory(thread_id: str, user: dict = Depends(current_user)):
+    owned_thread(thread_id, user["id"])
+    from .memory import bump_control
+    with connection() as db:
+        db.execute("BEGIN IMMEDIATE")
+        bump_control(db, user["id"], thread_id)
 
 
 @app.patch("/api/profiles/{user_id}")
@@ -249,6 +321,8 @@ def patch_profile(user_id: str, body: ProfilePatch, user: dict = Depends(current
             db.execute(f"UPDATE profiles SET {assignments},updated_at=? WHERE user_id=?",
                        (*changes.values(), now(), user_id))
             db.execute("UPDATE profiles SET safety_revision=safety_revision+1 WHERE user_id=?", (user_id,))
+            from .memory import invalidate_user
+            invalidate_user(db, user_id)
     return get_profile(user_id, user)
 
 
@@ -269,17 +343,28 @@ def revoke_profile_fact(fact_id: str, revision: int = Query(ge=0), user: dict = 
 
 def extract_file(filename: str, data: bytes) -> tuple[str, str]:
     extension = Path(filename).suffix.lower()
+    def collect(parts):
+        chunks, size = [], 0
+        for part in parts:
+            size += len(part) + (1 if chunks else 0)
+            if size > MAX_FILE_TEXT_CHARS:
+                raise HTTPException(413, "附件文本超过 20000 字符，请拆分文件后上传；本次未保存，也未截断处理。")
+            chunks.append(part)
+        return "\n".join(chunks)
+
     try:
         if extension == ".txt":
-            return "text/plain", data.decode("utf-8-sig")[:20000]
+            return "text/plain", collect([data.decode("utf-8-sig")])
         if extension == ".pdf" and data.startswith(b"%PDF"):
             pages = PdfReader(io.BytesIO(data)).pages
-            return "application/pdf", "\n".join(page.extract_text() or "" for page in pages)[:20000]
+            return "application/pdf", collect(page.extract_text() or "" for page in pages)
         if extension == ".docx" and data.startswith(b"PK"):
             doc = Document(io.BytesIO(data))
-            return "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "\n".join(
-                p.text for p in doc.paragraphs
-            )[:20000]
+            return "application/vnd.openxmlformats-officedocument.wordprocessingml.document", collect(
+                block.text if hasattr(block, "text") else "\n".join(" | ".join(cell.text for cell in row.cells) for row in block.rows)
+                for block in doc.iter_inner_content())
+    except HTTPException:
+        raise
     except Exception as exc:
         raise HTTPException(400, "文件无法解析") from exc
     raise HTTPException(400, "仅支持有效的 PDF、DOCX、UTF-8 TXT 文件")
@@ -293,7 +378,7 @@ async def upload(file: UploadFile = File(...), user: dict = Depends(current_user
     data = await file.read(MAX_UPLOAD_BYTES + 1)
     if len(data) > MAX_UPLOAD_BYTES:
         raise HTTPException(413, "文件不能超过 10 MB")
-    media_type, content = extract_file(filename, data)
+    media_type, content = await asyncio.to_thread(extract_file, filename, data)
     file_id = str(uuid4())
     storage_name = file_id + Path(filename).suffix.lower()
     (UPLOAD_DIR / storage_name).write_bytes(data)
@@ -337,7 +422,7 @@ def _prepare_chat(body: ChatRequest, user: dict) -> tuple[dict, dict, str]:
         file_texts.append(f'{item["original_name"]}: {item["extracted_text"]}')
     if thread is None:
         thread = new_thread(user["id"], body.message.strip()[:28], body.mode)
-    profile = one("SELECT constitution,allergies,history FROM profiles WHERE user_id=?", (user["id"],)) or {}
+    profile = {}  # Login authorizes access; the workflow resolves the patient first.
     with connection() as db:
         try:
             db.execute("INSERT INTO chat_runs(id,thread_id,user_id,status,created_at,updated_at) VALUES(?,?,?,'running',?,?)",
@@ -355,11 +440,17 @@ def _prepare_chat(body: ChatRequest, user: dict) -> tuple[dict, dict, str]:
         db.execute("UPDATE chat_runs SET source_message_id=?,source_files=? WHERE id=?",
                    (source_message_id, json.dumps(body.files), body.run_id))
         db.execute("UPDATE threads SET updated_at=? WHERE id=?", (now(), thread["id"]))
-    return thread, profile, "\n".join(file_texts)[:20000]
+    return thread, profile, "\n".join(file_texts)
 
 
 def _save_answer(run: runs.Run, result: dict, trace: dict):
     thread_id = run.thread_id
+    safe = result.get("safety_state", {})
+    personal = result.get("identity_mode") == "clinical" and safe.get("subject") == "self" and safe.get("subject_confirmed") and not result.get("identity_urgent")
+    resolved = result.get("identity_mode") == "clinical" and safe.get("subject_confirmed") and safe.get("subject") not in {"unknown", "other:未明确"}
+    expected_scope = f'{thread_id}:{safe.get("subject")}:{safe.get("subject_epoch", 0)}' if resolved else ""
+    if result.get("identity_scope", "") != expected_scope or result.get("intent_type") == "diagnose" and not resolved:
+        raise RuntimeError("问诊对象不一致，需要重新确认")
 
     candidate = result.get("treatment_plan", {})
     safe_plan = None
@@ -369,9 +460,9 @@ def _save_answer(run: runs.Run, result: dict, trace: dict):
         stored = one("SELECT status,review FROM candidates WHERE id=? AND run_id=?", (run.candidate_id, run.id))
         stored_review = json.loads(stored["review"] or "{}") if stored else {}
         with connection() as db:
-            manual = safety_store.effective_profile(db, run.user_id)
+            manual = safety_store.effective_profile(db, run.user_id) if personal else {}
         if (not latest_review["approved"] or fingerprint(candidate) != result.get("reviewed_hash")
-            or result.get("manual_profile_hash") != patient_fingerprint(manual)
+            or personal and result.get("manual_profile_hash") != patient_fingerprint(manual)
             or not stored or stored["status"] != "approved"
             or stored_review.get("plan_hash") != fingerprint(candidate)
             or stored_review.get("patient_hash") != patient_fingerprint(result.get("profile", {}))
@@ -387,24 +478,30 @@ def _save_answer(run: runs.Run, result: dict, trace: dict):
     final = run.final_event(result, answer, trace)
     with connection() as db:
         db.execute("BEGIN IMMEDIATE")
-        if result.get("manual_profile_hash") != patient_fingerprint(safety_store.effective_profile(db, run.user_id)):
+        if personal and result.get("manual_profile_hash") != patient_fingerprint(safety_store.effective_profile(db, run.user_id)):
             raise RuntimeError("画像已变化，本轮需要重新预审")
         changed = db.execute("UPDATE chat_runs SET status='completed',telemetry=?,updated_at=? WHERE id=? AND status='running'",
                              (json.dumps(trace, ensure_ascii=False), now(), run.id)).rowcount
         if not changed or run.context.cancelled:
             raise asyncio.CancelledError
         safe = result.get("safety_state", {})
-        if safe:
+        if safe and result.get("identity_mode") == "clinical":
             safe["symptom_facts"] = result.get("symptom_facts", [])
             safe.setdefault("clinical", {})[safe["subject"]] = {
                 key: result.get(key) for key in ("pending_context", "pending_question", "symptom_pending")}
             safety_store.commit_state(db, run.user_id, thread_id, safe, result.get("safety_state_version", 0))
-        safety_store.add_suggestions(db, run.user_id, thread_id, run.id, result.get("profile_suggestions", []))
-        if result.get("context_summary"):
-            db.execute("""INSERT INTO profile_memories(thread_id,user_id,summary,updated_at)
-                VALUES(?,?,?,?) ON CONFLICT(thread_id) DO UPDATE SET summary=excluded.summary,updated_at=excluded.updated_at
-                WHERE profile_memories.user_id=excluded.user_id""",
-                       (thread_id, run.user_id, result["context_summary"], now()))
+        if personal:
+            safety_store.add_suggestions(db, run.user_id, thread_id, run.id, result.get("profile_suggestions", []))
+        episode = result.get("episode_summary", {})
+        if result.get("episode_id") and episode and not result.get("episode_pending"):
+            db.execute("INSERT INTO consultation_episodes(id,thread_id,user_id,subject,version,summary,state,last_run_id,started_at,updated_at) VALUES(?,?,?,?,1,?,?,?,?,?) "
+                       "ON CONFLICT(id) DO UPDATE SET version=consultation_episodes.version+1,summary=excluded.summary,state=excluded.state,last_run_id=excluded.last_run_id,updated_at=excluded.updated_at",
+                       (result["episode_id"], thread_id, run.user_id, safe["subject"], result.get("context_summary") or episodes.summary(result)[0],
+                        json.dumps(episode, ensure_ascii=False), run.id, episode.get("started_at"), now()))
+        # Clinical episode summaries stay in this thread; never publish to profiles.
+        if result.get("identity_mode") == "knowledge" and result.get("knowledge_state") and not result.get("knowledge_ambiguous"):
+            db.execute("INSERT INTO knowledge_topics VALUES(?,?,?,?) ON CONFLICT(thread_id) DO UPDATE SET state=excluded.state,updated_at=excluded.updated_at",
+                       (thread_id, run.user_id, json.dumps(result["knowledge_state"], ensure_ascii=False), now()))
         db.execute("INSERT INTO messages(id,thread_id,role,content,intent_type,symptoms,notes,trace,plan,prescription_review,candidate_id,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",
                    (answer_id, thread_id, "assistant", result["response"], result.get("intent_type"),
                     json.dumps(result.get("symptoms", []), ensure_ascii=False),

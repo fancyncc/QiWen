@@ -1,16 +1,22 @@
-from __future__ import annotations
-
+"""Session-only clinical memory and legacy controls regression fixtures."""
 import asyncio
+import json
+from uuid import uuid4
 
 import pytest
+from fastapi.testclient import TestClient
 
-from app import db, memory, retrieval, workflow
+from app import db, memory, workflow, safety_store, model, symptoms
+from app.context import clinical_context
+from app.safety_context import empty_state, extract_facts, applicable_facts
+from app.agents import tools, multi
+from app.main import app
+from test_api import auth, register
 
 
 @pytest.fixture
 def memory_db(tmp_path, monkeypatch):
     monkeypatch.setattr(db, "DB_PATH", tmp_path / "memory.sqlite3")
-    monkeypatch.setenv("QIWEN_MEMORY_MODE", "bm25")
     db.init_db()
     with db.connection() as conn:
         for user in ("alice", "bob"):
@@ -27,200 +33,123 @@ def memory_db(tmp_path, monkeypatch):
     return db
 
 
-def test_followup_query_uses_pending_complaint_not_question_suggestions():
-    query = memory.build_query({"message":"三天，未有其它不适", "pending_context":"我头痛",
-                                "pending_question":"是否伴有失眠？"}, [])
-    assert "头痛" in query and "三天" in query and "失眠" not in query
-    assert "头痛" in memory.build_query({"message":"三天"}, ["我头痛"])
-    assert "头痛" not in memory.build_query({"message":"最近睡不好"}, ["我头痛"])
-
-
-@pytest.mark.parametrize("query,expected", [
-    ("头痛", ["head"]), ("最近睡不好", ["sleep"]), ("入睡困难", ["sleep"]),
-    ("腰痛", []), ("三天", []), ("最近不适", []),
-])
-def test_keyword_labeled_cases_reject_unrelated_memories(memory_db, query, expected):
-    rows, info = memory.retrieve_memories(query, "alice", "current")
-    assert [row["thread_id"] for row in rows] == expected
-    assert info["active_mode"] == "bm25"
-
-
-def test_workflow_preserves_memory_identity_and_recent_original_text(memory_db):
+def test_legacy_summary_controls_delete_without_losing_chat_or_other_users(memory_db):
     with db.connection() as conn:
-        conn.execute("INSERT INTO messages(id,thread_id,role,content,created_at) VALUES('a','current','user','我头痛','2026-09-25')")
-        conn.execute("INSERT INTO messages(id,thread_id,role,content,created_at) VALUES('b','current','user','三天，未有其它不适','2026-09-26')")
-    loaded = asyncio.run(workflow.memory_load({"user_id":"alice", "thread_id":"current",
-                         "message":"三天，未有其它不适", "pending_context":"我头痛"}))
-    assert "来源会话=head" in loaded["memory_context"]
-    assert "摘要更新时间=2026-09-01" in loaded["memory_context"]
-    assert "上个月头痛" in loaded["memory_context"]
-    assert "other-user" not in loaded["memory_context"]
-    assert "已确认症状" in loaded["memory_context"]
-    assert loaded["memory_context"].count("三天") == 0  # Current text is already a separate state field.
-    assert loaded["memory_retrieval"]["selected"][0]["thread_id"] == "head"
+        control = memory.bump_control(conn, "alice", "head", False)
+    assert control == {"enabled": False, "revision": 1}
+    assert not db.one("SELECT * FROM profile_memories WHERE thread_id='head'")
+    assert db.one("SELECT * FROM threads WHERE id='head'")
+    assert db.one("SELECT * FROM profile_memories WHERE thread_id='other-user'")
+    db.init_db()
+    assert memory.control("alice", "head")["enabled"] == 0
+    assert db.one("SELECT * FROM profile_memories WHERE thread_id='sleep'")
+    assert not db.one("SELECT * FROM memory_terms")
 
 
-def test_format_preserves_negation_and_drops_whole_over_budget_records():
-    rows = [{"thread_id":"past", "updated_at":"2026-09-01", "summary":"之前没有失眠"}]
-    context = memory.format_context(rows, [], "current")
-    assert "之前没有失眠" in context
-    assert "来源会话=past" in context
-    assert "摘要更新时间=2026-09-01" in context
-    assert "来源会话" not in memory.format_context(rows, [], "current", budget=70)
+def test_old_context_and_summary_risks_never_enter_clinical_input():
+    risks = extract_facts("正在服用华法林", subject="self", kind="summary", thread_id="old")
+    state = {"message": "我今天头痛", "thread_id": "new", "memory_context": "foreign-marker",
+             "memory_records": [{"summary": "foreign-marker", "thread_id": "old"}],
+             "safety_state": {**empty_state(), "subject": "self", "subject_confirmed": True, "facts": risks}}
+    text = clinical_context(state)
+    assert "foreign-marker" not in text and "华法林" not in text
+    assert not applicable_facts(state["safety_state"])
+    assert not hasattr(tools, "MEMORY_TOOL") and not hasattr(tools, "search_memories")
+    assert "memory_rerank" not in model.ROLES
 
 
-def test_hybrid_fallback_is_explicit_and_does_not_admit_unrelated_records(memory_db, monkeypatch):
-    monkeypatch.setenv("QIWEN_MEMORY_MODE", "hybrid")
-    monkeypatch.setattr(retrieval, "API_KEY", "")
-    rows, info = memory.retrieve_memories("腰痛", "alice", "current")
-    assert not rows and "未配置嵌入接口" in info["fallback_reason"]
-
-
-def configure_vectors(monkeypatch):
-    monkeypatch.setenv("QIWEN_MEMORY_MODE", "hybrid")
-    monkeypatch.setenv("QIWEN_EMBEDDING_MODEL", "synthetic-test-model")
-    monkeypatch.setenv("QIWEN_MEMORY_MIN_SIMILARITY", "0.8")
-    monkeypatch.setattr(retrieval, "API_BASE", "https://example.invalid/v1")
-    monkeypatch.setattr(retrieval, "API_KEY", "synthetic-key")
-
-
-def test_hybrid_rrf_with_synthetic_vectors_and_cache_lifecycle(memory_db, monkeypatch):
-    configure_vectors(monkeypatch)
-    calls = []
-    def embed(texts):
-        calls.append(texts)
-        return [[1.0,0.0] if "入睡" in text or "失眠" in text else [0.0,1.0] for text in texts]
-    monkeypatch.setattr(retrieval, "_embed", embed)
-    # No lexical overlap with either candidate: vectors alone admit the matching record.
-    rows, info = memory.retrieve_memories("夜里难以入睡", "alice", "current")
-    assert [row["thread_id"] for row in rows] == ["sleep"]
-    assert info["active_mode"] == "hybrid" and rows[0]["channels"] == ["vector"]
-    rows, _ = memory.retrieve_memories("失眠", "alice", "current")
-    assert rows[0]["channels"] == ["bm25", "vector"]
-    assert calls[1] == ["失眠"]  # Unchanged summaries are not embedded again.
-    assert not db.one("SELECT * FROM memory_embeddings WHERE user_id='bob'")
+def test_legacy_saved_state_and_foreign_symptoms_are_excluded(memory_db):
+    state = {**empty_state(), "subject": "self", "subject_confirmed": True}
+    state["facts"] = extract_facts("正在服用华法林", subject="self", kind="summary", thread_id="head")
+    state["symptom_facts"] = symptoms.extract("我咳嗽三天", kind="summary", thread_id="head")
     with db.connection() as conn:
-        conn.execute("UPDATE profile_memories SET summary='入睡困难' WHERE thread_id='sleep'")
-    memory.retrieve_memories("失眠", "alice", "current")
-    assert calls[2] == ["失眠", "入睡困难"]
-    with db.connection() as conn:
-        conn.execute("DELETE FROM profile_memories WHERE thread_id='sleep'")
-    assert not db.one("SELECT * FROM memory_embeddings WHERE thread_id='sleep'")
+        safety_store.commit_state(conn, "alice", "current", state, 0)
+    loaded = safety_store.load_state("alice", "current")
+    assert loaded["facts"] == [] and loaded["symptom_facts"] == []
+    foreign = symptoms.extract("我腹胀三天", thread_id="head")
+    text = clinical_context({"thread_id": "current", "message": "我今天头痛", "safety_state": loaded,
+                             "symptom_facts": foreign})
+    assert "腹胀" not in text and "咳嗽" not in text and "华法林" not in text
 
 
-def test_model_threshold_must_be_configured(memory_db, monkeypatch):
-    configure_vectors(monkeypatch)
-    monkeypatch.delenv("QIWEN_MEMORY_MIN_SIMILARITY")
-    monkeypatch.setattr(retrieval, "_embed", lambda _: pytest.fail("must not call uncalibrated vector branch"))
-    rows, info = memory.retrieve_memories("头痛", "alice", "current")
-    assert rows[0]["thread_id"] == "head" and "门槛" in info["fallback_reason"]
-
-
-def test_bad_embedding_response_falls_back_to_keyword_search(memory_db, monkeypatch):
-    configure_vectors(monkeypatch)
-    monkeypatch.setattr(retrieval, "_embed", lambda _: [[float("nan"),0.0]] * 3)
-    rows, info = memory.retrieve_memories("头痛", "alice", "current")
-    assert [row["thread_id"] for row in rows] == ["head"]
-    assert info["active_mode"] == "bm25" and "ValueError" in info["fallback_reason"]
-
-
-def rerank_candidates(monkeypatch):
-    monkeypatch.setenv("QIWEN_MEMORY_RERANK_MODE", "llm")
-    monkeypatch.setattr(memory.model, "API_BASE", "https://example.invalid/v1")
-    monkeypatch.setattr(memory.model, "API_KEY", "synthetic-key")
-    monkeypatch.setenv("QIWEN_MODEL_MEMORY_RERANK", "synthetic-reranker")
-    return memory.retrieve_memories("头痛，失眠", "alice", "current", limit=10)
-
-
-def test_rerank_order_rejection_and_preserved_identity(memory_db, monkeypatch):
-    rows, info = rerank_candidates(monkeypatch)
-    async def reranker(system, user, *, role, schema):
-        import json
-        assert role == "memory_rerank" and schema is memory.MemoryRanking
-        payload = json.loads(user)
-        assert payload["query"] == "完整问题"
-        assert {row["thread_id"] for row in payload["candidates"]} == {"head", "sleep"}
-        assert "之前没有失眠" in user and "2026-09-01" in user
-        return {"ordered_ids":["sleep", "head"]}
-    monkeypatch.setattr(memory.model, "acomplete_json", reranker)
-    selected, trace = asyncio.run(memory.rerank_memories("完整问题", rows, info, "alice", limit=1))
-    assert [row["thread_id"] for row in selected] == ["sleep"]
-    assert selected[0]["summary"] == "之前没有失眠"
-    assert trace["rerank"]["status"] == "success" and trace["rerank"]["input_count"] == 2
-    assert trace["selected"][0]["thread_id"] == "sleep"
-
-
-def test_reranker_can_reject_all_candidates(memory_db, monkeypatch):
-    rows, info = rerank_candidates(monkeypatch)
-    async def reranker(*args, **kwargs):
-        return {"ordered_ids":[]}
-    monkeypatch.setattr(memory.model, "acomplete_json", reranker)
-    selected, trace = asyncio.run(memory.rerank_memories("query", rows, info, "alice"))
-    assert selected == [] and trace["selected"] == []
-    assert trace["rerank"]["status"] == "success"
-
-
-@pytest.mark.parametrize("result", [
-    {"ordered_ids":["other-user"]}, {"ordered_ids":["head", "head"]},
-    {"ordered_ids":[1]}, {"ordered_ids":["head"], "rewritten_summary":"invented"},
-])
-def test_invalid_rerank_output_falls_back_without_new_ids(memory_db, monkeypatch, result):
-    rows, info = rerank_candidates(monkeypatch)
-    async def reranker(*args, **kwargs):
+@pytest.mark.parametrize("mode", ["fixed", "multi"])
+def test_new_thread_uses_only_profile_and_its_own_clinical_facts(monkeypatch, mode):
+    captured = []
+    original = workflow.profile_load
+    async def load(state):
+        result = await original(state)
+        captured.append(clinical_context({**state, **result}))
         return result
-    monkeypatch.setattr(memory.model, "acomplete_json", reranker)
-    selected, trace = asyncio.run(memory.rerank_memories("query", rows, info, "alice"))
-    assert [row["thread_id"] for row in selected] == [row["thread_id"] for row in rows]
-    assert trace["rerank"]["status"] == "fallback"
-
-
-def test_timeout_returns_fused_order(memory_db, monkeypatch):
-    rows, info = rerank_candidates(monkeypatch)
-    async def reranker(*args, **kwargs):
-        raise TimeoutError("synthetic timeout")
-    monkeypatch.setattr(memory.model, "acomplete_json", reranker)
-    selected, trace = asyncio.run(memory.rerank_memories("query", rows, info, "alice"))
-    assert selected == rows and "TimeoutError" in trace["rerank"]["fallback_reason"]
-
-
-def test_rerank_cancellation_does_not_return_fallback_answer(memory_db, monkeypatch):
-    rows, info = rerank_candidates(monkeypatch)
-    async def reranker(*args, **kwargs):
-        raise asyncio.CancelledError
-    monkeypatch.setattr(memory.model, "acomplete_json", reranker)
-    with pytest.raises(asyncio.CancelledError):
-        asyncio.run(memory.rerank_memories("query", rows, info, "alice"))
-
-
-def test_deleted_memory_not_revived_by_model_reply(memory_db, monkeypatch):
-    rows, info = rerank_candidates(monkeypatch)
-    async def reranker(*args, **kwargs):
+    monkeypatch.setattr(workflow, "profile_load", load)
+    with TestClient(app) as client:
+        token, uid = register(client, "session_" + uuid4().hex[:8])
+        h = auth(token)
+        client.patch(f"/api/profiles/{uid}", headers=h, json={"allergies": "甘草", "history": "画像背景标记"}).raise_for_status()
+        old = client.post("/api/threads", headers=h, json={"mode": mode}).json()["id"]
+        upload = client.post("/api/upload", headers=h, files={"file": ("old.txt", "附件来源隔离标记".encode(), "text/plain")})
+        upload.raise_for_status()
+        first = client.post("/api/chat", headers=h, json={"thread_id": old, "message": "我咳嗽三天，夜间明显，没有发热", "files": [upload.json()["id"]]})
+        first.raise_for_status()
         with db.connection() as conn:
-            conn.execute("DELETE FROM profile_memories WHERE thread_id='head'")
-        return {"ordered_ids":["head", "sleep"]}
-    monkeypatch.setattr(memory.model, "acomplete_json", reranker)
-    selected, trace = asyncio.run(memory.rerank_memories("query", rows, info, "alice"))
-    assert [row["thread_id"] for row in selected] == ["sleep"]
-    assert trace["rerank"]["output_count"] == 1
+            conn.execute("INSERT INTO profile_memories VALUES(?,?,?,?)", (old, uid, "旧会话症状标记，咳嗽三天", db.now()))
+        new = client.post("/api/threads", headers=h, json={"mode": mode}).json()["id"]
+        captured.clear()
+        reply = client.post("/api/chat", headers=h, json={"thread_id": new, "message": "我今天头痛三天，没有其他不适"})
+        reply.raise_for_status()
+        assert captured and all("甘草" in text and "画像背景标记" in text for text in captured)
+        assert all("咳嗽" not in text and "夜间" not in text and "旧会话症状标记" not in text and "附件来源隔离标记" not in text for text in captured)
+        state = safety_store.load_state(uid, new)
+        assert all(f["symptom"] != "咳嗽" for f in state["symptom_facts"])
+        assert not db.one("SELECT * FROM profile_memories WHERE thread_id=?", (new,))
+        assert db.one("SELECT * FROM consultation_episodes WHERE thread_id=?", (new,))
+        assert db.one("SELECT summary FROM profile_memories WHERE thread_id=?", (old,))["summary"].startswith("旧会话")
+        assert "memories" not in client.get(f"/api/profiles/{uid}", headers=h).json()
 
 
-def test_foreign_memory_is_filtered_before_model_request(memory_db, monkeypatch):
-    rows, info = rerank_candidates(monkeypatch)
-    rows.append({"thread_id":"other-user", "summary":"头痛失眠", "updated_at":"2026-09-01T00:00:00+00:00", "channels":["vector"]})
-    async def reranker(system, user, **kwargs):
-        assert "other-user" not in user
-        return {"ordered_ids":["head"]}
-    monkeypatch.setattr(memory.model, "acomplete_json", reranker)
-    selected, _ = asyncio.run(memory.rerank_memories("query", rows, info, "alice"))
-    assert selected[0]["thread_id"] == "head"
+@pytest.mark.parametrize("mode", ["fixed", "multi"])
+def test_same_thread_retains_duration_denials_and_sources(monkeypatch, mode):
+    captured = []
+    original = workflow.profile_load
+    async def load(state):
+        result = await original(state)
+        captured.append(clinical_context({**state, **result}))
+        return result
+    monkeypatch.setattr(workflow, "profile_load", load)
+    with TestClient(app) as client:
+        token, uid = register(client, "continuity_" + uuid4().hex[:8])
+        h = auth(token)
+        t = client.post("/api/threads", headers=h, json={"mode": mode}).json()["id"]
+        for text in ("我咳嗽三天", "夜间明显", "我没有发热，也没有其他不适"):
+            client.post("/api/chat", headers=h, json={"thread_id": t, "message": text}).raise_for_status()
+        assert "三天" in captured[-1] and "夜间" in captured[-1]
+        summary = db.one("SELECT summary FROM consultation_episodes WHERE thread_id=? ORDER BY updated_at DESC LIMIT 1", (t,))["summary"]
+        assert all(term in summary for term in ("三天", "夜间", "否认")), summary
+        assert not db.one("SELECT * FROM profile_memories WHERE thread_id=?", (t,))
 
 
-@pytest.mark.parametrize("mode,configured,status", [("none", True, "disabled"), ("llm", False, "skipped_unconfigured")])
-def test_disabled_or_unconfigured_rerank_is_explicit(memory_db, monkeypatch, mode, configured, status):
-    rows, info = rerank_candidates(monkeypatch)
-    monkeypatch.setenv("QIWEN_MEMORY_RERANK_MODE", mode)
-    if not configured:
-        monkeypatch.setattr(memory.model, "API_KEY", "")
-    monkeypatch.setattr(memory.model, "acomplete_json", lambda *args, **kwargs: pytest.fail("must not call model"))
-    selected, trace = asyncio.run(memory.rerank_memories("query", rows, info, "alice"))
-    assert selected == rows and trace["rerank"]["status"] == status
+def test_bare_qualifier_keeps_original_duration_source_and_does_not_guess_between_complaints():
+    facts = symptoms.extract("我咳嗽三天，夜间明显", message_id="initial", thread_id="t")
+    bound = symptoms.bind_details(facts, "饭后加重", subject="self", message_id="followup", thread_id="t")
+    result = symptoms.effective(symptoms.merge(facts, bound), "self")[0]
+    assert result["duration_text"] == "三天" and result["timing_text"] == "饭后"
+    assert result["evidence_refs"]["duration_text"]["message_id"] == "initial"
+    assert result["evidence_refs"]["timing_text"]["message_id"] == "followup"
+    multiple = symptoms.extract("我咳嗽三天，同时头痛", message_id="two", thread_id="t")
+    assert not symptoms.bind_details(multiple, "夜间明显", subject="self", message_id="answer", thread_id="t")
+    assert not symptoms.bind_details(facts, "母亲夜间明显", subject="self", message_id="answer", thread_id="t")
+
+
+def test_retired_display_endpoints_and_legacy_delete_permissions():
+    with TestClient(app) as client:
+        token, uid = register(client, "legacy_" + uuid4().hex[:8])
+        other, _ = register(client, "legacy_" + uuid4().hex[:8])
+        h = auth(token)
+        t = client.post("/api/threads", headers=h, json={}).json()["id"]
+        assert client.get("/api/memories", headers=h).status_code == 404
+        assert client.get(f"/api/threads/{t}/context", headers=h).status_code == 404
+        with db.connection() as conn:
+            conn.execute("INSERT INTO profile_memories VALUES(?,?,?,?)", (t, uid, "历史保留", db.now()))
+        assert client.delete(f"/api/threads/{t}/memory", headers=auth(other)).status_code == 404
+        assert client.delete(f"/api/profiles/{uid}/memories/{t}", headers=h).status_code == 204
+        assert not db.one("SELECT * FROM profile_memories WHERE thread_id=?", (t,))
+        assert client.get(f"/api/threads/{t}/messages", headers=h).status_code == 200

@@ -1,0 +1,1186 @@
+{
+  "selected": [
+    "quality",
+    "faithfulness"
+  ],
+  "limit": 3,
+  "modes": [
+    "fixed",
+    "multi"
+  ],
+  "results": {},
+  "predeclared_policy_sha256": null,
+  "manifest": {
+    "run_id": "49a22d286c804853a44bd6c9c8ddd1cc",
+    "created_at": "2026-10-11T13:13:09.056971+00:00",
+    "behavior_version": "session-profile-boundary-v3-retrieval",
+    "profile": "live_core",
+    "git_revision": "19c842ae330eb21947b1d8fb41e59d8f042a95e5",
+    "dirty": true,
+    "files": {
+      "backend/app/__init__.py": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "backend/app/agents/__init__.py": "40675c29d25abe3a87c85fe1c82792495a437fcd9743c78e107782c7d28d9cc6",
+      "backend/app/agents/multi.py": "429bef007511294ef78059bc1c07d591fd88ac422018d79d533d19b7113e77f1",
+      "backend/app/agents/runtime.py": "2c17e3eb5f4f75e0c76f5b2150bab08420f97815e61ea4995f8bae19a043a1c0",
+      "backend/app/agents/tools.py": "c803a4a42d80a4fc7e38f2a8e03f6931821ac73081ddb428dcb21d2d807771c0",
+      "backend/app/auth.py": "263ad1fd1a7db33149c32e391c3e1bcae074ddb1d19aca1636dd6ce0ab073d6c",
+      "backend/app/blocking.py": "574f8e46c2c86b37b1ec56b77e6c1ecf1ae38e727bbd615cae4320dccf49da99",
+      "backend/app/checkpoint_retention.py": "10bf8699c57bae0a2124c83e1772b2bfe9cde8cf18036ad3ab03528615dc9c78",
+      "backend/app/classics.py": "4b5f45caaa790343f52156d2e9a7aa30383fd59ad73456f8744b194df38f7338",
+      "backend/app/config.py": "78b1ac4d2e2800d6655a2e312f751fa1bc8b033f85eaecd854aaace5a74feb8e",
+      "backend/app/context.py": "3045a3d5034738b0691d4d70bea8d40a9c8552218abe1acf8310cb53c1e970ed",
+      "backend/app/context_budget.py": "7b8cef2c95e22b21d407d154eae78808737d28185158bda2dce0549796ce7421",
+      "backend/app/corpus_seed.py": "54543e8f3521fdb2ea0f0758fa623478628898d9c9267a4d79a9d258bdd1462d",
+      "backend/app/db.py": "1d112fa3ed41aa3c069cf6aba537f6faaaffad138318a7356a526ff340b7e2bc",
+      "backend/app/documents.py": "f883ec162387478cba8ef4c7526ef15dc34fa7812e617dd1f3c20819b5ba5091",
+      "backend/app/episodes.py": "2730f0ce005916d3e7cb48f53d645632787482c2b5ed3bed77b263895dd02343",
+      "backend/app/knowledge.py": "f09a69a9ea17fbb73b23d0c4758edc0317a9360a8380266304c3b4f32b08a6fe",
+      "backend/app/knowledge_seed.py": "5e30708ec5546b4938eb78ffcd78a006a2396a5b1a025159d15c76c220164285",
+      "backend/app/local_ranking.py": "0a4cabda6cd6e92adde92b3fb57872f13e4c6e93408b42248109209175b12332",
+      "backend/app/main.py": "a91ececa305cfc71d2d4056da22a0879d703856554b38ac9f6dcdd832a60b532",
+      "backend/app/mcp_server.py": "d08f4c8f51434d06e2bd687c7c9a7dddf842df0c11806201088297c29b9a3894",
+      "backend/app/memory.py": "4fba74c0ef87c802f9936e6b16200a78c3e32755ec1ceeb980f647a69c2184e0",
+      "backend/app/model.py": "410e9ca0cf98f28ec61adc593efd81acd48563452a0157209ecdc04e76ca877c",
+      "backend/app/preflight.py": "d6333b0ea987889b87f1a55e9a24ca1afeaa18aa37b29de20fa5493bd00a895d",
+      "backend/app/prescription.py": "4d7df4d598830ac08f2ed8fea1187fe273ec498f5b60f6a569370f23207c827e",
+      "backend/app/profile_access.py": "7715cb3035743f56d48ef00880160f1859c3e18eb4208c043755d7ed48f6d5b4",
+      "backend/app/query_plan.py": "21b1fbf9922d5ba94594d70031b09105dc27f711c06d6f38ce7bfdbf828119a4",
+      "backend/app/retrieval.py": "aee47b86dfe8d1140e10fa90602c57408cf56c589faeb696a23852e6a6d244af",
+      "backend/app/retrieval_budget.py": "6ab0b1f67c6df5fac4687a3c504636ffbe062e03e7bb23302c430e34e4317812",
+      "backend/app/runs.py": "bf68c6c7e2dffa7033c06df0e65f04b8b5740fd6b218a07ba716c3ff811ccb9b",
+      "backend/app/safety.py": "d213cacf484484c168ae6c0d1a83ef3d023effad989fcc3006a325f4c69abcb5",
+      "backend/app/safety_context.py": "73e55d67060718aa0e55fd4c1d49f1384aced7adfdc28374d70c50664da77730",
+      "backend/app/safety_store.py": "98dfd85228fd6b6af4ea985ca7f9a374e8e457ae6990cc5300aba5f238ba863a",
+      "backend/app/symptoms.py": "fba4d2d43bf6556df929f1eebbe03fb243dedf4a3cf541b8f5b7907d4a768e05",
+      "backend/app/terms.py": "75f03f916a846019fe549923026da80900fabab84b6aa49d3df032fc48060564",
+      "backend/app/workflow.py": "e4874806b2e917e56e7710f2a673940d0001260bc167dc71dee3ff9d5db8d5f2",
+      "backend/evaluation/__init__.py": "0916d858ef3b5edbb77a72f25e9ee1434bbcc5e6127bc8bd4071ffddbb23b1d0",
+      "backend/evaluation/benchmark.py": "1b075573acbec856da89c3bf4657d6fdb79bdb4b6412aa037e9d0c22bfc5ce54",
+      "backend/evaluation/browser.py": "a841dc284214c96a4f92fa320c34b74e94912847fc274063a5314de43ce2b7bd",
+      "backend/evaluation/datasets.py": "fb6a3ee8fbf826bf5ac8d51975b9bf5d9860e368722a6c49f4b29ba4dc699123",
+      "backend/evaluation/deployment.py": "e3f340f8de3a40c92ffcaa1544f57eeeb76fb840b158c58f28052c1fd526eee1",
+      "backend/evaluation/generate_benchmark_data.py": "c830b0eb616b7ca172df5a41ac0f4e17438460e3be86a8154f82d0990c63328c",
+      "backend/evaluation/review.py": "e12a43ba58a1273edb5ccd24da4da253aaa4bb11a7106f5ba9c3a51fee443ba7",
+      "backend/evaluation/runner.py": "5568c2ce7e7a56a1ed26545080cca93d1c9cf56b7e689e735895b942366e4b34",
+      "backend/evaluation/runtime.py": "79be4867c275dabe388fabb9434aa9fe50fcc748f52adc2adc5dbeb5ebaf007d",
+      "backend/evaluation/safe_run.py": "2f5e8461ec8c5f6f7959bdc59dc5418732c1e96898cad07eeba750c990878e2b",
+      "backend/evaluation/scenarios.py": "0592078816e063c072be297b628561858c3320f4910ea33d4e45fbed61461c56",
+      "backend/evaluation/supplement.py": "045ff22b6ed75d582ae2babd8bb9e7a4e011f20056b5af73e86d9b7d86553651",
+      "backend/evaluation/usage.py": "b517195cedae425c427adf731f2863f00905e29b033f13fae044db5ffa466ca8",
+      "backend/evaluation/baseline.json": "d959add9aca86a66a5abde84d88e1da942c81e4669efd94d0408197cf8200f48",
+      "backend/evaluation/safety_cases.json": "d3cd33af840ef4b60fe1bf6f4b13fae5a44b8e9c154e4797c94e9364e264af6b",
+      "backend/evaluation/datasets/agent_tasks.jsonl": "88370844dd867e9c99c121ff284a0280ba40060e95549ed66cd85719a37a462e",
+      "backend/evaluation/datasets/deployment_cases.jsonl": "89a5f7be4269f9420dfef8bfba7fb3473e7256f8ec905e873595928ef0db7609",
+      "backend/evaluation/datasets/faithfulness.jsonl": "558a56bcb2826903e0b4e22dd06b7cb37d2af035475c6a868cf47ee0520db9d7",
+      "backend/evaluation/datasets/performance.jsonl": "5be8da55f07c8f9f1cdf2102ef5d26a64bc27c40a40512d7ebc1069c8588cb49",
+      "backend/evaluation/datasets/quality.jsonl": "f50d4bf0a6278e50ec221819921d44c99deda93971b0bece380f1f65edd2e549",
+      "backend/evaluation/datasets/rag_golden.jsonl": "26e73ae158b32b09a3cabb6b4d079a88412fda8754d9141ca6b8250a6ec6c6f4",
+      "backend/evaluation/datasets/router.jsonl": "d3a74cde95d49b6c47c3cc25b5887f80b903f2a521773eba3f0e9652546de019",
+      "backend/evaluation/datasets/safety_e2e.jsonl": "3bbbb92d1c34163782ce4134b3be8b5571bdf13ee22e806fd357f1b940ed2a44",
+      "backend/evaluation/datasets/safety_pairs.jsonl": "93c680c9c4b6728e1d370f84acdf4dac27f0ee7e28644b5df9060076d37f96ab",
+      "backend/evaluation/datasets/scenarios.jsonl": "dbbccb10f25ffa0cda2116f0b96083ae9d87ab31268950689f8e600b5c7a13b4",
+      "backend/data_pipeline/__init__.py": "82e51f31275d02ce9034f294743e732564028947ff0af174e17b3c46b2f8289b",
+      "backend/data_pipeline/base.py": "5bde0c90f6c878f27f025993d304a0247bd0534fd778b0ad7551f78fe9a049ab",
+      "backend/data_pipeline/chunkers/__init__.py": "a19adae8ce8febba1ae64ea769929c13993a3166ef11385621aa6eaf1d6deeaf",
+      "backend/data_pipeline/chunkers/jingui.py": "7d8dfc55410fa842d6a4fbd31f51df7c539fa7d7fbb24763b70fec948ef57a74",
+      "backend/data_pipeline/chunkers/maijing.py": "932fb2e7bef270cf811b48a0b7291e00cbab41f7f67fefddf6ad6b50b5d6d6dd",
+      "backend/data_pipeline/chunkers/registry.py": "aeb942ccd862d8d3139d812aa44d416fad537b4bcaef7cf8d01ec9a5b7a74ec8",
+      "backend/data_pipeline/chunkers/shanghan.py": "06958d0b4624e59dabd0fcf6d08a27024f4ab07a92ddcc307f1ebae34b6c90dd",
+      "backend/data_pipeline/chunkers/shennong.py": "0c17527506fbcfa1ecad30a2552d29d30ceaa2dfccd8e97bfc404107a30dcf28",
+      "backend/data_pipeline/chunkers/suwen.py": "f2bf8f438599a1f7839f0f7799c6b8c3b348b5c3dd9eccd10a954d26a298e80e",
+      "backend/data_pipeline/chunkers/wenbing.py": "ee49e63d1db0b3c693faf9a294fee28d36fcec28c9f61c86aeec3e367f32710a",
+      "backend/data_pipeline/cleaners.py": "57414b2b006a5ca3a0e655515e305c343b4c7a7310b12618774720515c2347aa",
+      "backend/data_pipeline/ingest.py": "98de50a1baabe5d0c7f0b5ab8c185629a3ab9ec31d04c4519b97b7f9abcf9f3e",
+      "backend/data_pipeline/seed_knowledge.py": "88342e02aeaa38cfcae48b7103c5666c86cf4653b690c581c49c996556ad7640",
+      "backend/resources/classics_segments/伤寒论.json": "23e9972eeb5d06981e86ffcf129074963337f46434423d33b70d413a2ea9926c",
+      "backend/resources/classics_segments/温病条辨.json": "6b3dfc8f157495da946170842d5ca6916f561fe862c47ce966ccf01d1573ac62",
+      "backend/resources/classics_segments/神农本草经.json": "f36fc3601b65dc569217f4747dd47dc0e36ea5b56daea7721d2f5effefd9703e",
+      "backend/resources/classics_segments/脉经.json": "5ac4770311db4185e18f171450c3dce9a6ae6f8c2bb968104b2c7464bd49b791",
+      "backend/resources/classics_segments/金匮要略.json": "77f092e198afefea4e074a6fed80060a39d619be4f872c0042855cb8217a834b",
+      "backend/resources/classics_segments/黄帝内经-素问.json": "c18760be82e9df40e156c45306d1194b6a3e6d1e42644c2d623f4c5680b98596",
+      "backend/resources/knowledge_seed.json": "0f24ed02620aa6082bef9939d51c28574e6808069ffa0270470a28a4dc17e921",
+      "backend/resources/symptom_terms.json": "6987f9a89ef56b4a8c8edaff304f2a60a7b8928276e44c095e326e876d28b5c9",
+      "backend/resources/classics_source/伤寒论.txt": "2f2033f6c89eda8bbd9562db68b31fd75ec4243fc7cae3fb89c20021e1d1eca4",
+      "backend/resources/classics_source/温病条辨.txt": "490f80ed5bc403383a78d3e9811fd2218323216ead763d1dc4de39cfd77bbabd",
+      "backend/resources/classics_source/神农本草经.txt": "9a4127f3d43b86ed1fa659dbf23ca341c89c56d7cec925d4a66e24265b959126",
+      "backend/resources/classics_source/脉经.txt": "4e39486ac86a59f64bb10cacf2dbad6f3c12ed81810bbfaf147dee63c64878de",
+      "backend/resources/classics_source/金匮要略.txt": "c771527546ed68cae8cad0a8f24b71a15c83ca6f292aaa6a5c7833f05c7fca99",
+      "backend/resources/classics_source/黄帝内经-素问.txt": "e557a543c05e0e5daaabd0e9b5ada387861513e9a118fad2ac7684403d9682bf",
+      "frontend/src/components/chat/__tests__/ChatWindow.test.ts": "f6e86a4254363b2fa1cae85d65aef7ce94155ceb8271f2fbbe14ee84b052814d",
+      "frontend/src/hooks/__tests__/useChat.test.ts": "c53f658f8ae0eca0dd6bebbb0ef8e15186c2e40521338ee86e96dbb73eff4b36",
+      "frontend/src/hooks/useChat.ts": "f8fa3b49e4d3efcc204c084f6b10fa4d0d7c331ebd2dc7c5670e120369d49d4a",
+      "frontend/src/lib/__tests__/backend-contract.test.ts": "69bddf80a0e62e99916e90ec35f2ef37c3732bc81f19165c8d6cccbc5852170b",
+      "frontend/src/lib/__tests__/stream.test.ts": "be50aee2cb0c5cdcfec47f1270e2a346ef2f1daaaf67c3a90444f33907609ff8",
+      "frontend/src/lib/__tests__/utils.test.ts": "8f70f814590fedb9790844b6eabb8b4ec6fcde412daa4afa14f49554a2d063ca",
+      "frontend/src/lib/api.ts": "062231c7fbd327f148f06e6ab108d5b8411d8d0462a83d4a2459610809350b4b",
+      "frontend/src/lib/backend-contract.ts": "ec6b64bc2e3c3fe96bd14ab0eadb1a320709d94df2d73c81143a714cb56316e8",
+      "frontend/src/lib/stream.ts": "e4b1b8a7e86df0d7217575f183ce07288416fd76fe6c9c9027d9816b6b0e63fc",
+      "frontend/src/lib/types.ts": "f9ea6b2519abbd028e46b4ebf26dab185520480c6b5c383a13f0ea8bedb794aa",
+      "frontend/src/lib/utils.ts": "7c8c3dfc0cdd370d44932828eb067ef771c8fe7996693221d5d4b90af6d54f2d",
+      "frontend/src/stores/__tests__/auth.test.ts": "4b6278c78485cb03bde3bdea728215a92b7ac5e35b7cad5f4a96d901907b0023",
+      "frontend/src/stores/auth.ts": "31a30c9ef2d18a42186afc54f41be2dbe4c0ff792b3f035f138dfe658f2b6592",
+      "frontend/src/test/setup.ts": "9b328c4843431fa76d8de00008fc159e95f99a840211085ff3b8f25e53d14409",
+      "frontend/src/app/chat/[threadId]/page.tsx": "e3f8d17afeef368c600344cce0d267cf3df58d3029c13f8dc78c04ac4ab02008",
+      "frontend/src/app/chat/layout.tsx": "44cbb20f4ea0c26d00748830cded6fde47efc831e09fd435bacb5fb13968d6f3",
+      "frontend/src/app/chat/page.tsx": "8573c0b5a0cc23b61b6785bc91289e93d4c65d7d49748157b7d243492c087ff8",
+      "frontend/src/app/layout.tsx": "7cc4aa10dad1be4e000b76ee18abc00a96e0896b006d3ae84a53e79548dec10a",
+      "frontend/src/app/login/__tests__/page.test.tsx": "ad046cf48c13c097fa2141a9614556c0975f46bdb981ff14f91a3f3e575ccae6",
+      "frontend/src/app/login/page.tsx": "b2286b0d07ee38d33b9014140c03767fa4af63ab289c1b6417b562f480965ce9",
+      "frontend/src/app/page.tsx": "c557dad748010eaae0a30abe857b15863128f897e9df56085782cf5c0930726e",
+      "frontend/src/components/__tests__/providers.test.tsx": "fdb8e0d10e1377bc80058921c3ce2d4c9a6ae3700bee3c29ab2343259217dc52",
+      "frontend/src/components/chat/__tests__/ConsultationTrace.test.tsx": "bd0027fb5c73a44e7b6457a6283a507cb29ab96a3131918c6ba1d6fb4ebf75e6",
+      "frontend/src/components/chat/__tests__/MessageBubble.test.tsx": "3978ee845356b52f296f92c5e625344019b04019068c3771e9eaeece10849b66",
+      "frontend/src/components/chat/__tests__/PrescriptionCard.test.tsx": "7815e9a6d2f5172631a82239a328bcac30c127fb1deb370aaf49f07c270b0ef5",
+      "frontend/src/components/chat/__tests__/ProfileSuggestions.test.tsx": "ef92b27ca90d7a07c596da8996a6ebcb3b8c798cf558451649276d0cb24c4377",
+      "frontend/src/components/chat/ChatWindow.tsx": "9c961abda61d6ea840e8d37a79d077fca03a712f07033ae805a2d63d476ed5c6",
+      "frontend/src/components/chat/ConsultationTrace.tsx": "1c987b5a831a619374bca3d46ba511b5e62824c12bedb9982e33d3a93dc6e4a4",
+      "frontend/src/components/chat/MessageBubble.tsx": "890b6572924282581ac31f61672f2de55389b93cd0378cd1e23f22d95885564f",
+      "frontend/src/components/chat/PrescriptionCard.tsx": "94ab11605a38e19254c71512788985cfb4cc1c6f9743132b17d435dc2ba2a2dd",
+      "frontend/src/components/chat/ProfileFacts.tsx": "66081d23ceda111bb361e3736964fc15d8de96f0819d3b71c4383f80eb9b042a",
+      "frontend/src/components/chat/ProfileSuggestions.tsx": "c92bb70410b7989718b5bca8c21fefa6342b58c387114df492ee42004cb3c678",
+      "frontend/src/components/layout/AppShell.tsx": "faf60729ca51df4ad5515eaa7dc69386d4d069b28920f60772e628c229d5490c",
+      "frontend/src/components/providers.tsx": "ccdcb6e48617a674acc753e4315e55bd23f78c5cb5ab0b1c4a8fb897d8160f90",
+      "frontend/src/components/ui/avatar.tsx": "357b2f9aac0192c071cb2ed65cb6e4c8ec01fa02fc15cf50d889b85731b75666",
+      "frontend/src/components/ui/badge.tsx": "968b0403af74a785c9408ca69a677235e49d0c80b2c27fb9858ad421a8778c7d",
+      "frontend/src/components/ui/button.tsx": "d14549ab3ba7a9d5d1f424c2599233bffa0b317121abf3b6efa2fb902d5e2781",
+      "frontend/src/components/ui/card.tsx": "d8113cbf964f8d1aadf2649d2944d8bbc6e3cfd49d36746f76868cbc4dde3cfe",
+      "frontend/src/components/ui/collapsible.tsx": "f449506d78c32d107b127419fef75e064b642157d04b95bbc655dceb2babf31e",
+      "frontend/src/components/ui/dialog.tsx": "ccabf6cc674a68b09d9168904bb46b7c1075a67312cf6f51f3e38b8eeacd2fdb",
+      "frontend/src/components/ui/dropdown-menu.tsx": "1c1ae4ec02de9778286f84e0d15a1b74cc610c13c5b6a13c1ada2e6770eeb4e1",
+      "frontend/src/components/ui/input.tsx": "f7d6ecff9a4d631feeaf401c02bb87e26ddb38131c55d15a43b9290747390847",
+      "frontend/src/components/ui/scroll-area.tsx": "42de3962daca60255bf1d3cd90bd3c038db73a3ed61ecaac6cffc6a153181e4a",
+      "frontend/src/components/ui/separator.tsx": "75085bd84ff6965e4a356c53a4689799cabf65caa93c0bba064d5a0c6fa78f13",
+      "frontend/src/components/ui/sonner.tsx": "2dd975ad2170ba2570b00e58713dcbda90f26a7fffdaceb1ef7255f450c2d2a6",
+      "frontend/src/components/ui/tabs.tsx": "8bf9ee3935ab86c268a2a71cb5b4b67d3d5587ca9f2e0bf25f37ffdb1980434c",
+      "frontend/src/components/ui/textarea.tsx": "58b58d84fc54ba5f4ca46937870c619349fd9eccc4d494250ac7bc73a94e05e9",
+      "frontend/src/app/globals.css": "fc99ad2fa662bd5e1f04a60ad2af21b896a87c32718a2b069c9c231f17eadb06",
+      "backend/Dockerfile": "3b2c76683d5e2f2eba0092b63c22d77c02d8f2a965b6be1074a9832dfffa1b11",
+      "frontend/Dockerfile": "9f68aad18d7961dbd9738341c792f4594322bac35855d1f359b179b8cdb75442",
+      "backend/requirements.lock.txt": "2856a333d0a525d5bf34997d911d51de42191d885bdfa51fe742930644c49c41",
+      "backend/requirements.rerank.txt": "b5a9af0915c5af6559aa3bcfb15d9084a1b6162bdbd3ca403f68e8b2f908d7b6",
+      "frontend/package-lock.json": "ee3c9bc2f1a1c32caab85f45aca9156d5a7a2da0a346ad46e3a9cff43f74ba1e",
+      "frontend/next.config.ts": "4ce93ef376159dd9b76b8f8eac0229e723bbd638a8367489b151e4628307967e",
+      ".github/workflows/ci.yml": "18a9a120d9601b975090ed39fa08d1053ca35de197c079e55712755e17fe391e"
+    },
+    "workspace_sha256": "35065769070cb73e5eccf811fd13b99544baf8c230cbbe568700a8ccc6119356",
+    "public_settings": {
+      "QIWEN_MODEL_NAME": "",
+      "QIWEN_MODEL_MODE": "openai_compatible",
+      "QIWEN_RAG_MODE": "bm25",
+      "QIWEN_RAG_RERANK_MODE": "none",
+      "QIWEN_EMBEDDING_MODEL": "text-embedding-3-small",
+      "QIWEN_CROSS_ENCODER_MODEL": "BAAI/bge-reranker-v2-m3",
+      "QIWEN_CROSS_ENCODER_REVISION": null,
+      "QIWEN_MMR_EMBEDDING_MODEL": "BAAI/bge-small-zh-v1.5",
+      "QIWEN_MMR_EMBEDDING_REVISION": null,
+      "QIWEN_RAG_MMR_LAMBDA": "0.7",
+      "QIWEN_MODEL_CONTEXT_LIMIT": null,
+      "QIWEN_MODEL_OUTPUT_RESERVE": null,
+      "QIWEN_JUDGE_MODEL": null,
+      "QIWEN_RAG_RECALL_K": null,
+      "QIWEN_RAG_CANDIDATES": null,
+      "QIWEN_CROSS_ENCODER_MAX_LENGTH": null,
+      "QIWEN_RAG_TOTAL_TIMEOUT": null,
+      "QIWEN_CROSS_ENCODER_BATCH_SIZE": null,
+      "QIWEN_LOCAL_MODEL_THREADS": null,
+      "QIWEN_RAG_MMR_EMBEDDING_BACKEND": "local",
+      "QIWEN_CROSS_ENCODER_TIMEOUT": null,
+      "QIWEN_MODEL_TIMEOUT": null,
+      "QIWEN_MODEL_RETRIES": null,
+      "QIWEN_MODEL_INQUIRY_TIMEOUT": null,
+      "QIWEN_MODEL_INQUIRY_RETRIES": null,
+      "QIWEN_MODEL_INQUIRY_CONTEXT_LIMIT": null,
+      "QIWEN_MODEL_INQUIRY_OUTPUT_RESERVE": null,
+      "QIWEN_MODEL_KNOWLEDGE_TIMEOUT": null,
+      "QIWEN_MODEL_KNOWLEDGE_RETRIES": null,
+      "QIWEN_MODEL_KNOWLEDGE_CONTEXT_LIMIT": null,
+      "QIWEN_MODEL_KNOWLEDGE_OUTPUT_RESERVE": null,
+      "QIWEN_MODEL_SAFETY_PREFLIGHT_TIMEOUT": null,
+      "QIWEN_MODEL_SAFETY_PREFLIGHT_RETRIES": null,
+      "QIWEN_MODEL_SAFETY_PREFLIGHT_CONTEXT_LIMIT": null,
+      "QIWEN_MODEL_SAFETY_PREFLIGHT_OUTPUT_RESERVE": null,
+      "QIWEN_MODEL_PROFILE_EXTRACTION_TIMEOUT": null,
+      "QIWEN_MODEL_PROFILE_EXTRACTION_RETRIES": null,
+      "QIWEN_MODEL_PROFILE_EXTRACTION_CONTEXT_LIMIT": null,
+      "QIWEN_MODEL_PROFILE_EXTRACTION_OUTPUT_RESERVE": null,
+      "QIWEN_MODEL_QUERY_REWRITE_TIMEOUT": null,
+      "QIWEN_MODEL_QUERY_REWRITE_RETRIES": null,
+      "QIWEN_MODEL_QUERY_REWRITE_CONTEXT_LIMIT": null,
+      "QIWEN_MODEL_QUERY_REWRITE_OUTPUT_RESERVE": null,
+      "QIWEN_MODEL_BIANZHENG_TIMEOUT": null,
+      "QIWEN_MODEL_BIANZHENG_RETRIES": null,
+      "QIWEN_MODEL_BIANZHENG_CONTEXT_LIMIT": null,
+      "QIWEN_MODEL_BIANZHENG_OUTPUT_RESERVE": null,
+      "QIWEN_MODEL_FORMULA_TIMEOUT": null,
+      "QIWEN_MODEL_FORMULA_RETRIES": null,
+      "QIWEN_MODEL_FORMULA_CONTEXT_LIMIT": null,
+      "QIWEN_MODEL_FORMULA_OUTPUT_RESERVE": null,
+      "QIWEN_MODEL_HERB_TIMEOUT": null,
+      "QIWEN_MODEL_HERB_RETRIES": null,
+      "QIWEN_MODEL_HERB_CONTEXT_LIMIT": null,
+      "QIWEN_MODEL_HERB_OUTPUT_RESERVE": null,
+      "QIWEN_MODEL_SYNTHESIS_TIMEOUT": null,
+      "QIWEN_MODEL_SYNTHESIS_RETRIES": null,
+      "QIWEN_MODEL_SYNTHESIS_CONTEXT_LIMIT": null,
+      "QIWEN_MODEL_SYNTHESIS_OUTPUT_RESERVE": null,
+      "QIWEN_MODEL_REVIEWER_TIMEOUT": null,
+      "QIWEN_MODEL_REVIEWER_RETRIES": null,
+      "QIWEN_MODEL_REVIEWER_CONTEXT_LIMIT": null,
+      "QIWEN_MODEL_REVIEWER_OUTPUT_RESERVE": null
+    },
+    "provider_fingerprints": {
+      "application": "659c5407a37e40b51f9defb5a460de27b52f1017f909dd1f4476a664f3372812",
+      "judge": null
+    },
+    "roles": {
+      "inquiry": "",
+      "knowledge": "",
+      "safety_preflight": "",
+      "profile_extraction": "",
+      "query_rewrite": "",
+      "bianzheng": "",
+      "formula": "",
+      "herb": "",
+      "synthesis": "",
+      "reviewer": ""
+    },
+    "python": "3.12.14",
+    "platform": "Windows",
+    "data_policy": "isolated_synthetic_only"
+  },
+  "dataset_audit": {
+    "status": "passed",
+    "errors": [],
+    "files": {
+      "agent_tasks.jsonl": {
+        "count": 8,
+        "sha256": "88370844dd867e9c99c121ff284a0280ba40060e95549ed66cd85719a37a462e"
+      },
+      "deployment_cases.jsonl": {
+        "count": 5,
+        "sha256": "89a5f7be4269f9420dfef8bfba7fb3473e7256f8ec905e873595928ef0db7609"
+      },
+      "faithfulness.jsonl": {
+        "count": 30,
+        "sha256": "558a56bcb2826903e0b4e22dd06b7cb37d2af035475c6a868cf47ee0520db9d7"
+      },
+      "performance.jsonl": {
+        "count": 30,
+        "sha256": "5be8da55f07c8f9f1cdf2102ef5d26a64bc27c40a40512d7ebc1069c8588cb49"
+      },
+      "quality.jsonl": {
+        "count": 35,
+        "sha256": "f50d4bf0a6278e50ec221819921d44c99deda93971b0bece380f1f65edd2e549"
+      },
+      "rag_golden.jsonl": {
+        "count": 47,
+        "sha256": "26e73ae158b32b09a3cabb6b4d079a88412fda8754d9141ca6b8250a6ec6c6f4"
+      },
+      "router.jsonl": {
+        "count": 30,
+        "sha256": "d3a74cde95d49b6c47c3cc25b5887f80b903f2a521773eba3f0e9652546de019"
+      },
+      "safety_e2e.jsonl": {
+        "count": 30,
+        "sha256": "3bbbb92d1c34163782ce4134b3be8b5571bdf13ee22e806fd357f1b940ed2a44"
+      },
+      "safety_pairs.jsonl": {
+        "count": 20,
+        "sha256": "93c680c9c4b6728e1d370f84acdf4dac27f0ee7e28644b5df9060076d37f96ab"
+      },
+      "scenarios.jsonl": {
+        "count": 33,
+        "sha256": "dbbccb10f25ffa0cda2116f0b96083ae9d87ab31268950689f8e600b5c7a13b4"
+      }
+    },
+    "unique_families": 268,
+    "duplicate_prompt_groups": [
+      [
+        {
+          "file": "agent_tasks.jsonl",
+          "id": "TASK-001",
+          "split": "development",
+          "family": "agent_tasks-TASK-001"
+        },
+        {
+          "file": "deployment_cases.jsonl",
+          "id": "DEPLOY-001",
+          "split": "development",
+          "family": "deploy-greeting"
+        },
+        {
+          "file": "performance.jsonl",
+          "id": "PERF-001",
+          "split": "development",
+          "family": "performance-PERF-001"
+        },
+        {
+          "file": "router.jsonl",
+          "id": "ROUTE-001",
+          "split": "development",
+          "family": "router-ROUTE-001"
+        },
+        {
+          "file": "scenarios.jsonl",
+          "id": "SC-033",
+          "split": "development",
+          "family": "thread_delete_consistency"
+        }
+      ],
+      [
+        {
+          "file": "agent_tasks.jsonl",
+          "id": "TASK-003",
+          "split": "development",
+          "family": "agent_tasks-TASK-003"
+        },
+        {
+          "file": "scenarios.jsonl",
+          "id": "SC-012",
+          "split": "development",
+          "family": "denial_preservation"
+        }
+      ],
+      [
+        {
+          "file": "agent_tasks.jsonl",
+          "id": "TASK-003",
+          "split": "development",
+          "family": "agent_tasks-TASK-003"
+        },
+        {
+          "file": "scenarios.jsonl",
+          "id": "SC-012",
+          "split": "development",
+          "family": "denial_preservation"
+        }
+      ],
+      [
+        {
+          "file": "deployment_cases.jsonl",
+          "id": "DEPLOY-002",
+          "split": "development",
+          "family": "deploy-knowledge"
+        },
+        {
+          "file": "scenarios.jsonl",
+          "id": "SC-002",
+          "split": "development",
+          "family": "knowledge_profile_exclusion"
+        },
+        {
+          "file": "scenarios.jsonl",
+          "id": "SC-003",
+          "split": "development",
+          "family": "knowledge_topic_continuation"
+        },
+        {
+          "file": "scenarios.jsonl",
+          "id": "SC-016",
+          "split": "development",
+          "family": "thread_topic_isolation"
+        }
+      ],
+      [
+        {
+          "file": "deployment_cases.jsonl",
+          "id": "DEPLOY-003",
+          "split": "development",
+          "family": "deploy-clinical"
+        },
+        {
+          "file": "performance.jsonl",
+          "id": "PERF-016",
+          "split": "development",
+          "family": "performance-PERF-016"
+        },
+        {
+          "file": "router.jsonl",
+          "id": "ROUTE-019",
+          "split": "development",
+          "family": "router-ROUTE-019"
+        }
+      ],
+      [
+        {
+          "file": "faithfulness.jsonl",
+          "id": "FA-001",
+          "split": "development",
+          "family": "faithfulness-FA-001"
+        },
+        {
+          "file": "rag_golden.jsonl",
+          "id": "RAG-001",
+          "split": "development",
+          "family": "rag_golden-RAG-001"
+        }
+      ],
+      [
+        {
+          "file": "faithfulness.jsonl",
+          "id": "FA-002",
+          "split": "development",
+          "family": "faithfulness-FA-002"
+        },
+        {
+          "file": "rag_golden.jsonl",
+          "id": "RAG-002",
+          "split": "development",
+          "family": "rag_golden-RAG-002"
+        }
+      ],
+      [
+        {
+          "file": "faithfulness.jsonl",
+          "id": "FA-003",
+          "split": "development",
+          "family": "faithfulness-FA-003"
+        },
+        {
+          "file": "rag_golden.jsonl",
+          "id": "RAG-003",
+          "split": "development",
+          "family": "rag_golden-RAG-003"
+        }
+      ],
+      [
+        {
+          "file": "faithfulness.jsonl",
+          "id": "FA-004",
+          "split": "development",
+          "family": "faithfulness-FA-004"
+        },
+        {
+          "file": "rag_golden.jsonl",
+          "id": "RAG-004",
+          "split": "development",
+          "family": "rag_golden-RAG-004"
+        }
+      ],
+      [
+        {
+          "file": "faithfulness.jsonl",
+          "id": "FA-005",
+          "split": "development",
+          "family": "faithfulness-FA-005"
+        },
+        {
+          "file": "rag_golden.jsonl",
+          "id": "RAG-005",
+          "split": "development",
+          "family": "rag_golden-RAG-005"
+        }
+      ],
+      [
+        {
+          "file": "faithfulness.jsonl",
+          "id": "FA-006",
+          "split": "development",
+          "family": "faithfulness-FA-006"
+        },
+        {
+          "file": "rag_golden.jsonl",
+          "id": "RAG-006",
+          "split": "development",
+          "family": "rag_golden-RAG-006"
+        }
+      ],
+      [
+        {
+          "file": "faithfulness.jsonl",
+          "id": "FA-007",
+          "split": "development",
+          "family": "faithfulness-FA-007"
+        },
+        {
+          "file": "rag_golden.jsonl",
+          "id": "RAG-007",
+          "split": "development",
+          "family": "rag_golden-RAG-007"
+        }
+      ],
+      [
+        {
+          "file": "faithfulness.jsonl",
+          "id": "FA-008",
+          "split": "development",
+          "family": "faithfulness-FA-008"
+        },
+        {
+          "file": "rag_golden.jsonl",
+          "id": "RAG-008",
+          "split": "development",
+          "family": "rag_golden-RAG-008"
+        }
+      ],
+      [
+        {
+          "file": "faithfulness.jsonl",
+          "id": "FA-009",
+          "split": "development",
+          "family": "faithfulness-FA-009"
+        },
+        {
+          "file": "rag_golden.jsonl",
+          "id": "RAG-009",
+          "split": "development",
+          "family": "rag_golden-RAG-009"
+        }
+      ],
+      [
+        {
+          "file": "faithfulness.jsonl",
+          "id": "FA-010",
+          "split": "development",
+          "family": "faithfulness-FA-010"
+        },
+        {
+          "file": "rag_golden.jsonl",
+          "id": "RAG-010",
+          "split": "development",
+          "family": "rag_golden-RAG-010"
+        }
+      ],
+      [
+        {
+          "file": "faithfulness.jsonl",
+          "id": "FA-011",
+          "split": "development",
+          "family": "faithfulness-FA-011"
+        },
+        {
+          "file": "rag_golden.jsonl",
+          "id": "RAG-011",
+          "split": "development",
+          "family": "rag_golden-RAG-011"
+        }
+      ],
+      [
+        {
+          "file": "faithfulness.jsonl",
+          "id": "FA-012",
+          "split": "development",
+          "family": "faithfulness-FA-012"
+        },
+        {
+          "file": "rag_golden.jsonl",
+          "id": "RAG-012",
+          "split": "development",
+          "family": "rag_golden-RAG-012"
+        }
+      ],
+      [
+        {
+          "file": "faithfulness.jsonl",
+          "id": "FA-013",
+          "split": "development",
+          "family": "faithfulness-FA-013"
+        },
+        {
+          "file": "rag_golden.jsonl",
+          "id": "RAG-013",
+          "split": "development",
+          "family": "rag_golden-RAG-013"
+        }
+      ],
+      [
+        {
+          "file": "faithfulness.jsonl",
+          "id": "FA-014",
+          "split": "development",
+          "family": "faithfulness-FA-014"
+        },
+        {
+          "file": "rag_golden.jsonl",
+          "id": "RAG-014",
+          "split": "development",
+          "family": "rag_golden-RAG-014"
+        }
+      ],
+      [
+        {
+          "file": "faithfulness.jsonl",
+          "id": "FA-015",
+          "split": "development",
+          "family": "faithfulness-FA-015"
+        },
+        {
+          "file": "rag_golden.jsonl",
+          "id": "RAG-015",
+          "split": "development",
+          "family": "rag_golden-RAG-015"
+        }
+      ],
+      [
+        {
+          "file": "faithfulness.jsonl",
+          "id": "FA-016",
+          "split": "development",
+          "family": "faithfulness-FA-016"
+        },
+        {
+          "file": "rag_golden.jsonl",
+          "id": "RAG-016",
+          "split": "development",
+          "family": "rag_golden-RAG-016"
+        }
+      ],
+      [
+        {
+          "file": "faithfulness.jsonl",
+          "id": "FA-017",
+          "split": "development",
+          "family": "faithfulness-FA-017"
+        },
+        {
+          "file": "rag_golden.jsonl",
+          "id": "RAG-017",
+          "split": "development",
+          "family": "rag_golden-RAG-017"
+        }
+      ],
+      [
+        {
+          "file": "faithfulness.jsonl",
+          "id": "FA-018",
+          "split": "development",
+          "family": "faithfulness-FA-018"
+        },
+        {
+          "file": "rag_golden.jsonl",
+          "id": "RAG-018",
+          "split": "development",
+          "family": "rag_golden-RAG-018"
+        }
+      ],
+      [
+        {
+          "file": "faithfulness.jsonl",
+          "id": "FA-019",
+          "split": "development",
+          "family": "faithfulness-FA-019"
+        },
+        {
+          "file": "rag_golden.jsonl",
+          "id": "RAG-019",
+          "split": "development",
+          "family": "rag_golden-RAG-019"
+        }
+      ],
+      [
+        {
+          "file": "faithfulness.jsonl",
+          "id": "FA-020",
+          "split": "development",
+          "family": "faithfulness-FA-020"
+        },
+        {
+          "file": "rag_golden.jsonl",
+          "id": "RAG-020",
+          "split": "development",
+          "family": "rag_golden-RAG-020"
+        }
+      ],
+      [
+        {
+          "file": "faithfulness.jsonl",
+          "id": "FA-021",
+          "split": "development",
+          "family": "faithfulness-FA-021"
+        },
+        {
+          "file": "rag_golden.jsonl",
+          "id": "RAG-021",
+          "split": "development",
+          "family": "rag_golden-RAG-021"
+        }
+      ],
+      [
+        {
+          "file": "faithfulness.jsonl",
+          "id": "FA-022",
+          "split": "development",
+          "family": "faithfulness-FA-022"
+        },
+        {
+          "file": "rag_golden.jsonl",
+          "id": "RAG-022",
+          "split": "development",
+          "family": "rag_golden-RAG-022"
+        }
+      ],
+      [
+        {
+          "file": "faithfulness.jsonl",
+          "id": "FA-023",
+          "split": "development",
+          "family": "faithfulness-FA-023"
+        },
+        {
+          "file": "rag_golden.jsonl",
+          "id": "RAG-023",
+          "split": "development",
+          "family": "rag_golden-RAG-023"
+        }
+      ],
+      [
+        {
+          "file": "faithfulness.jsonl",
+          "id": "FA-024",
+          "split": "development",
+          "family": "faithfulness-FA-024"
+        },
+        {
+          "file": "rag_golden.jsonl",
+          "id": "RAG-024",
+          "split": "development",
+          "family": "rag_golden-RAG-024"
+        }
+      ],
+      [
+        {
+          "file": "faithfulness.jsonl",
+          "id": "FA-025",
+          "split": "development",
+          "family": "faithfulness-FA-025"
+        },
+        {
+          "file": "rag_golden.jsonl",
+          "id": "RAG-025",
+          "split": "development",
+          "family": "rag_golden-RAG-025"
+        }
+      ],
+      [
+        {
+          "file": "faithfulness.jsonl",
+          "id": "FA-026",
+          "split": "development",
+          "family": "faithfulness-FA-026"
+        },
+        {
+          "file": "rag_golden.jsonl",
+          "id": "RAG-026",
+          "split": "development",
+          "family": "rag_golden-RAG-026"
+        }
+      ],
+      [
+        {
+          "file": "faithfulness.jsonl",
+          "id": "FA-027",
+          "split": "development",
+          "family": "faithfulness-FA-027"
+        },
+        {
+          "file": "rag_golden.jsonl",
+          "id": "RAG-027",
+          "split": "development",
+          "family": "rag_golden-RAG-027"
+        }
+      ],
+      [
+        {
+          "file": "faithfulness.jsonl",
+          "id": "FA-028",
+          "split": "development",
+          "family": "faithfulness-FA-028"
+        },
+        {
+          "file": "rag_golden.jsonl",
+          "id": "RAG-028",
+          "split": "development",
+          "family": "rag_golden-RAG-028"
+        }
+      ],
+      [
+        {
+          "file": "faithfulness.jsonl",
+          "id": "FA-029",
+          "split": "development",
+          "family": "faithfulness-FA-029"
+        },
+        {
+          "file": "rag_golden.jsonl",
+          "id": "RAG-029",
+          "split": "development",
+          "family": "rag_golden-RAG-029"
+        }
+      ],
+      [
+        {
+          "file": "faithfulness.jsonl",
+          "id": "FA-030",
+          "split": "development",
+          "family": "faithfulness-FA-030"
+        },
+        {
+          "file": "rag_golden.jsonl",
+          "id": "RAG-030",
+          "split": "development",
+          "family": "rag_golden-RAG-030"
+        }
+      ],
+      [
+        {
+          "file": "performance.jsonl",
+          "id": "PERF-003",
+          "split": "development",
+          "family": "performance-PERF-003"
+        },
+        {
+          "file": "scenarios.jsonl",
+          "id": "SC-029",
+          "split": "development",
+          "family": "empty_knowledge_retrieval"
+        }
+      ],
+      [
+        {
+          "file": "performance.jsonl",
+          "id": "PERF-017",
+          "split": "development",
+          "family": "performance-PERF-017"
+        },
+        {
+          "file": "router.jsonl",
+          "id": "ROUTE-020",
+          "split": "development",
+          "family": "router-ROUTE-020"
+        },
+        {
+          "file": "scenarios.jsonl",
+          "id": "SC-014",
+          "split": "development",
+          "family": "thread_symptom_isolation"
+        },
+        {
+          "file": "scenarios.jsonl",
+          "id": "SC-018",
+          "split": "development",
+          "family": "unconfirmed_profile_not_persisted"
+        },
+        {
+          "file": "scenarios.jsonl",
+          "id": "SC-020",
+          "split": "development",
+          "family": "dismissed_profile_not_persisted"
+        },
+        {
+          "file": "scenarios.jsonl",
+          "id": "SC-021",
+          "split": "development",
+          "family": "revoked_profile_not_restored"
+        }
+      ],
+      [
+        {
+          "file": "performance.jsonl",
+          "id": "PERF-018",
+          "split": "development",
+          "family": "performance-PERF-018"
+        },
+        {
+          "file": "router.jsonl",
+          "id": "ROUTE-021",
+          "split": "development",
+          "family": "router-ROUTE-021"
+        }
+      ],
+      [
+        {
+          "file": "performance.jsonl",
+          "id": "PERF-019",
+          "split": "development",
+          "family": "performance-PERF-019"
+        },
+        {
+          "file": "router.jsonl",
+          "id": "ROUTE-022",
+          "split": "development",
+          "family": "router-ROUTE-022"
+        }
+      ],
+      [
+        {
+          "file": "performance.jsonl",
+          "id": "PERF-020",
+          "split": "development",
+          "family": "performance-PERF-020"
+        },
+        {
+          "file": "router.jsonl",
+          "id": "ROUTE-023",
+          "split": "development",
+          "family": "router-ROUTE-023"
+        }
+      ],
+      [
+        {
+          "file": "performance.jsonl",
+          "id": "PERF-021",
+          "split": "development",
+          "family": "performance-PERF-021"
+        },
+        {
+          "file": "router.jsonl",
+          "id": "ROUTE-024",
+          "split": "development",
+          "family": "router-ROUTE-024"
+        }
+      ],
+      [
+        {
+          "file": "performance.jsonl",
+          "id": "PERF-022",
+          "split": "development",
+          "family": "performance-PERF-022"
+        },
+        {
+          "file": "router.jsonl",
+          "id": "ROUTE-025",
+          "split": "development",
+          "family": "router-ROUTE-025"
+        }
+      ],
+      [
+        {
+          "file": "performance.jsonl",
+          "id": "PERF-023",
+          "split": "development",
+          "family": "performance-PERF-023"
+        },
+        {
+          "file": "router.jsonl",
+          "id": "ROUTE-026",
+          "split": "development",
+          "family": "router-ROUTE-026"
+        }
+      ],
+      [
+        {
+          "file": "performance.jsonl",
+          "id": "PERF-024",
+          "split": "development",
+          "family": "performance-PERF-024"
+        },
+        {
+          "file": "router.jsonl",
+          "id": "ROUTE-027",
+          "split": "development",
+          "family": "router-ROUTE-027"
+        }
+      ],
+      [
+        {
+          "file": "performance.jsonl",
+          "id": "PERF-025",
+          "split": "development",
+          "family": "performance-PERF-025"
+        },
+        {
+          "file": "router.jsonl",
+          "id": "ROUTE-028",
+          "split": "development",
+          "family": "router-ROUTE-028"
+        }
+      ],
+      [
+        {
+          "file": "performance.jsonl",
+          "id": "PERF-026",
+          "split": "development",
+          "family": "performance-PERF-026"
+        },
+        {
+          "file": "router.jsonl",
+          "id": "ROUTE-029",
+          "split": "development",
+          "family": "router-ROUTE-029"
+        }
+      ],
+      [
+        {
+          "file": "performance.jsonl",
+          "id": "PERF-027",
+          "split": "development",
+          "family": "performance-PERF-027"
+        },
+        {
+          "file": "router.jsonl",
+          "id": "ROUTE-030",
+          "split": "development",
+          "family": "router-ROUTE-030"
+        }
+      ],
+      [
+        {
+          "file": "router.jsonl",
+          "id": "ROUTE-011",
+          "split": "development",
+          "family": "router-ROUTE-011"
+        },
+        {
+          "file": "scenarios.jsonl",
+          "id": "SC-007",
+          "split": "development",
+          "family": "subject_privacy_skip"
+        }
+      ],
+      [
+        {
+          "file": "scenarios.jsonl",
+          "id": "SC-005",
+          "split": "development",
+          "family": "unknown_subject_gate"
+        },
+        {
+          "file": "scenarios.jsonl",
+          "id": "SC-006",
+          "split": "development",
+          "family": "subject_confirmation_resumes"
+        }
+      ],
+      [
+        {
+          "file": "scenarios.jsonl",
+          "id": "SC-010",
+          "split": "development",
+          "family": "subject_switch"
+        },
+        {
+          "file": "scenarios.jsonl",
+          "id": "SC-015",
+          "split": "development",
+          "family": "thread_attachment_isolation"
+        },
+        {
+          "file": "scenarios.jsonl",
+          "id": "SC-025",
+          "split": "development",
+          "family": "long_gap_episode_confirmation"
+        }
+      ],
+      [
+        {
+          "file": "scenarios.jsonl",
+          "id": "SC-011",
+          "split": "development",
+          "family": "duration_and_modifier"
+        },
+        {
+          "file": "scenarios.jsonl",
+          "id": "SC-013",
+          "split": "development",
+          "family": "symptom_correction"
+        },
+        {
+          "file": "scenarios.jsonl",
+          "id": "SC-032",
+          "split": "development",
+          "family": "account_history_isolation"
+        }
+      ],
+      [
+        {
+          "file": "scenarios.jsonl",
+          "id": "SC-015",
+          "split": "development",
+          "family": "thread_attachment_isolation"
+        },
+        {
+          "file": "scenarios.jsonl",
+          "id": "SC-017",
+          "split": "development",
+          "family": "manual_profile_cross_thread"
+        },
+        {
+          "file": "scenarios.jsonl",
+          "id": "SC-019",
+          "split": "development",
+          "family": "accepted_profile_cross_thread"
+        }
+      ],
+      [
+        {
+          "file": "scenarios.jsonl",
+          "id": "SC-017",
+          "split": "development",
+          "family": "manual_profile_cross_thread"
+        },
+        {
+          "file": "scenarios.jsonl",
+          "id": "SC-022",
+          "split": "development",
+          "family": "manual_profile_replacement"
+        },
+        {
+          "file": "scenarios.jsonl",
+          "id": "SC-023",
+          "split": "development",
+          "family": "profile_revision_conflict"
+        }
+      ],
+      [
+        {
+          "file": "scenarios.jsonl",
+          "id": "SC-018",
+          "split": "development",
+          "family": "unconfirmed_profile_not_persisted"
+        },
+        {
+          "file": "scenarios.jsonl",
+          "id": "SC-019",
+          "split": "development",
+          "family": "accepted_profile_cross_thread"
+        },
+        {
+          "file": "scenarios.jsonl",
+          "id": "SC-020",
+          "split": "development",
+          "family": "dismissed_profile_not_persisted"
+        },
+        {
+          "file": "scenarios.jsonl",
+          "id": "SC-021",
+          "split": "development",
+          "family": "revoked_profile_not_restored"
+        }
+      ]
+    ],
+    "similarity_scope": "exact_normalized_prompts; paraphrase_families_require_manual_review",
+    "frozen_ready": false
+  },
+  "created_at": "2026-10-11T13:13:09.056971+00:00",
+  "git_revision": "19c842ae330eb21947b1d8fb41e59d8f042a95e5",
+  "mode": "live_core",
+  "model_probe": {
+    "status": "blocked"
+  },
+  "dependencies": {
+    "status": "blocked",
+    "checks": {
+      "configuration": {
+        "status": "not_configured",
+        "missing": [
+          "QIWEN_MODEL_NAME",
+          "QIWEN_JUDGE_BASE_URL",
+          "QIWEN_JUDGE_API_KEY",
+          "QIWEN_JUDGE_MODEL"
+        ]
+      }
+    }
+  },
+  "gate": {
+    "status": "blocked",
+    "incomplete": [
+      "dependencies"
+    ],
+    "failures": []
+  },
+  "review_queue": [],
+  "release_gate": {
+    "status": "blocked",
+    "reason": "predeclared_policy_and_human_review_required"
+  }
+}

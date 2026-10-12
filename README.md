@@ -17,7 +17,9 @@ Invoke-RestMethod http://127.0.0.1:23000/api/health
 
 登录 → 创建或选择会话 → 编辑体质和过敏史 → 输入问题或附加文件 → 查看处理阶段与最终答复。支持带文本 PDF、DOCX、UTF-8 TXT，单文件最多 10 MB、单轮最多 5 个附件，不支持扫描 PDF OCR。会话可重命名、删除与重新打开，停止按钮会请求服务端取消。
 
-聊天默认 `mock`，新会话默认 `fixed`；`multi` 使用受限的辨证、方剂与本草 ReAct Agent，外层程序控制安全与最终提交。页面只展示 `answer.final` 确认的正文，未通过审查的候选不进入答复气泡。对话中提取的长期资料需用户在合并弹窗确认后保存，可查看来源与撤销。
+同一会话保留问诊事实、病程和待答问题，长间隔续问按需确认是否延续。跨会话仅参考本人手填或明确确认的用户画像，其他会话的症状、附件和自动摘要不进入回答。长期资料的查看与撤销沿用画像管理。
+
+聊天默认 `mock`，新会话默认 `fixed`；`multi` 使用由 LangGraph 子图编排的辨证、方剂与本草 Agent，外层程序控制安全与最终提交。页面只展示 `answer.final` 确认的正文，未通过审查的候选不进入答复气泡。对话中提取的长期资料需用户在合并弹窗确认后保存，可查看来源与撤销。
 
 古籍默认请求 `hybrid`，实际链路为 BM25/可选向量召回 → RRF → 本地 CrossEncoder → sigmoid ≥0.7 → MMR。首次部署显式准备本地模型：
 
@@ -40,6 +42,7 @@ docker compose exec backend python -m scripts.prepare_ranking
 | [deployment.md](docs/deployment.md) | Docker、本地开发、模型配置、数据快照与可选 MCP |
 | [evaluation_report.md](docs/evaluation_report.md) | 六维测评结果、适用范围与历史工程验收归档 |
 | [rag.md](docs/rag.md) | 古籍混合检索、重排、MMR、术语扩展与会话记忆 |
+| [evaluation_plan.md](docs/evaluation_plan.md) | 测评完善计划、会话与画像边界、实施范围 |
 | [testing.md](docs/testing.md) | 工程回归、测评数据、复现命令与部署验收 |
 
 分散的中文计划、流程与验收文档已合并到上述主题中。测评原始 JSON 与自动生成摘要仍位于 `backend/evaluation/reports/`；`evaluate_exports/` 保留独立导出结果，不作为主题文档重复维护。

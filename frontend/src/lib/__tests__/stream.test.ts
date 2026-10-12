@@ -16,6 +16,34 @@ function makeSSEStream(events: object[]): ReadableStream<Uint8Array> {
 }
 
 describe("streamChat (SSE 解析)", () => {
+  it("network errors before response headers use onError", async () => {
+    const error = vi.fn();
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
+    await streamChat({ message: "hi" }, { onEvent: vi.fn(), onError: error });
+    expect(error).toHaveBeenCalledWith(expect.objectContaining({ message: "offline" }));
+  });
+  it("abort before response headers requests backend cancellation and ignores late data", async () => {
+    const controller = new AbortController();
+    const event = vi.fn(), error = vi.fn();
+    let respond!: (response: object) => void;
+    const fetcher = vi.fn().mockImplementationOnce(() => new Promise((resolve) => { respond = resolve; }))
+      .mockResolvedValue({ ok: true });
+    vi.stubGlobal("fetch", fetcher);
+    const running = streamChat({ message: "hi" }, { signal: controller.signal, onEvent: event, onError: error });
+    controller.abort();
+    expect(fetcher).toHaveBeenCalledTimes(2);
+    expect(fetcher.mock.calls[1][0]).toMatch(/\/api\/runs\/.+\/cancel$/);
+    respond({ ok: true, status: 200, body: makeSSEStream([{ type: "answer.final", payload: { response: "late" } }]) });
+    await running;
+    expect(event).not.toHaveBeenCalled();
+    expect(error).not.toHaveBeenCalled();
+  });
+  it("premature EOF reports that no final answer was received", async () => {
+    const error = vi.fn();
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, status: 200, body: makeSSEStream([]) }));
+    await streamChat({ message: "hi" }, { onEvent: vi.fn(), onError: error });
+    expect(error).toHaveBeenCalledWith(expect.objectContaining({ message: expect.stringContaining("尚未收到最终答复") }));
+  });
   it("自有后端候选被拒绝时不显示正文，只接收最终答案", async () => {
     const events: ChatStreamEvent[] = [];
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, status: 200, body: makeSSEStream([

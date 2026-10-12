@@ -1,0 +1,10 @@
+{
+  "status": "blocked",
+  "reasons": [
+    "independent_review_incomplete",
+    "no_reviewed_scored_samples"
+  ],
+  "groups": {},
+  "runtime_threshold_changed": false,
+  "scope": "independent_passage_support_not_diagnostic_confidence"
+}

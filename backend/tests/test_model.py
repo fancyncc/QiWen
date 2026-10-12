@@ -21,31 +21,13 @@ def output(content="ok", usage=None):
     return httpx.Response(200, json={"choices": [{"message": {"content": content}}], "usage": usage})
 
 
-def test_memory_reranker_can_call_model_while_chat_stays_mock(monkeypatch):
-    from app.memory import MemoryRanking
-    received = []
-    def handler(request):
-        payload = json.loads(request.content)
-        received.append(payload)
-        assert "stream" not in payload
-        return output('{"ordered_ids":["head"]}', {"prompt_tokens":11,"completion_tokens":4})
-    configure(monkeypatch, handler)
+def test_retired_memory_role_cannot_override_mock_mode(monkeypatch):
     monkeypatch.setattr(model, "MODEL_MODE", "mock")
     monkeypatch.setenv("QIWEN_MEMORY_RERANK_MODE", "llm")
-    monkeypatch.setenv("QIWEN_MODEL_MEMORY_RERANK", "rerank-model")
-    async def run():
-        context = model.InvocationContext()
-        token = model.invocation.set(context)
-        try:
-            result = await model.acomplete_json("system", "user", role="memory_rerank", schema=MemoryRanking)
-            assert result == {"ordered_ids":["head"]}
-            assert context.calls[0]["role"] == "memory_rerank" and context.calls[0]["input_tokens"] == 11
-            with pytest.raises(RuntimeError):
-                await model.acomplete("system", "user", role="bianzheng")
-        finally:
-            model.invocation.reset(token)
-    asyncio.run(run())
-    assert len(received) == 1 and received[0]["model"] == "rerank-model"
+    with pytest.raises(ValueError):
+        model.role_config("memory_rerank")
+    with pytest.raises(RuntimeError):
+        asyncio.run(model.acomplete("system", "user", role="bianzheng"))
 
 
 def test_classics_cross_encoder_is_not_a_chat_model_role():

@@ -15,15 +15,30 @@ from pydantic import BaseModel, ConfigDict, Field
 from .config import API_BASE, API_KEY, MODEL_MODE, MODEL_NAME
 from .prescription import CandidatePlan
 
-ROLES = ("inquiry", "safety_preflight", "summary", "profile_extraction", "retrieval_evaluation",
-         "query_rewrite", "bianzheng", "formula", "herb", "synthesis", "reviewer", "memory_rerank")
+ROLES = ("inquiry", "knowledge", "safety_preflight", "summary", "profile_extraction", "retrieval_evaluation",
+         "query_rewrite", "bianzheng", "formula", "herb", "synthesis", "reviewer")
+
+# In-process test hook only. No HTTP/config switch and no prompt persistence.
+input_observer: ContextVar[Callable | None] = ContextVar("evaluation_input_observer", default=None)
+
+
+def observe_input(kind: str, value: dict):
+    context = invocation.get()
+    observer = context.observer if context is not None else input_observer.get()
+    if observer is not None:
+        observer({"kind": kind, "node": current_node.get(), **value})
 
 
 @dataclass
 class InvocationContext:
     calls: list[dict] = field(default_factory=list)
+    contexts: list[dict] = field(default_factory=list)
     cancelled: bool = False
     emit: Callable | None = None
+    observer: Callable | None = field(default_factory=lambda: input_observer.get(), repr=False)
+    retrieval_deadline: float | None = None
+    retrieval_terminal: str | None = None
+    retrieval_cache: dict = field(default_factory=dict, repr=False)
 
     def check(self):
         if self.cancelled:
@@ -45,8 +60,8 @@ def role_config(role: str) -> RoleConfig:
     if role not in ROLES:
         raise ValueError("未知模型角色")
     prefix = f"QIWEN_MODEL_{role.upper()}"
-    timeout = os.getenv(prefix + "_TIMEOUT", "").strip() or os.getenv("QIWEN_MODEL_TIMEOUT", "").strip() or ("15" if role == "memory_rerank" else "45")
-    retries = os.getenv(prefix + "_RETRIES", "").strip() or os.getenv("QIWEN_MODEL_RETRIES", "").strip() or ("0" if role == "memory_rerank" else "2")
+    timeout = os.getenv(prefix + "_TIMEOUT", "").strip() or os.getenv("QIWEN_MODEL_TIMEOUT", "").strip() or "45"
+    retries = os.getenv(prefix + "_RETRIES", "").strip() or os.getenv("QIWEN_MODEL_RETRIES", "").strip() or "2"
     return RoleConfig(
         os.getenv(prefix, "").strip() or MODEL_NAME,
         min(300, max(0.05, float(timeout))),
@@ -93,8 +108,7 @@ async def acomplete(system: str, user: str, *, role: str = "inquiry", schema: ty
         context.calls.append(record)
     started = time.monotonic()
     try:
-        rerank_enabled = role == "memory_rerank" and os.getenv("QIWEN_MEMORY_RERANK_MODE", "llm") == "llm"
-        if (MODEL_MODE != "openai_compatible" and not rerank_enabled) or not API_BASE or not API_KEY or not config.model:
+        if MODEL_MODE != "openai_compatible" or not API_BASE or not API_KEY or not config.model:
             raise RuntimeError("真实模型配置不完整或未启用")
         url = API_BASE.rstrip("/")
         if not url.endswith("/chat/completions"):
@@ -103,6 +117,9 @@ async def acomplete(system: str, user: str, *, role: str = "inquiry", schema: ty
             system += "\n只输出 JSON 对象，不要 Markdown。JSON Schema：" + json.dumps(schema.model_json_schema(), ensure_ascii=False)
         payload = {"model": config.model, "temperature": 0.2,
                    "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}]}
+        from .context_budget import budget_request
+        payload["messages"], payload["max_tokens"], record["budget"] = budget_request(payload["messages"], [], role)
+        observe_input("model_request", {"role": role, "messages": payload["messages"], "budget": record["budget"]})
         streaming = bool(context and context.emit and role in {"bianzheng", "formula"})
         if streaming:
             payload.update(stream=True, stream_options={"include_usage": True})
@@ -196,7 +213,7 @@ async def acomplete_json(system: str, user: str, *, role: str, schema: type[Base
 async def achat_tools(messages: list[dict], tools: list[dict], *, role: str) -> dict:
     """Call an OpenAI-compatible model with an allow-listed tool schema.
 
-    The caller owns the ReAct loop.  This adapter performs one bounded model
+    The LangGraph caller owns tool routing.  This adapter performs one bounded model
     decision and returns either tool calls or final text without executing any
     model-provided name directly.
     """
@@ -217,6 +234,9 @@ async def achat_tools(messages: list[dict], tools: list[dict], *, role: str) -> 
             url += "/chat/completions"
         payload = {"model": config.model, "temperature": 0.1, "messages": messages,
                    "tools": tools, "tool_choice": "auto"}
+        from .context_budget import budget_request
+        payload["messages"], payload["max_tokens"], record["budget"] = budget_request(messages, tools, role)
+        observe_input("model_request", {"role": role, "messages": payload["messages"], "budget": record["budget"]})
         async with httpx.AsyncClient(timeout=config.timeout) as client:
             for attempt in range(config.retries + 1):
                 if context:

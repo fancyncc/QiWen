@@ -5,11 +5,12 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from .runtime import AgentRun, run_react_agent
+from .runtime import AgentRun, run_agent_graph
 from .tools import (CLASSICS_TOOL, COMPATIBILITY_TOOL, DOSAGE_TOOL, FORMULA_TOOL, HERB_TOOL,
-                    MEMORY_TOOL, PROFILE_TOOL, USER_RISK_TOOL)
+                    PROFILE_TOOL, USER_RISK_TOOL)
 from .. import model
 from ..db import one
+from ..context import clinical_context
 from ..prescription import CandidatePlan, migrate_plan, names
 
 
@@ -64,27 +65,38 @@ def _mock_diagnosis(state: dict) -> dict:
 
 
 def _classics_from_run(run: AgentRun) -> tuple[list[dict], dict]:
-    documents, warnings, statuses = [], [], []
+    documents, warnings, statuses, attempts = [], [], [], []
     for observation in run.observations:
-        if observation.get("tool") != "search_classics" or observation.get("status") != "success":
+        if observation.get("tool") != "search_classics":
+            continue
+        if observation.get("status") != "success":
+            statuses.append("dependency_error")
+            warnings.append("古籍工具未完成，本轮没有取得该次检索证据。")
+            attempts.append({"outcome": "dependency_error", "error_type": observation.get("error", "ToolFailure")})
             continue
         result = observation.get("result", {})
         statuses.append(result.get("status", "unknown"))
+        if result.get("retrieval_trace"):
+            attempts.append(result["retrieval_trace"])
         if result.get("warning"):
             warnings.append(result["warning"])
         for item in result.get("documents", []):
             row = one("SELECT id,title,chapter,body,metadata FROM corpus WHERE id=?", (item.get("id"),))
-            if row:
-                row["retrieval"] = {"admitted_by": "agent_tool", "evidence": item.get("excerpt", ""),
-                                    "matched_terms": []}
+            if row and item.get("excerpt") and item["excerpt"] in row["body"]:
+                row["retrieval"] = {**item.get("retrieval", {}), "evidence": item["excerpt"],
+                                    "admitted_by": item.get("retrieval", {}).get("admitted_by", "agent_tool")}
                 documents.append(row)
     unique = {row["id"]: row for row in documents}
     documents = list(unique.values())
     trace = {"requested_mode": "agent", "active_mode": "agent_tool",
+             "outcome": "success" if documents else statuses[-1] if statuses else "not_called",
+             "attempts": attempts,
              "warning": " ".join(dict.fromkeys(warnings)),
              "rerank": {"status": statuses[-1] if statuses else "not_called"},
              "selected": [{"id": row["id"], "title": row["title"], "chapter": row["chapter"]}
                           for row in documents]}
+    for source, row in zip(trace["selected"], documents):
+        source["excerpt"] = row["retrieval"]["evidence"]
     return documents, trace
 
 
@@ -96,8 +108,6 @@ async def bianzheng_agent(state: dict) -> dict:
         if step == 1:
             return {"tool": "get_patient_profile", "arguments": {}}
         if step == 2:
-            return {"tool": "search_memories", "arguments": {"query": query}}
-        if step == 3:
             return {"tool": "search_classics", "arguments": {"query": query}}
         completed = {**final, "evidence_ids": [item["id"] for observation in observations
                                                 if observation.get("tool") == "search_classics"
@@ -108,9 +118,10 @@ async def bianzheng_agent(state: dict) -> dict:
         "goal": "形成有证据支持、明确不确定性的辨证假设；资料不足时请求用户补充。",
         "current_message": state.get("message", ""), "symptoms": state.get("symptoms", []),
         "denied_symptoms": state.get("denied_symptoms", []), "retrieval_query": query,
+        "patient_context": clinical_context(state),
     }, ensure_ascii=False)
-    run = await run_react_agent(name="辨证 Agent", role="bianzheng", task=task, state=state,
-                                tools=[PROFILE_TOOL, MEMORY_TOOL, CLASSICS_TOOL],
+    run = await run_agent_graph(name="辨证 Agent", role="bianzheng", task=task, state=state,
+                                tools=[PROFILE_TOOL, CLASSICS_TOOL],
                                 output_schema=BianzhengArtifact, mock_planner=planner, max_steps=6)
     artifact = run.output
     agent_docs, retrieval_trace = _classics_from_run(run)
@@ -178,9 +189,10 @@ async def formula_agent(state: dict) -> dict:
         "goal": "根据辨证产物形成结构化候选方剂。先查询方剂和药材，缺少剂量证据时必须留空，不得猜测。",
         "diagnosis": state.get("diagnosis", ""), "symptoms": state.get("symptoms", []),
         "profile": state.get("profile", {}), "review_feedback": state.get("safety_errors", []),
+        "patient_context": clinical_context(state),
         "available_dosage_evidence": "需要时调用 get_dosage_evidence，不得从模型常识补充",
     }, ensure_ascii=False)
-    run = await run_react_agent(name="方剂 Agent", role="formula", task=task, state=state,
+    run = await run_agent_graph(name="方剂 Agent", role="formula", task=task, state=state,
                                 tools=[FORMULA_TOOL, HERB_TOOL, DOSAGE_TOOL, COMPATIBILITY_TOOL],
                                 output_schema=FormulaArtifact, mock_planner=planner, max_steps=8)
     artifact = run.output
@@ -235,8 +247,9 @@ async def herb_agent(state: dict) -> dict:
     task = json.dumps({
         "goal": "独立审查候选药材与当前画像、配伍和剂量证据。未知药物相互作用必须标记人工复核。",
         "candidate": plan, "profile_summary": state.get("profile", {}),
+        "patient_context": clinical_context(state),
     }, ensure_ascii=False)
-    run = await run_react_agent(name="本草 Agent", role="herb", task=task, state=state,
+    run = await run_agent_graph(name="本草 Agent", role="herb", task=task, state=state,
                                 tools=[PROFILE_TOOL, HERB_TOOL, DOSAGE_TOOL, COMPATIBILITY_TOOL, USER_RISK_TOOL],
                                 output_schema=HerbReviewArtifact, mock_planner=planner,
                                 max_steps=min(12, 5 + len(herb_names)))

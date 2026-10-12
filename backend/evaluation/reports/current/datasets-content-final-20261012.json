@@ -1,0 +1,953 @@
+{
+  "status": "passed",
+  "errors": [],
+  "files": {
+    "agent_tasks.jsonl": {
+      "count": 8,
+      "sha256": "88370844dd867e9c99c121ff284a0280ba40060e95549ed66cd85719a37a462e"
+    },
+    "deployment_cases.jsonl": {
+      "count": 5,
+      "sha256": "89a5f7be4269f9420dfef8bfba7fb3473e7256f8ec905e873595928ef0db7609"
+    },
+    "faithfulness.jsonl": {
+      "count": 30,
+      "sha256": "558a56bcb2826903e0b4e22dd06b7cb37d2af035475c6a868cf47ee0520db9d7"
+    },
+    "performance.jsonl": {
+      "count": 30,
+      "sha256": "5be8da55f07c8f9f1cdf2102ef5d26a64bc27c40a40512d7ebc1069c8588cb49"
+    },
+    "quality.jsonl": {
+      "count": 35,
+      "sha256": "f50d4bf0a6278e50ec221819921d44c99deda93971b0bece380f1f65edd2e549"
+    },
+    "rag_golden.jsonl": {
+      "count": 48,
+      "sha256": "c737f6a4bade7d90b6efd08a3a0019b76ccb4aafa1208bf9cd6134aebe088b1f"
+    },
+    "rag_regression.jsonl": {
+      "count": 6,
+      "sha256": "03b9ecbd9cc5edbf14ddca6c23e724153f53c04152e944a3a028694430ab612b"
+    },
+    "router.jsonl": {
+      "count": 30,
+      "sha256": "d3a74cde95d49b6c47c3cc25b5887f80b903f2a521773eba3f0e9652546de019"
+    },
+    "safety_e2e.jsonl": {
+      "count": 30,
+      "sha256": "3bbbb92d1c34163782ce4134b3be8b5571bdf13ee22e806fd357f1b940ed2a44"
+    },
+    "safety_pairs.jsonl": {
+      "count": 20,
+      "sha256": "93c680c9c4b6728e1d370f84acdf4dac27f0ee7e28644b5df9060076d37f96ab"
+    },
+    "scenarios.jsonl": {
+      "count": 33,
+      "sha256": "dbbccb10f25ffa0cda2116f0b96083ae9d87ab31268950689f8e600b5c7a13b4"
+    }
+  },
+  "unique_families": 268,
+  "duplicate_prompt_groups": [
+    [
+      {
+        "file": "agent_tasks.jsonl",
+        "id": "TASK-001",
+        "split": "development",
+        "family": "agent_tasks-TASK-001"
+      },
+      {
+        "file": "deployment_cases.jsonl",
+        "id": "DEPLOY-001",
+        "split": "development",
+        "family": "deploy-greeting"
+      },
+      {
+        "file": "performance.jsonl",
+        "id": "PERF-001",
+        "split": "development",
+        "family": "performance-PERF-001"
+      },
+      {
+        "file": "router.jsonl",
+        "id": "ROUTE-001",
+        "split": "development",
+        "family": "router-ROUTE-001"
+      },
+      {
+        "file": "scenarios.jsonl",
+        "id": "SC-033",
+        "split": "development",
+        "family": "thread_delete_consistency"
+      }
+    ],
+    [
+      {
+        "file": "agent_tasks.jsonl",
+        "id": "TASK-003",
+        "split": "development",
+        "family": "agent_tasks-TASK-003"
+      },
+      {
+        "file": "scenarios.jsonl",
+        "id": "SC-012",
+        "split": "development",
+        "family": "denial_preservation"
+      }
+    ],
+    [
+      {
+        "file": "agent_tasks.jsonl",
+        "id": "TASK-003",
+        "split": "development",
+        "family": "agent_tasks-TASK-003"
+      },
+      {
+        "file": "scenarios.jsonl",
+        "id": "SC-012",
+        "split": "development",
+        "family": "denial_preservation"
+      }
+    ],
+    [
+      {
+        "file": "deployment_cases.jsonl",
+        "id": "DEPLOY-002",
+        "split": "development",
+        "family": "deploy-knowledge"
+      },
+      {
+        "file": "scenarios.jsonl",
+        "id": "SC-002",
+        "split": "development",
+        "family": "knowledge_profile_exclusion"
+      },
+      {
+        "file": "scenarios.jsonl",
+        "id": "SC-003",
+        "split": "development",
+        "family": "knowledge_topic_continuation"
+      },
+      {
+        "file": "scenarios.jsonl",
+        "id": "SC-016",
+        "split": "development",
+        "family": "thread_topic_isolation"
+      }
+    ],
+    [
+      {
+        "file": "deployment_cases.jsonl",
+        "id": "DEPLOY-003",
+        "split": "development",
+        "family": "deploy-clinical"
+      },
+      {
+        "file": "performance.jsonl",
+        "id": "PERF-016",
+        "split": "development",
+        "family": "performance-PERF-016"
+      },
+      {
+        "file": "router.jsonl",
+        "id": "ROUTE-019",
+        "split": "development",
+        "family": "router-ROUTE-019"
+      }
+    ],
+    [
+      {
+        "file": "faithfulness.jsonl",
+        "id": "FA-001",
+        "split": "development",
+        "family": "faithfulness-FA-001"
+      },
+      {
+        "file": "rag_golden.jsonl",
+        "id": "RAG-001",
+        "split": "development",
+        "family": "rag_golden-RAG-001"
+      }
+    ],
+    [
+      {
+        "file": "faithfulness.jsonl",
+        "id": "FA-002",
+        "split": "development",
+        "family": "faithfulness-FA-002"
+      },
+      {
+        "file": "rag_golden.jsonl",
+        "id": "RAG-002",
+        "split": "development",
+        "family": "rag_golden-RAG-002"
+      }
+    ],
+    [
+      {
+        "file": "faithfulness.jsonl",
+        "id": "FA-003",
+        "split": "development",
+        "family": "faithfulness-FA-003"
+      },
+      {
+        "file": "rag_golden.jsonl",
+        "id": "RAG-003",
+        "split": "development",
+        "family": "rag_golden-RAG-003"
+      },
+      {
+        "file": "rag_regression.jsonl",
+        "id": "RAG-003",
+        "split": "development",
+        "family": "rag_golden-RAG-003"
+      }
+    ],
+    [
+      {
+        "file": "faithfulness.jsonl",
+        "id": "FA-004",
+        "split": "development",
+        "family": "faithfulness-FA-004"
+      },
+      {
+        "file": "rag_golden.jsonl",
+        "id": "RAG-004",
+        "split": "development",
+        "family": "rag_golden-RAG-004"
+      }
+    ],
+    [
+      {
+        "file": "faithfulness.jsonl",
+        "id": "FA-005",
+        "split": "development",
+        "family": "faithfulness-FA-005"
+      },
+      {
+        "file": "rag_golden.jsonl",
+        "id": "RAG-005",
+        "split": "development",
+        "family": "rag_golden-RAG-005"
+      }
+    ],
+    [
+      {
+        "file": "faithfulness.jsonl",
+        "id": "FA-006",
+        "split": "development",
+        "family": "faithfulness-FA-006"
+      },
+      {
+        "file": "rag_golden.jsonl",
+        "id": "RAG-006",
+        "split": "development",
+        "family": "rag_golden-RAG-006"
+      },
+      {
+        "file": "rag_regression.jsonl",
+        "id": "RAG-006",
+        "split": "development",
+        "family": "rag_golden-RAG-006"
+      }
+    ],
+    [
+      {
+        "file": "faithfulness.jsonl",
+        "id": "FA-007",
+        "split": "development",
+        "family": "faithfulness-FA-007"
+      },
+      {
+        "file": "rag_golden.jsonl",
+        "id": "RAG-007",
+        "split": "development",
+        "family": "rag_golden-RAG-007"
+      }
+    ],
+    [
+      {
+        "file": "faithfulness.jsonl",
+        "id": "FA-008",
+        "split": "development",
+        "family": "faithfulness-FA-008"
+      },
+      {
+        "file": "rag_golden.jsonl",
+        "id": "RAG-008",
+        "split": "development",
+        "family": "rag_golden-RAG-008"
+      }
+    ],
+    [
+      {
+        "file": "faithfulness.jsonl",
+        "id": "FA-009",
+        "split": "development",
+        "family": "faithfulness-FA-009"
+      },
+      {
+        "file": "rag_golden.jsonl",
+        "id": "RAG-009",
+        "split": "development",
+        "family": "rag_golden-RAG-009"
+      }
+    ],
+    [
+      {
+        "file": "faithfulness.jsonl",
+        "id": "FA-010",
+        "split": "development",
+        "family": "faithfulness-FA-010"
+      },
+      {
+        "file": "rag_golden.jsonl",
+        "id": "RAG-010",
+        "split": "development",
+        "family": "rag_golden-RAG-010"
+      }
+    ],
+    [
+      {
+        "file": "faithfulness.jsonl",
+        "id": "FA-011",
+        "split": "development",
+        "family": "faithfulness-FA-011"
+      },
+      {
+        "file": "rag_golden.jsonl",
+        "id": "RAG-011",
+        "split": "development",
+        "family": "rag_golden-RAG-011"
+      }
+    ],
+    [
+      {
+        "file": "faithfulness.jsonl",
+        "id": "FA-012",
+        "split": "development",
+        "family": "faithfulness-FA-012"
+      },
+      {
+        "file": "rag_golden.jsonl",
+        "id": "RAG-012",
+        "split": "development",
+        "family": "rag_golden-RAG-012"
+      }
+    ],
+    [
+      {
+        "file": "faithfulness.jsonl",
+        "id": "FA-013",
+        "split": "development",
+        "family": "faithfulness-FA-013"
+      },
+      {
+        "file": "rag_golden.jsonl",
+        "id": "RAG-013",
+        "split": "development",
+        "family": "rag_golden-RAG-013"
+      }
+    ],
+    [
+      {
+        "file": "faithfulness.jsonl",
+        "id": "FA-014",
+        "split": "development",
+        "family": "faithfulness-FA-014"
+      },
+      {
+        "file": "rag_golden.jsonl",
+        "id": "RAG-014",
+        "split": "development",
+        "family": "rag_golden-RAG-014"
+      }
+    ],
+    [
+      {
+        "file": "faithfulness.jsonl",
+        "id": "FA-015",
+        "split": "development",
+        "family": "faithfulness-FA-015"
+      },
+      {
+        "file": "rag_golden.jsonl",
+        "id": "RAG-015",
+        "split": "development",
+        "family": "rag_golden-RAG-015"
+      }
+    ],
+    [
+      {
+        "file": "faithfulness.jsonl",
+        "id": "FA-016",
+        "split": "development",
+        "family": "faithfulness-FA-016"
+      },
+      {
+        "file": "rag_golden.jsonl",
+        "id": "RAG-016",
+        "split": "development",
+        "family": "rag_golden-RAG-016"
+      }
+    ],
+    [
+      {
+        "file": "faithfulness.jsonl",
+        "id": "FA-017",
+        "split": "development",
+        "family": "faithfulness-FA-017"
+      },
+      {
+        "file": "rag_golden.jsonl",
+        "id": "RAG-017",
+        "split": "development",
+        "family": "rag_golden-RAG-017"
+      }
+    ],
+    [
+      {
+        "file": "faithfulness.jsonl",
+        "id": "FA-018",
+        "split": "development",
+        "family": "faithfulness-FA-018"
+      },
+      {
+        "file": "rag_golden.jsonl",
+        "id": "RAG-018",
+        "split": "development",
+        "family": "rag_golden-RAG-018"
+      }
+    ],
+    [
+      {
+        "file": "faithfulness.jsonl",
+        "id": "FA-019",
+        "split": "development",
+        "family": "faithfulness-FA-019"
+      },
+      {
+        "file": "rag_golden.jsonl",
+        "id": "RAG-019",
+        "split": "development",
+        "family": "rag_golden-RAG-019"
+      }
+    ],
+    [
+      {
+        "file": "faithfulness.jsonl",
+        "id": "FA-020",
+        "split": "development",
+        "family": "faithfulness-FA-020"
+      },
+      {
+        "file": "rag_golden.jsonl",
+        "id": "RAG-020",
+        "split": "development",
+        "family": "rag_golden-RAG-020"
+      }
+    ],
+    [
+      {
+        "file": "faithfulness.jsonl",
+        "id": "FA-021",
+        "split": "development",
+        "family": "faithfulness-FA-021"
+      },
+      {
+        "file": "rag_golden.jsonl",
+        "id": "RAG-021",
+        "split": "development",
+        "family": "rag_golden-RAG-021"
+      }
+    ],
+    [
+      {
+        "file": "faithfulness.jsonl",
+        "id": "FA-022",
+        "split": "development",
+        "family": "faithfulness-FA-022"
+      },
+      {
+        "file": "rag_golden.jsonl",
+        "id": "RAG-022",
+        "split": "development",
+        "family": "rag_golden-RAG-022"
+      },
+      {
+        "file": "rag_regression.jsonl",
+        "id": "RAG-022",
+        "split": "development",
+        "family": "rag_golden-RAG-022"
+      }
+    ],
+    [
+      {
+        "file": "faithfulness.jsonl",
+        "id": "FA-023",
+        "split": "development",
+        "family": "faithfulness-FA-023"
+      },
+      {
+        "file": "rag_golden.jsonl",
+        "id": "RAG-023",
+        "split": "development",
+        "family": "rag_golden-RAG-023"
+      }
+    ],
+    [
+      {
+        "file": "faithfulness.jsonl",
+        "id": "FA-024",
+        "split": "development",
+        "family": "faithfulness-FA-024"
+      },
+      {
+        "file": "rag_golden.jsonl",
+        "id": "RAG-024",
+        "split": "development",
+        "family": "rag_golden-RAG-024"
+      }
+    ],
+    [
+      {
+        "file": "faithfulness.jsonl",
+        "id": "FA-025",
+        "split": "development",
+        "family": "faithfulness-FA-025"
+      },
+      {
+        "file": "rag_golden.jsonl",
+        "id": "RAG-025",
+        "split": "development",
+        "family": "rag_golden-RAG-025"
+      }
+    ],
+    [
+      {
+        "file": "faithfulness.jsonl",
+        "id": "FA-026",
+        "split": "development",
+        "family": "faithfulness-FA-026"
+      },
+      {
+        "file": "rag_golden.jsonl",
+        "id": "RAG-026",
+        "split": "development",
+        "family": "rag_golden-RAG-026"
+      }
+    ],
+    [
+      {
+        "file": "faithfulness.jsonl",
+        "id": "FA-027",
+        "split": "development",
+        "family": "faithfulness-FA-027"
+      },
+      {
+        "file": "rag_golden.jsonl",
+        "id": "RAG-027",
+        "split": "development",
+        "family": "rag_golden-RAG-027"
+      }
+    ],
+    [
+      {
+        "file": "faithfulness.jsonl",
+        "id": "FA-028",
+        "split": "development",
+        "family": "faithfulness-FA-028"
+      },
+      {
+        "file": "rag_golden.jsonl",
+        "id": "RAG-028",
+        "split": "development",
+        "family": "rag_golden-RAG-028"
+      }
+    ],
+    [
+      {
+        "file": "faithfulness.jsonl",
+        "id": "FA-029",
+        "split": "development",
+        "family": "faithfulness-FA-029"
+      },
+      {
+        "file": "rag_golden.jsonl",
+        "id": "RAG-029",
+        "split": "development",
+        "family": "rag_golden-RAG-029"
+      }
+    ],
+    [
+      {
+        "file": "faithfulness.jsonl",
+        "id": "FA-030",
+        "split": "development",
+        "family": "faithfulness-FA-030"
+      },
+      {
+        "file": "rag_golden.jsonl",
+        "id": "RAG-030",
+        "split": "development",
+        "family": "rag_golden-RAG-030"
+      }
+    ],
+    [
+      {
+        "file": "performance.jsonl",
+        "id": "PERF-003",
+        "split": "development",
+        "family": "performance-PERF-003"
+      },
+      {
+        "file": "scenarios.jsonl",
+        "id": "SC-029",
+        "split": "development",
+        "family": "empty_knowledge_retrieval"
+      }
+    ],
+    [
+      {
+        "file": "performance.jsonl",
+        "id": "PERF-017",
+        "split": "development",
+        "family": "performance-PERF-017"
+      },
+      {
+        "file": "router.jsonl",
+        "id": "ROUTE-020",
+        "split": "development",
+        "family": "router-ROUTE-020"
+      },
+      {
+        "file": "scenarios.jsonl",
+        "id": "SC-014",
+        "split": "development",
+        "family": "thread_symptom_isolation"
+      },
+      {
+        "file": "scenarios.jsonl",
+        "id": "SC-018",
+        "split": "development",
+        "family": "unconfirmed_profile_not_persisted"
+      },
+      {
+        "file": "scenarios.jsonl",
+        "id": "SC-020",
+        "split": "development",
+        "family": "dismissed_profile_not_persisted"
+      },
+      {
+        "file": "scenarios.jsonl",
+        "id": "SC-021",
+        "split": "development",
+        "family": "revoked_profile_not_restored"
+      }
+    ],
+    [
+      {
+        "file": "performance.jsonl",
+        "id": "PERF-018",
+        "split": "development",
+        "family": "performance-PERF-018"
+      },
+      {
+        "file": "router.jsonl",
+        "id": "ROUTE-021",
+        "split": "development",
+        "family": "router-ROUTE-021"
+      }
+    ],
+    [
+      {
+        "file": "performance.jsonl",
+        "id": "PERF-019",
+        "split": "development",
+        "family": "performance-PERF-019"
+      },
+      {
+        "file": "router.jsonl",
+        "id": "ROUTE-022",
+        "split": "development",
+        "family": "router-ROUTE-022"
+      }
+    ],
+    [
+      {
+        "file": "performance.jsonl",
+        "id": "PERF-020",
+        "split": "development",
+        "family": "performance-PERF-020"
+      },
+      {
+        "file": "router.jsonl",
+        "id": "ROUTE-023",
+        "split": "development",
+        "family": "router-ROUTE-023"
+      }
+    ],
+    [
+      {
+        "file": "performance.jsonl",
+        "id": "PERF-021",
+        "split": "development",
+        "family": "performance-PERF-021"
+      },
+      {
+        "file": "router.jsonl",
+        "id": "ROUTE-024",
+        "split": "development",
+        "family": "router-ROUTE-024"
+      }
+    ],
+    [
+      {
+        "file": "performance.jsonl",
+        "id": "PERF-022",
+        "split": "development",
+        "family": "performance-PERF-022"
+      },
+      {
+        "file": "router.jsonl",
+        "id": "ROUTE-025",
+        "split": "development",
+        "family": "router-ROUTE-025"
+      }
+    ],
+    [
+      {
+        "file": "performance.jsonl",
+        "id": "PERF-023",
+        "split": "development",
+        "family": "performance-PERF-023"
+      },
+      {
+        "file": "router.jsonl",
+        "id": "ROUTE-026",
+        "split": "development",
+        "family": "router-ROUTE-026"
+      }
+    ],
+    [
+      {
+        "file": "performance.jsonl",
+        "id": "PERF-024",
+        "split": "development",
+        "family": "performance-PERF-024"
+      },
+      {
+        "file": "router.jsonl",
+        "id": "ROUTE-027",
+        "split": "development",
+        "family": "router-ROUTE-027"
+      }
+    ],
+    [
+      {
+        "file": "performance.jsonl",
+        "id": "PERF-025",
+        "split": "development",
+        "family": "performance-PERF-025"
+      },
+      {
+        "file": "router.jsonl",
+        "id": "ROUTE-028",
+        "split": "development",
+        "family": "router-ROUTE-028"
+      }
+    ],
+    [
+      {
+        "file": "performance.jsonl",
+        "id": "PERF-026",
+        "split": "development",
+        "family": "performance-PERF-026"
+      },
+      {
+        "file": "router.jsonl",
+        "id": "ROUTE-029",
+        "split": "development",
+        "family": "router-ROUTE-029"
+      }
+    ],
+    [
+      {
+        "file": "performance.jsonl",
+        "id": "PERF-027",
+        "split": "development",
+        "family": "performance-PERF-027"
+      },
+      {
+        "file": "router.jsonl",
+        "id": "ROUTE-030",
+        "split": "development",
+        "family": "router-ROUTE-030"
+      }
+    ],
+    [
+      {
+        "file": "rag_golden.jsonl",
+        "id": "RAG-035",
+        "split": "development",
+        "family": "rag_golden-RAG-035"
+      },
+      {
+        "file": "rag_regression.jsonl",
+        "id": "RAG-035",
+        "split": "development",
+        "family": "rag_golden-RAG-035"
+      }
+    ],
+    [
+      {
+        "file": "rag_golden.jsonl",
+        "id": "RAG-022-MAI",
+        "split": "development",
+        "family": "rag_golden-RAG-022"
+      },
+      {
+        "file": "rag_regression.jsonl",
+        "id": "RAG-022-MAI",
+        "split": "development",
+        "family": "rag_golden-RAG-022"
+      }
+    ],
+    [
+      {
+        "file": "router.jsonl",
+        "id": "ROUTE-011",
+        "split": "development",
+        "family": "router-ROUTE-011"
+      },
+      {
+        "file": "scenarios.jsonl",
+        "id": "SC-007",
+        "split": "development",
+        "family": "subject_privacy_skip"
+      }
+    ],
+    [
+      {
+        "file": "scenarios.jsonl",
+        "id": "SC-005",
+        "split": "development",
+        "family": "unknown_subject_gate"
+      },
+      {
+        "file": "scenarios.jsonl",
+        "id": "SC-006",
+        "split": "development",
+        "family": "subject_confirmation_resumes"
+      }
+    ],
+    [
+      {
+        "file": "scenarios.jsonl",
+        "id": "SC-010",
+        "split": "development",
+        "family": "subject_switch"
+      },
+      {
+        "file": "scenarios.jsonl",
+        "id": "SC-015",
+        "split": "development",
+        "family": "thread_attachment_isolation"
+      },
+      {
+        "file": "scenarios.jsonl",
+        "id": "SC-025",
+        "split": "development",
+        "family": "long_gap_episode_confirmation"
+      }
+    ],
+    [
+      {
+        "file": "scenarios.jsonl",
+        "id": "SC-011",
+        "split": "development",
+        "family": "duration_and_modifier"
+      },
+      {
+        "file": "scenarios.jsonl",
+        "id": "SC-013",
+        "split": "development",
+        "family": "symptom_correction"
+      },
+      {
+        "file": "scenarios.jsonl",
+        "id": "SC-032",
+        "split": "development",
+        "family": "account_history_isolation"
+      }
+    ],
+    [
+      {
+        "file": "scenarios.jsonl",
+        "id": "SC-015",
+        "split": "development",
+        "family": "thread_attachment_isolation"
+      },
+      {
+        "file": "scenarios.jsonl",
+        "id": "SC-017",
+        "split": "development",
+        "family": "manual_profile_cross_thread"
+      },
+      {
+        "file": "scenarios.jsonl",
+        "id": "SC-019",
+        "split": "development",
+        "family": "accepted_profile_cross_thread"
+      }
+    ],
+    [
+      {
+        "file": "scenarios.jsonl",
+        "id": "SC-017",
+        "split": "development",
+        "family": "manual_profile_cross_thread"
+      },
+      {
+        "file": "scenarios.jsonl",
+        "id": "SC-022",
+        "split": "development",
+        "family": "manual_profile_replacement"
+      },
+      {
+        "file": "scenarios.jsonl",
+        "id": "SC-023",
+        "split": "development",
+        "family": "profile_revision_conflict"
+      }
+    ],
+    [
+      {
+        "file": "scenarios.jsonl",
+        "id": "SC-018",
+        "split": "development",
+        "family": "unconfirmed_profile_not_persisted"
+      },
+      {
+        "file": "scenarios.jsonl",
+        "id": "SC-019",
+        "split": "development",
+        "family": "accepted_profile_cross_thread"
+      },
+      {
+        "file": "scenarios.jsonl",
+        "id": "SC-020",
+        "split": "development",
+        "family": "dismissed_profile_not_persisted"
+      },
+      {
+        "file": "scenarios.jsonl",
+        "id": "SC-021",
+        "split": "development",
+        "family": "revoked_profile_not_restored"
+      }
+    ]
+  ],
+  "similarity_scope": "exact_normalized_prompts; paraphrase_families_require_manual_review",
+  "frozen_ready": false
+}

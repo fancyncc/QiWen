@@ -164,6 +164,13 @@ def render_plan(plan: dict) -> str:
         + ("；" + item["preparation"] if item["preparation"] else "") + "）" for item in plan["herbs"])
 
 
-def knowledge_context() -> str:
-    rows = all_rows("SELECT id,herb_id,herb_name,min_dose,max_dose,unit,preparation,source,verification_status FROM dosage_evidence LIMIT 120")
+def knowledge_context(herbs: list[str] | None = None) -> str:
+    query = "SELECT id,herb_id,herb_name,min_dose,max_dose,unit,preparation,source,verification_status FROM dosage_evidence"
+    if herbs is not None:
+        herbs = list(dict.fromkeys(normalize(name) for name in herbs))[:40]
+        if not herbs:
+            return "[]"
+        rows = all_rows(query + " WHERE herb_name IN (" + ",".join("?" for _ in herbs) + ") LIMIT 40", tuple(herbs))
+    else:
+        rows = all_rows(query + " LIMIT 120")
     return json.dumps(rows, ensure_ascii=False)

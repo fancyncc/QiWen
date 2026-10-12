@@ -1,0 +1,42 @@
+{
+  "mode": "mock",
+  "baseline_version": 2,
+  "created_at": "2026-10-11T11:41:41.407907+00:00",
+  "checks": {
+    "followup_and_history": {
+      "passed": true,
+      "elapsed_ms": 2453
+    },
+    "account_isolation": {
+      "passed": true,
+      "elapsed_ms": 281
+    },
+    "urgent_route": {
+      "passed": true,
+      "elapsed_ms": 688
+    },
+    "contraindication": {
+      "passed": true,
+      "elapsed_ms": 0
+    },
+    "allergy_and_final_history": {
+      "passed": true,
+      "elapsed_ms": 3312
+    },
+    "multi_stream_and_final_version": {
+      "passed": true,
+      "elapsed_ms": 3797
+    },
+    "retrieval_provenance": {
+      "passed": true,
+      "elapsed_ms": 344
+    }
+  },
+  "passed": 7,
+  "total": 7,
+  "manual_review_required": [
+    "citation_faithfulness",
+    "answer_quality",
+    "clinical_appropriateness"
+  ]
+}

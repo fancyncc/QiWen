@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from "vitest";
-import { renderHook, act, waitFor } from "@testing-library/react";
+import { afterEach, describe, it, expect, vi } from "vitest";
+import { renderHook, act, waitFor, cleanup } from "@testing-library/react";
 import { useChat } from "@/hooks/useChat";
 import type { ChatStreamEvent, MessageItem } from "@/lib/types";
 
@@ -27,6 +27,76 @@ vi.mock("@/lib/api", () => ({
 }));
 
 import { api } from "@/lib/api";
+import { streamChat, type StreamOptions } from "@/lib/stream";
+
+afterEach(() => { cleanup(); vi.clearAllMocks(); });
+
+function pendingStream() {
+  let finish!: () => void;
+  let options!: StreamOptions;
+  vi.mocked(streamChat).mockImplementationOnce((_request, opts) => {
+    options = opts;
+    return new Promise<void>((resolve) => { finish = resolve; });
+  });
+  return { get options() { return options; }, finish: () => finish() };
+}
+
+describe("useChat request isolation", () => {
+  it("late events and finally from a stopped turn cannot mutate or cancel the next turn", async () => {
+    const first = pendingStream();
+    const second = pendingStream();
+    const { result } = renderHook(() => useChat(""));
+    let firstSend!: Promise<void>, secondSend!: Promise<void>;
+    await act(async () => { firstSend = result.current.send("first"); });
+    act(() => result.current.stop());
+    expect(first.options.signal?.aborted).toBe(true);
+    await act(async () => { secondSend = result.current.send("second"); });
+    act(() => {
+      first.options.onEvent({ type: "token", content: "late result" });
+      first.options.onEvent({ type: "done", thread_id: "wrong-thread" });
+    });
+    await act(async () => { first.finish(); await firstSend; });
+    expect(result.current.streaming).toBe(true);
+    expect(result.current.messages.at(-1)?.content).toBe("");
+    expect(result.current.currentThreadId).toBe("");
+    act(() => result.current.stop());
+    expect(second.options.signal?.aborted).toBe(true);
+    await act(async () => { second.finish(); await secondSend; });
+  });
+
+  it("switching threads aborts the old stream and ignores late events", async () => {
+    vi.mocked(api.getMessages).mockImplementation(async (thread) => [{ role: "assistant", content: thread }]);
+    const stream = pendingStream();
+    const { result, rerender, unmount } = renderHook(({ thread }) => useChat(thread), { initialProps: { thread: "one" } });
+    await waitFor(() => expect(result.current.messages[0]?.content).toBe("one"));
+    let sending!: Promise<void>;
+    await act(async () => { sending = result.current.send("question"); });
+    rerender({ thread: "two" });
+    await waitFor(() => expect(result.current.messages[0]?.content).toBe("two"));
+    expect(stream.options.signal?.aborted).toBe(true);
+    act(() => stream.options.onEvent({ type: "token", content: "stale" }));
+    expect(result.current.messages[0].content).toBe("two");
+    await act(async () => { stream.finish(); await sending; });
+    const next = pendingStream();
+    await act(async () => { sending = result.current.send("next"); });
+    unmount();
+    expect(next.options.signal?.aborted).toBe(true);
+    next.finish(); await sending;
+    vi.mocked(api.getMessages).mockImplementation(async () => []);
+  });
+
+  it("late initial history cannot replace a newly sent message", async () => {
+    let history!: (messages: MessageItem[]) => void;
+    vi.mocked(api.getMessages).mockImplementationOnce(() => new Promise((resolve) => { history = resolve; }));
+    const stream = pendingStream();
+    const { result } = renderHook(() => useChat("one"));
+    let sending!: Promise<void>;
+    await act(async () => { sending = result.current.send("new message"); });
+    await act(async () => { history([{ role: "assistant", content: "old history" }]); });
+    expect(result.current.messages[0].content).toBe("new message");
+    await act(async () => { stream.finish(); await sending; });
+  });
+});
 
 describe("useChat stages 持久化", () => {
   it("token 不抹 stages；并行专家不提前补勾；重跑重置笔记", async () => {

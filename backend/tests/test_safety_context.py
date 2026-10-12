@@ -106,8 +106,10 @@ def test_unspecified_identity_confirmation_and_long_term_read_without_retrieval(
         h = auth(token)
         first = chat(client, h, "对甘草过敏")
         tid = first["thread_id"]
+        assert not suggestions(client, h, tid)["items"]
+        chat(client, h, "是我本人", tid)
         proposal = suggestions(client, h, tid)
-        assert proposal["items"][0]["fact"]["subject"] == "unknown"
+        assert proposal["items"][0]["fact"]["subject"] == "self"
         assert client.get("/api/profile-suggestions", headers=auth(other), params={"thread_id": tid}).status_code == 404
         item = proposal["items"][0]["id"]
         body = {"revision": proposal["revision"], "decisions": [{"id": item, "action": "accept", "confirm_self": True}]}
@@ -119,8 +121,7 @@ def test_unspecified_identity_confirmation_and_long_term_read_without_retrieval(
         portrait = client.get(f"/api/profiles/{user_id}", headers=h).json()
         assert "甘草" in portrait["allergies"]
         assert portrait["facts"][0]["confirmation"] == "confirmed"
-        monkeypatch.setattr(workflow, "retrieve_memories", lambda *a: ([], {"selected": []}))
-        new = chat(client, h, "最近失眠三天，白天疲劳")
+        new = chat(client, h, "我最近失眠三天，白天疲劳")
         assert "药材清单已隐藏" in new["response"]
         assert not suggestions(client, h, new["thread_id"])["items"]
         revision = portrait["safety_revision"]
@@ -170,7 +171,7 @@ def test_mixed_people_and_unknown_allergen_are_not_silently_ignored():
         data = chat(client, h, "我没有过敏史，但我妈妈对花生过敏")
         assert data["trace"]["safety"]["pending"]["key"] == "subject"
         p = suggestions(client, h, data["thread_id"])
-        assert len(p["items"]) == 1 and p["items"][0]["fact"]["subject"] == "self"
+        assert not p["items"]  # Patient identity must be resolved before proposing a self save.
         peanut = chat(client, h, "我对花生过敏")
         assert peanut["trace"]["preflight"]["decision"] == "clarify"
         assert suggestions(client, h, peanut["thread_id"])["items"][0]["fact"]["entity"] == "花生"
@@ -202,7 +203,7 @@ def test_model_evidence_validation_and_cannot_weaken_rules(monkeypatch):
     with TestClient(app) as client:
         token, _ = register(client, "evidence_" + uuid4().hex[:8])
         h = auth(token)
-        data = chat(client, h, "最近头痛三天")
+        data = chat(client, h, "我最近头痛三天")
         assert data["trace"]["preflight"]["risk_categories"] == ["preflight_unavailable"]
         assert not suggestions(client, h, data["thread_id"])["items"]
 
@@ -271,7 +272,7 @@ def test_portrait_change_during_generation_prevents_commit(monkeypatch):
         h = auth(token)
         tid = client.post("/api/threads", headers=h, json={}).json()["id"]
         future = pool.submit(client.post, "/api/chat", headers=h,
-                             json={"message": "最近失眠三天，白天疲劳，不用查古籍", "thread_id": tid})
+                             json={"message": "我最近失眠三天，白天疲劳，不用查古籍", "thread_id": tid})
         try:
             assert entered.wait(8)
             assert client.patch(f"/api/profiles/{user_id}", headers=h, json={"allergies": "甘草"}).status_code == 200

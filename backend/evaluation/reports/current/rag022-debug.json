@@ -1,0 +1,230 @@
+{
+  "status_code": 503,
+  "messages": [
+    {
+      "id": "fed92e33-7a42-4604-a944-013e501ecf45",
+      "role": "user",
+      "content": "哪些脉证属于病不可发汗？",
+      "intent_type": null,
+      "symptoms": [],
+      "notes": [],
+      "trace": null,
+      "prescription_review": null,
+      "candidate_id": null,
+      "created_at": "2026-10-12T10:11:32.508416+00:00",
+      "prescription": null
+    },
+    {
+      "id": "e18185b7-a8fc-499b-8ea3-09351cd0bb4a",
+      "role": "assistant",
+      "content": "问答暂不可用，本轮未提供治疗建议，请稍后重试。",
+      "intent_type": "failed",
+      "symptoms": [],
+      "notes": [],
+      "trace": {
+        "run_id": "83b80b73-d4a3-410d-988b-5d005b807442",
+        "events": [
+          {
+            "type": "stage",
+            "stage": "prepare",
+            "label": "资料准备",
+            "status": "start",
+            "attempt": 1
+          },
+          {
+            "type": "stage",
+            "stage": "prepare",
+            "label": "资料准备",
+            "status": "done",
+            "elapsed_ms": 0,
+            "attempt": 1
+          },
+          {
+            "type": "stage",
+            "stage": "document_parse",
+            "label": "文档解析",
+            "status": "start",
+            "attempt": 1
+          },
+          {
+            "type": "stage",
+            "stage": "document_parse",
+            "label": "文档解析",
+            "status": "done",
+            "elapsed_ms": 0,
+            "attempt": 1
+          },
+          {
+            "type": "stage",
+            "stage": "subject_resolve",
+            "label": "确认问诊对象",
+            "status": "start",
+            "attempt": 1
+          },
+          {
+            "type": "stage",
+            "stage": "subject_resolve",
+            "label": "确认问诊对象",
+            "status": "done",
+            "elapsed_ms": 5,
+            "attempt": 1
+          },
+          {
+            "type": "stage",
+            "stage": "episode_resolve",
+            "label": "确认本次病程",
+            "status": "start",
+            "attempt": 1
+          },
+          {
+            "type": "stage",
+            "stage": "episode_resolve",
+            "label": "确认本次病程",
+            "status": "done",
+            "elapsed_ms": 0,
+            "attempt": 1
+          },
+          {
+            "type": "stage",
+            "stage": "profile_load",
+            "label": "加载本人画像",
+            "status": "start",
+            "attempt": 1
+          },
+          {
+            "type": "stage",
+            "stage": "profile_load",
+            "label": "加载本人画像",
+            "status": "done",
+            "elapsed_ms": 6,
+            "attempt": 1
+          },
+          {
+            "type": "stage",
+            "stage": "pre_safety",
+            "label": "前置安全审查",
+            "status": "start",
+            "attempt": 1
+          },
+          {
+            "type": "stage",
+            "stage": "pre_safety",
+            "label": "前置安全审查",
+            "status": "done",
+            "elapsed_ms": 3,
+            "attempt": 1
+          },
+          {
+            "type": "stage",
+            "stage": "inquiry",
+            "label": "问诊与意图识别",
+            "status": "start",
+            "attempt": 1
+          },
+          {
+            "type": "stage",
+            "stage": "inquiry",
+            "label": "问诊与意图识别",
+            "status": "done",
+            "elapsed_ms": 0,
+            "attempt": 1
+          },
+          {
+            "type": "stage",
+            "stage": "main_route",
+            "label": "主路由",
+            "status": "start",
+            "attempt": 1
+          },
+          {
+            "type": "stage",
+            "stage": "main_route",
+            "label": "主路由",
+            "status": "done",
+            "elapsed_ms": 0,
+            "attempt": 1
+          },
+          {
+            "type": "stage",
+            "stage": "knowledge_search",
+            "label": "知识检索",
+            "status": "start",
+            "attempt": 1
+          },
+          {
+            "type": "stage",
+            "stage": "knowledge_search",
+            "label": "知识检索",
+            "status": "done",
+            "elapsed_ms": 20544,
+            "attempt": 1
+          },
+          {
+            "type": "stage",
+            "stage": "knowledge_answer",
+            "label": "知识解答",
+            "status": "start",
+            "attempt": 1
+          },
+          {
+            "type": "stage",
+            "stage": "knowledge_answer",
+            "label": "知识解答",
+            "status": "failed",
+            "elapsed_ms": 17224,
+            "attempt": 1
+          }
+        ],
+        "model_calls": [
+          {
+            "role": "cross_encoder",
+            "node": "knowledge_search",
+            "model": "BAAI/bge-reranker-v2-m3",
+            "input_tokens": null,
+            "output_tokens": null,
+            "elapsed_ms": 12394,
+            "retries": 0,
+            "status": "success",
+            "attempts": []
+          },
+          {
+            "role": "knowledge",
+            "node": "knowledge_answer",
+            "model": "qwen-plus",
+            "elapsed_ms": 17223,
+            "input_tokens": 1338,
+            "output_tokens": 530,
+            "retries": 0,
+            "status": "success",
+            "attempts": [
+              {
+                "attempt": 1,
+                "status": "success",
+                "input_tokens": 1338,
+                "output_tokens": 530
+              }
+            ],
+            "budget": {
+              "estimated_input_tokens": 2751,
+              "estimation": "utf8_byte_upper_bound",
+              "context_limit": 32768,
+              "output_reserve": 4096,
+              "dropped_tool_call_ids": []
+            }
+          }
+        ],
+        "context_usage": [],
+        "elapsedMs": 38627,
+        "mode": "fixed",
+        "phases_ms": {
+          "preparation": 38627
+        },
+        "status": "failed"
+      },
+      "prescription_review": null,
+      "candidate_id": null,
+      "created_at": "2026-10-12T10:12:11.141062+00:00",
+      "prescription": null
+    }
+  ]
+}

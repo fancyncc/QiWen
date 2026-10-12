@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "entries": [
+    {
+      "concept": "阴虚",
+      "aliases": ["阴虚", "Yin deficiency", "Yinxu"],
+      "title": "美国国家医学图书馆 MeSH 术语释义",
+      "chapter": "D016710 · Yin Deficiency",
+      "body": "阴虚（Yin deficiency，又称 Yinxu）：在阴阳理论与传统医学语境中，指体内阴液不足，可伴烦躁、口渴、便秘等表现。这是术语的范围释义，不能仅凭这些表现确定个人诊断。",
+      "source_url": "https://meshb.nlm.nih.gov/record/ui?ui=D016710",
+      "source_locator": "D016710 · Scope Note",
+      "source_quote": "an insufficiency of body fluid (called yinxu)",
+      "content_kind": "translated_scope_note",
+      "source_verified_at": "2026-10-12",
+      "verification_status": "source_verified",
+      "clinical_review_status": "not_clinical_guidance"
+    }
+  ]
+}

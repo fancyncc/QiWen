@@ -91,11 +91,11 @@ def dependency_errors(events: list[dict], mode: str) -> list[str]:
     return errors
 
 
-def tool_checks(actions: list[dict], required: list[str]) -> dict:
+def tool_checks(actions: list[dict], required: list[str], semantics: dict | None = None) -> dict:
     from app.agents import tools as t
-    registry = {spec.name: spec for spec in (t.PROFILE_TOOL, t.MEMORY_TOOL, t.CLASSICS_TOOL,
+    registry = {spec.name: spec for spec in (t.PROFILE_TOOL, t.CLASSICS_TOOL,
                 t.FORMULA_TOOL, t.HERB_TOOL, t.DOSAGE_TOOL, t.COMPATIBILITY_TOOL, t.USER_RISK_TOOL)}
-    allowed = {"辨证 Agent": {"get_patient_profile", "search_memories", "search_classics"},
+    allowed = {"辨证 Agent": {"get_patient_profile", "search_classics"},
                "方剂 Agent": {"search_formulas", "lookup_herb", "get_dosage_evidence", "check_herb_compatibility"},
                "本草 Agent": {"get_patient_profile", "lookup_herb", "get_dosage_evidence",
                             "check_herb_compatibility", "check_user_risks"}}
@@ -107,6 +107,11 @@ def tool_checks(actions: list[dict], required: list[str]) -> dict:
         try:
             registry[name].args_schema.model_validate(action.get("arguments"))
             valid += 1
+            constraints = (semantics or {}).get(name, {})
+            for field, permitted in constraints.items():
+                value = action["arguments"].get(field)
+                if not isinstance(value, str) or not any(term in value for term in permitted):
+                    errors.append("tool_argument_semantic_mismatch")
         except Exception:
             errors.append("invalid_tool_arguments")
     missing = sorted(set(required) - {a.get("tool") for a in actions})
@@ -165,7 +170,10 @@ def run_tasks(client, repeat: int, limit: int | None) -> dict:
                 history = client.get(f"/api/threads/{thread}/messages", headers=headers).json()
                 run_events = client.get(f'/api/runs/{data["run_id"]}/events', headers=headers).json()
                 actions = [e["payload"] for e in run_events if e.get("type") == "agent.action"]
-                tools = tool_checks(actions, case["required_tools"])
+                tools = tool_checks(actions, case["required_tools"], case.get("tool_arguments"))
+                selected_tools = {a.get("tool") for a in actions}
+                tools["alternative_groups_passed"] = all(set(group) & selected_tools for group in case.get("required_tool_groups", []))
+                tools["selection_passed"] = tools["selection_passed"] and tools["alternative_groups_passed"]
                 if not case["required_tools"]:
                     tools["selection_passed"] = tools["selection_passed"] and not actions
                 finals = [e["payload"] for e in run_events if e.get("type") == "answer.final"]
@@ -184,7 +192,7 @@ def run_tasks(client, repeat: int, limit: int | None) -> dict:
                               state_consistency=state_ok, cancel_idempotency=idempotent, tool_checks=tools,
                               actions=actions, request_success=requests_ok, intents_correct=intents_ok)
                 record["task_success"] = all((requests_ok, intents_ok, record["constraints"],
-                                              record["dependencies"], state_ok, tools["selection_passed"]))
+                                              record["dependencies"], state_ok, idempotent, tools["selection_passed"]))
             except Exception as exc:
                 record["error_type"] = type(exc).__name__
             details.append(record)
@@ -209,12 +217,12 @@ def run_tasks(client, repeat: int, limit: int | None) -> dict:
             r["responses"][-1]["data"].get("response", "") for r in records if r["responses"]})
     return {"status": "completed", "mode": "mock", "unique_tasks": len(cases), "repeat": repeat,
             "count": len(details), "metrics": metrics, "by_case": by_case, "details": details,
-            "scope": "workflow_success_not_clinical_correctness; schema_validity_not_argument_semantics"}
+            "scope": "workflow_success_not_clinical_correctness; argument_semantics_only_when_explicitly_labelled"}
 
 
 def runtime_controls() -> dict:
     from pydantic import BaseModel, ConfigDict
-    from app.agents.runtime import AgentLoopError, ToolSpec, run_react_agent
+    from app.agents.runtime import AgentLoopError, ToolSpec, run_agent_graph
     class Args(BaseModel):
         model_config = ConfigDict(extra="forbid", strict=True)
         query: str
@@ -240,7 +248,7 @@ def runtime_controls() -> dict:
             return {"tool": "forbidden" if fault == "forbidden_tool" and step == 1 else "search",
                     "arguments": {"query": 123 if fault == "invalid_arguments" and step == 1 else "synthetic"}}
         try:
-            run = asyncio.run(run_react_agent(name="补充评测", role="bianzheng", task="合成运行时控制检查",
+            run = asyncio.run(run_agent_graph(name="补充评测", role="bianzheng", task="合成运行时控制检查",
                              state={}, tools=[ToolSpec("search", "synthetic", Args, handler, .005)],
                              output_schema=Result, mock_planner=planner, max_steps=4))
             passed = run.output["evidence"] == ["synthetic-evidence"] and run.trace[0]["status"] == "failed"
@@ -294,30 +302,26 @@ def archived_operations(source: dict) -> dict:
 
 
 def main() -> int:
+    from .runtime import environment, manifest, write_report
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--source", type=Path, required=True)
+    parser.add_argument("--source", type=Path, help="Optional archived report; never used as current gate evidence")
     parser.add_argument("--repeat", type=int, default=3)
     parser.add_argument("--limit", type=int)
     parser.add_argument("--reports", type=Path, default=Path(__file__).with_name("reports"))
     args = parser.parse_args()
     if args.repeat < 1 or (args.limit is not None and args.limit < 1):
         parser.error("repeat and limit must be positive")
-    source = json.loads(args.source.read_text(encoding="utf-8"))
-    with tempfile.TemporaryDirectory(prefix="qiwen-supplement-") as directory:
-        os.environ.update(QIWEN_DATA_DIR=directory, QIWEN_MODEL_MODE="mock", QIWEN_RAG_MODE="mock")
+    source = json.loads(args.source.read_text(encoding="utf-8")) if args.source else None
+    with environment("mock_contract"):
         from fastapi.testclient import TestClient
         from app.main import app
         with TestClient(app) as client:
-            report = {"created_at": datetime.now(timezone.utc).isoformat(), "source": args.source.name,
-                      "source_sha256": hashlib.sha256(args.source.read_bytes()).hexdigest(), "mode": "mock",
-                      "rag": supplement_rag(source), "archived_operations": archived_operations(source),
+            report = {"created_at": datetime.now(timezone.utc).isoformat(), "mode": "mock",
+                      "archive": {"source": args.source.name, "source_sha256": hashlib.sha256(args.source.read_bytes()).hexdigest(),
+                                  "rag": supplement_rag(source), "operations": archived_operations(source)} if source else None,
                       "agent": run_tasks(client, args.repeat, args.limit), "runtime_controls": runtime_controls(),
                       "authorization": authorization_checks(client)}
-        report["manifest"] = {str(path.relative_to(ROOT)): hashlib.sha256(path.read_bytes()).hexdigest()
-                              for path in sorted((ROOT / "backend/evaluation/datasets").glob("*.jsonl"))}
-        report["code_manifest"] = {str(path.relative_to(ROOT)): hashlib.sha256(path.read_bytes()).hexdigest()
-                                   for pattern in ("app/**/*.py", "evaluation/*.py")
-                                   for path in sorted((ROOT / "backend").glob(pattern))}
+        report["manifest"] = manifest("mock_contract")
     report["pending_metrics"] = {
         "context_recall_precision": "needs_answer_facts_and_admitted_context_labels",
         "answer_relevance_correctness_citations": "needs_real_answers_and_reference_claim_labels",
@@ -328,14 +332,16 @@ def main() -> int:
         "cost_per_request_success": "needs_complete_usage_and_model_tool_infrastructure_prices",
         "business_effect": "needs_user_feedback_or_measured_business_baseline",
     }
-    args.reports.mkdir(parents=True, exist_ok=True)
-    path = args.reports / ("supplement-" + datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ") + ".json")
-    path.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(json.dumps({"report": str(path), "rag": report["rag"]["metrics"],
+    passed = (report["agent"]["count"] > 0 and report["agent"]["metrics"]["task_success"]["rate"] == 1
+              and report["runtime_controls"]["metrics"]["rate"] == 1
+              and report["authorization"]["attack_success"]["rate"] == 0)
+    report["gate"] = {"status": "passed" if passed else "failed", "scope": "current_agent_runtime_authorization_only"}
+    path = write_report(args.reports, "supplement", report)
+    print(json.dumps({"report": str(path), "gate": report["gate"],
                       "agent": report["agent"]["metrics"], "by_case": report["agent"]["by_case"],
                       "runtime": report["runtime_controls"]["metrics"],
                       "authorization": report["authorization"]["attack_success"]}, ensure_ascii=False, indent=2))
-    return 0
+    return 0 if passed else 1
 
 
 if __name__ == "__main__":

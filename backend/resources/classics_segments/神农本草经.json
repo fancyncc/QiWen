@@ -1,21 +1,141 @@
 [
   {
     "id": "SNBCJ_0001_1",
-    "content": "《神农本草经》\n==============================\n### 神農本草經\n----------\n中国哲学书电子化计划\n中国哲学书电子化计划\n《神农本草经》\n] [\n修改\n] [\n查看历史\n上卷》\n上药一百二十种为君，主养命以应天，无毒，多服久服不伤人，欲轻身益气不老延年者，本《上经》。\n\n中药一百二十种为臣，主养性以应人，无毒，有毒，斟酌其宜，欲遏病补虚羸者，本《中经》。\n\n下药一百二十五种为佐使，主治病以应地，多毒，不可久服，欲除寒热邪气、破积聚、愈疾者，本《下经》。\n\n药有君臣佐使，以相宣摄合和者，宜用一君二臣五佐，又可一君三臣九佐使也。\n\n药有阴阳配合，子母兄弟，根茎花实草石骨肉。\n有单行者，有相须者，有相使者，有相畏者，有相恶者，有相反者，有相杀者。\n凡此七情和合视之，当用相须相使良者，勿用相恶相反者。\n若有毒宜制，可用相畏相杀者，不尔，勿合用也。\n药有酸咸甘苦辛五味，又有寒热温凉四气及有毒无毒，阴干暴干，采治时日，生熟，上地所出，真伪陈新，并各有法。",
+    "content": "上药一百二十种为君，主养命以应天，无毒，多服久服不伤人，欲轻身益气不老延年者，本《上经》。\n\n中药一百二十种为臣，主养性以应人，无毒，有毒，斟酌其宜，欲遏病补虚羸者，本《中经》。\n\n下药一百二十五种为佐使，主治病以应地，多毒，不可久服，欲除寒热邪气、破积聚、愈疾者，本《下经》。\n\n药有君臣佐使，以相宣摄合和者，宜用一君二臣五佐，又可一君三臣九佐使也。\n\n药有阴阳配合，子母兄弟，根茎花实草石骨肉。\n有单行者，有相须者，有相使者，有相畏者，有相恶者，有相反者，有相杀者。\n凡此七情和合视之，当用相须相使良者，勿用相恶相反者。\n若有毒宜制，可用相畏相杀者，不尔，勿合用也。\n药有酸咸甘苦辛五味，又有寒热温凉四气及有毒无毒，阴干暴干，采治时日，生熟，上地所出，真伪陈新，并各有法。\n\n药性有宜丸者，宜散者，宜水煮者，宜酒浸者，宜膏煎者，亦有一物兼宜者，亦有不可入汤酒者，并随药性，不得违越。\n\n凡欲治病，先察其源，先候病机。\n五脏未虚，六腑未竭，血脉未乱，精神未散，服药必活。\n若病已成，可得半愈。\n病势已过，命将难全。\n\n若用毒药疗病，先起如黍粟，病去及止。\n不去，倍之；不去，十之。\n取去为度。",
     "metadata": {
       "book": "神农本草经",
       "category": "序言",
       "drug_name": "",
+      "cleaning_version": 1,
+      "raw_body_sha256": "fa06a5e328e3ead58c9ef6051fad86d0c2f8e3facd5b0636107f20c85a23a190",
+      "removed_source_ranges": [
+        [
+          0,
+          8
+        ],
+        [
+          8,
+          39
+        ],
+        [
+          42,
+          52
+        ],
+        [
+          52,
+          63
+        ],
+        [
+          63,
+          74
+        ],
+        [
+          74,
+          85
+        ],
+        [
+          85,
+          93
+        ],
+        [
+          93,
+          97
+        ],
+        [
+          97,
+          100
+        ],
+        [
+          100,
+          104
+        ],
+        [
+          104,
+          109
+        ],
+        [
+          109,
+          113
+        ],
+        [
+          707,
+          710
+        ],
+        [
+          873,
+          876
+        ]
+      ],
       "split_from": "SNBCJ_0001"
     }
   },
   {
     "id": "SNBCJ_0001_2",
-    "content": "\n药性有宜丸者，宜散者，宜水煮者，宜酒浸者，宜膏煎者，亦有一物兼宜者，亦有不可入汤酒者，并随药性，不得违越。\n\n凡欲治病，先察其源，先候病机。\n五脏未虚，六腑未竭，血脉未乱，精神未散，服药必活。\n若病已成，可得半愈。\n病势已过，命将难全。\n\n若用毒药疗病，先起如黍粟，病去及止。\n不去，倍之；不去，十之。\n取去为度。\n治寒以热药，治热以寒药。\n饮食不消，以吐下药。\n鬼注蛊毒，以毒药。\n痈肿疮瘤，以疮药。\n风湿，以风湿药。\n各随其所宜。\n\n病在胸鬲以上者，先食后服药。\n病在心腹以下者，先服药而后食。\n病在四肢血脉者，宜空腹而在旦。\n病在骨髓者，宜饱满而在夜。\n\n10\n夫大病之主，有中风、伤寒、温疟、中恶、霍乱、大腹、水肿、肠澼下利、大小便不通、贲肫、上气、咳逆、呕吐、黄疸、消渴、留饮、澼食、坚积症瘕、惊邪、癫痫、鬼注、喉痺、齿痛、耳聋、目盲、金创、踒折、痈肿、恶疮、痔、瘘、瘿瘘、男子五劳七伤、虚乏羸瘦，女子带下、崩中、血闭，虫蛇蛊毒所伤，此皆大略，宗兆。\n其间变动枝节，各宜依端绪以取之。\n\n中卷》。",
+    "content": "治寒以热药，治热以寒药。\n饮食不消，以吐下药。\n鬼注蛊毒，以毒药。\n痈肿疮瘤，以疮药。\n风湿，以风湿药。\n各随其所宜。\n\n病在胸鬲以上者，先食后服药。\n病在心腹以下者，先服药而后食。\n病在四肢血脉者，宜空腹而在旦。\n病在骨髓者，宜饱满而在夜。\n\n夫大病之主，有中风、伤寒、温疟、中恶、霍乱、大腹、水肿、肠澼下利、大小便不通、贲肫、上气、咳逆、呕吐、黄疸、消渴、留饮、澼食、坚积症瘕、惊邪、癫痫、鬼注、喉痺、齿痛、耳聋、目盲、金创、踒折、痈肿、恶疮、痔、瘘、瘿瘘、男子五劳七伤、虚乏羸瘦，女子带下、崩中、血闭，虫蛇蛊毒所伤，此皆大略，宗兆。\n其间变动枝节，各宜依端绪以取之。",
     "metadata": {
       "book": "神农本草经",
       "category": "序言",
       "drug_name": "",
+      "cleaning_version": 1,
+      "raw_body_sha256": "fa06a5e328e3ead58c9ef6051fad86d0c2f8e3facd5b0636107f20c85a23a190",
+      "removed_source_ranges": [
+        [
+          0,
+          8
+        ],
+        [
+          8,
+          39
+        ],
+        [
+          42,
+          52
+        ],
+        [
+          52,
+          63
+        ],
+        [
+          63,
+          74
+        ],
+        [
+          74,
+          85
+        ],
+        [
+          85,
+          93
+        ],
+        [
+          93,
+          97
+        ],
+        [
+          97,
+          100
+        ],
+        [
+          100,
+          104
+        ],
+        [
+          104,
+          109
+        ],
+        [
+          109,
+          113
+        ],
+        [
+          707,
+          710
+        ],
+        [
+          873,
+          876
+        ]
+      ],
       "split_from": "SNBCJ_0001"
     }
   },
@@ -84,2306 +204,4358 @@
   },
   {
     "id": "SNBCJ_0009",
-    "content": "朴消　味苦寒无毒。主治百病，除寒热邪气，逐六腑积聚、结固留癖。能化七十二种石。炼饵服之，轻身神仙。生山谷。\n10",
+    "content": "朴消　味苦寒无毒。主治百病，除寒热邪气，逐六腑积聚、结固留癖。能化七十二种石。炼饵服之，轻身神仙。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "玉石部上品",
-      "drug_name": "朴消"
+      "drug_name": "朴消",
+      "cleaning_version": 1,
+      "raw_body_sha256": "aca6fd0e407ef23cf34b99d71ff44a27f7c5bb85fa03e2b9bea030e31fdb8719",
+      "removed_source_ranges": [
+        [
+          54,
+          56
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0010",
-    "content": "消石　味苦寒。主治五脏积热，胃胀闭。涤去畜结饮食，推陈致新，除邪气。炼之如膏，久服轻身。一名芒硝。生山谷。\n11",
+    "content": "消石　味苦寒。主治五脏积热，胃胀闭。涤去畜结饮食，推陈致新，除邪气。炼之如膏，久服轻身。一名芒硝。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "玉石部上品",
-      "drug_name": "消石"
+      "drug_name": "消石",
+      "cleaning_version": 1,
+      "raw_body_sha256": "f2ecd0dc0e04d840b0eac458aaed0d1facfbfd650d4d3028321e6bf5beb96678",
+      "removed_source_ranges": [
+        [
+          54,
+          56
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0011",
-    "content": "矾石　味酸寒。主治寒热泄利，白沃阴蚀，恶疮目痛，坚骨齿。炼饵服之，轻身不老增年。一名羽涅。生山谷。\n12",
+    "content": "矾石　味酸寒。主治寒热泄利，白沃阴蚀，恶疮目痛，坚骨齿。炼饵服之，轻身不老增年。一名羽涅。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "玉石部上品",
-      "drug_name": "矾石"
+      "drug_name": "矾石",
+      "cleaning_version": 1,
+      "raw_body_sha256": "7b326d80bcb2cbf736962f4f45979a87aa98292e0e40d099e8ceedaf6942eeb6",
+      "removed_source_ranges": [
+        [
+          50,
+          52
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0012",
-    "content": "滑石　味甘寒。主治身热泄澼，女子乳难，癃闭。利小便，荡胃中积聚寒热，益精气。久服轻身、耐饥，长年。生赭阳山谷。\n13",
+    "content": "滑石　味甘寒。主治身热泄澼，女子乳难，癃闭。利小便，荡胃中积聚寒热，益精气。久服轻身、耐饥，长年。生赭阳山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "玉石部上品",
-      "drug_name": "滑石"
+      "drug_name": "滑石",
+      "cleaning_version": 1,
+      "raw_body_sha256": "cdb230519f476760707f2e1adbc0d8df8c7946e6a4750eaa84713bcecac6cfe2",
+      "removed_source_ranges": [
+        [
+          56,
+          58
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0013",
-    "content": "紫石　味甘平。主治心腹欬逆邪气，补不足，女子风寒在子宫，绝孕十年无子。久服温中、轻身、延年。生太山山谷。\n14",
+    "content": "紫石　味甘平。主治心腹欬逆邪气，补不足，女子风寒在子宫，绝孕十年无子。久服温中、轻身、延年。生太山山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "玉石部上品",
-      "drug_name": "紫石"
+      "drug_name": "紫石",
+      "cleaning_version": 1,
+      "raw_body_sha256": "9119f1458c0ea3d0296e3a1cab37ed8b1d60de0230d57140bcefb05a5f135bc7",
+      "removed_source_ranges": [
+        [
+          53,
+          55
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0014",
-    "content": "白石英　味甘微温。主治消渴，阴痿不足，欬逆，胸膈间久寒。益气，除风湿痺。久服轻身、长年。生山谷。\n15",
+    "content": "白石英　味甘微温。主治消渴，阴痿不足，欬逆，胸膈间久寒。益气，除风湿痺。久服轻身、长年。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "玉石部上品",
-      "drug_name": "白石英"
+      "drug_name": "白石英",
+      "cleaning_version": 1,
+      "raw_body_sha256": "3d1fcc23dbb2fc66e3b8dbc59d1a94830f9d7c69303d69d1766224942c72e390",
+      "removed_source_ranges": [
+        [
+          49,
+          51
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0015",
-    "content": "青石赤石黄石白石黑石脂等　味甘平。主治黄疸、泄利、肠澼脓血、阴蚀、下血赤白、邪气、痈肿、疽痔恶疮、头疡、疥瘙。久服补髓益气，肥健，不饥，轻身，延年。五石脂，各随五色补五脏。生山谷。\n16",
+    "content": "青石赤石黄石白石黑石脂等　味甘平。主治黄疸、泄利、肠澼脓血、阴蚀、下血赤白、邪气、痈肿、疽痔恶疮、头疡、疥瘙。久服补髓益气，肥健，不饥，轻身，延年。五石脂，各随五色补五脏。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "玉石部上品",
-      "drug_name": "青石赤石黄石白石黑石脂等"
+      "drug_name": "青石赤石黄石白石黑石脂等",
+      "cleaning_version": 1,
+      "raw_body_sha256": "8e644f8d56c02e8f9664bfd813301886b9cde41dfc41f74383027e210d05a773",
+      "removed_source_ranges": [
+        [
+          91,
+          93
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0016",
-    "content": "太一禹余粮　味甘平。主治咳逆上气、症瘕、血闭、漏下，除邪气。久服耐寒暑不饥，轻身飞行千里神仙。　一名石脑。生山谷。\n17",
+    "content": "太一禹余粮　味甘平。主治咳逆上气、症瘕、血闭、漏下，除邪气。久服耐寒暑不饥，轻身飞行千里神仙。　一名石脑。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "玉石部上品",
-      "drug_name": "太一禹余粮"
+      "drug_name": "太一禹余粮",
+      "cleaning_version": 1,
+      "raw_body_sha256": "563046a7d3f75922dfd6967dc9d28ee940477f71a9a2e9bae224786e03bac75f",
+      "removed_source_ranges": [
+        [
+          58,
+          60
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0017",
-    "content": "禹余粮　味甘寒。主治咳逆、寒热、烦满，下利赤白，血闭症家大热。炼饵服之，不饥、轻身、延年。生池泽。\n18",
+    "content": "禹余粮　味甘寒。主治咳逆、寒热、烦满，下利赤白，血闭症家大热。炼饵服之，不饥、轻身、延年。生池泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "玉石部上品",
-      "drug_name": "禹余粮"
+      "drug_name": "禹余粮",
+      "cleaning_version": 1,
+      "raw_body_sha256": "c0469ed3359871308fddc976a129aa6b37d9e18be08d518581f0c6c30847fc81",
+      "removed_source_ranges": [
+        [
+          50,
+          52
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0018",
-    "content": "雄黄　味苦平。主治寒热鼠瘘，恶疮疽痔，死肌，杀精物恶鬼邪气百虫毒，胜五兵。炼食之，轻身神仙。一名黄食石。生山谷。\n19",
+    "content": "雄黄　味苦平。主治寒热鼠瘘，恶疮疽痔，死肌，杀精物恶鬼邪气百虫毒，胜五兵。炼食之，轻身神仙。一名黄食石。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "玉石部上品",
-      "drug_name": "雄黄"
+      "drug_name": "雄黄",
+      "cleaning_version": 1,
+      "raw_body_sha256": "88b8d47839dc3eaa0d1958ad88bb315fe9f2fe8d3b9f8dede2702b0e9c62d76c",
+      "removed_source_ranges": [
+        [
+          57,
+          59
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0020",
-    "content": "石胆　味酸小寒。主明目目痛，金创诸痫痉，女子阴蚀痛，石淋寒热，崩中下血，诸邪毒气，令人有子。炼饵服之不老，久服增寿神仙。能化铁为铜、成金银。一名毕石，生山谷。\n21",
+    "content": "石胆　味酸小寒。主明目目痛，金创诸痫痉，女子阴蚀痛，石淋寒热，崩中下血，诸邪毒气，令人有子。炼饵服之不老，久服增寿神仙。能化铁为铜、成金银。一名毕石，生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "玉石部中品",
-      "drug_name": "石胆"
+      "drug_name": "石胆",
+      "cleaning_version": 1,
+      "raw_body_sha256": "51ed0bbbe970cc983c81fc54d9891c10ae401ef793c6b6eed71a7abca46af8ee",
+      "removed_source_ranges": [
+        [
+          80,
+          82
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0021",
-    "content": "石钟乳　味甘温。主治咳逆上气，明目益精，安五脏，通百节，利九窍，下乳汁。生山谷。\n22",
+    "content": "石钟乳　味甘温。主治咳逆上气，明目益精，安五脏，通百节，利九窍，下乳汁。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "玉石部中品",
-      "drug_name": "石钟乳"
+      "drug_name": "石钟乳",
+      "cleaning_version": 1,
+      "raw_body_sha256": "6d486791e2bd4c2448fa55e1a6c8e9d791e41d3a14eddc3200c39ddbf6a547c4",
+      "removed_source_ranges": [
+        [
+          41,
+          43
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0022",
-    "content": "雌黄　味辛平。主治恶疮头秃痂疥，杀毒虫*，身痒，邪气，诸毒。炼之久服，轻身、增年、不老。生山谷。\n23",
+    "content": "雌黄　味辛平。主治恶疮头秃痂疥，杀毒虫*，身痒，邪气，诸毒。炼之久服，轻身、增年、不老。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "玉石部中品",
-      "drug_name": "雌黄"
+      "drug_name": "雌黄",
+      "cleaning_version": 1,
+      "raw_body_sha256": "21d4fbe617f29cbceb2338ab1e25cb5327ff73fbef22eab7b91d3e9a65db6547",
+      "removed_source_ranges": [
+        [
+          49,
+          51
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0023",
-    "content": "殷孽　味辛温。主治烂伤瘀血，泄利寒热，鼠瘘，症瘕结气。一名姜石。生山谷。\n24",
+    "content": "殷孽　味辛温。主治烂伤瘀血，泄利寒热，鼠瘘，症瘕结气。一名姜石。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "玉石部中品",
-      "drug_name": "殷孽"
+      "drug_name": "殷孽",
+      "cleaning_version": 1,
+      "raw_body_sha256": "b9f5dea4efa6cf26a1695c22368cdaa523de451034c54b839a880adb3bd35d03",
+      "removed_source_ranges": [
+        [
+          37,
+          39
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0024",
-    "content": "孔公孽　味辛温。主治伤食不化，邪结气，恶疮疽瘘痔，利九窍，下乳汁。生山谷。\n25",
+    "content": "孔公孽　味辛温。主治伤食不化，邪结气，恶疮疽瘘痔，利九窍，下乳汁。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "玉石部中品",
-      "drug_name": "孔公孽"
+      "drug_name": "孔公孽",
+      "cleaning_version": 1,
+      "raw_body_sha256": "c740c492cdae71b7e8953fe235dfdace390d9c41f4ceda65ef2c9b1491a1b1a3",
+      "removed_source_ranges": [
+        [
+          38,
+          40
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0025",
-    "content": "石流黄　味酸温有毒。主治妇人阴蚀，疽痔恶血，坚筋骨，除头秃，能化金银铜铁奇物。生山谷中。\n26",
+    "content": "石流黄　味酸温有毒。主治妇人阴蚀，疽痔恶血，坚筋骨，除头秃，能化金银铜铁奇物。生山谷中。",
     "metadata": {
       "book": "神农本草经",
       "category": "玉石部中品",
-      "drug_name": "石流黄"
+      "drug_name": "石流黄",
+      "cleaning_version": 1,
+      "raw_body_sha256": "2622828ff2d2570b93183d6097a7af8f88fb62a536a00d3270064b754120ebb6",
+      "removed_source_ranges": [
+        [
+          45,
+          47
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0026",
-    "content": "阳起石　味酸无毒。主治崩中漏下，破子藏中血，症瘕结气，寒热腹痛，无子，阴痿不起，补不足。一名白石。生奇山山谷。\n27",
+    "content": "阳起石　味酸无毒。主治崩中漏下，破子藏中血，症瘕结气，寒热腹痛，无子，阴痿不起，补不足。一名白石。生奇山山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "玉石部中品",
-      "drug_name": "阳起石"
+      "drug_name": "阳起石",
+      "cleaning_version": 1,
+      "raw_body_sha256": "ef8ba57faa7c3a8dd7887f83f590392da7ada57493f3151dc627d7b7607d866b",
+      "removed_source_ranges": [
+        [
+          56,
+          58
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0027",
-    "content": "凝水石　味辛寒。主治身热，腹中积聚邪气，皮中如火烧，烦满。水饮之。久服不饥。一名白水石。生山谷。\n28",
+    "content": "凝水石　味辛寒。主治身热，腹中积聚邪气，皮中如火烧，烦满。水饮之。久服不饥。一名白水石。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "玉石部中品",
-      "drug_name": "凝水石"
+      "drug_name": "凝水石",
+      "cleaning_version": 1,
+      "raw_body_sha256": "eade0802ca776d692019c62621e77d7d3a21630466f622040afdba27f3071166",
+      "removed_source_ranges": [
+        [
+          49,
+          51
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0028",
-    "content": "慈石　味辛寒。主治周痺风湿，支节中痛，不可持物，洗洗酸痛，除大热烦满及耳聋。一名玄石。生山谷。\n29",
+    "content": "慈石　味辛寒。主治周痺风湿，支节中痛，不可持物，洗洗酸痛，除大热烦满及耳聋。一名玄石。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "玉石部中品",
-      "drug_name": "慈石"
+      "drug_name": "慈石",
+      "cleaning_version": 1,
+      "raw_body_sha256": "4cffb956eae75293d35d2037ae0c8cca6e6c386423fe1322de83fb544e6374f2",
+      "removed_source_ranges": [
+        [
+          48,
+          50
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0029",
-    "content": "理石　味辛寒。主治身热，利胃解烦，益精明目，破积聚，去三虫。一名立制石。生山谷。\n30",
+    "content": "理石　味辛寒。主治身热，利胃解烦，益精明目，破积聚，去三虫。一名立制石。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "玉石部中品",
-      "drug_name": "理石"
+      "drug_name": "理石",
+      "cleaning_version": 1,
+      "raw_body_sha256": "6035315199445d31d5c449d73d8ba1625356fc42487025907ea031fa250b5f52",
+      "removed_source_ranges": [
+        [
+          41,
+          43
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0030",
-    "content": "长石　味辛寒。主治身热，四肢寒厥，利小便，通血脉，明目去翳，眇，去三虫，杀蛊毒。久服不饥。一名方石。生山谷。\n31",
+    "content": "长石　味辛寒。主治身热，四肢寒厥，利小便，通血脉，明目去翳，眇，去三虫，杀蛊毒。久服不饥。一名方石。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "玉石部中品",
-      "drug_name": "长石"
+      "drug_name": "长石",
+      "cleaning_version": 1,
+      "raw_body_sha256": "d4f9e0d47b291525359941043bcec6a8a2bdffc886630fd8a653cf510d9f9d97",
+      "removed_source_ranges": [
+        [
+          55,
+          57
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0031",
-    "content": "肤青　味辛。主治蛊毒，毒蛇，菜肉诸毒，恶创。一名推青。生山谷。\n32",
+    "content": "肤青　味辛。主治蛊毒，毒蛇，菜肉诸毒，恶创。一名推青。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "玉石部中品",
-      "drug_name": "肤青"
+      "drug_name": "肤青",
+      "cleaning_version": 1,
+      "raw_body_sha256": "16d8cbe2073d60b0d7f7a9fbe87d3aef010f977da0839d5f06ecc5d39e49624a",
+      "removed_source_ranges": [
+        [
+          32,
+          34
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0032",
-    "content": "铁落　味辛平。主治风热恶创，疡疽创痂疥，气在皮肤中。　铁，主坚肌耐痛。　铁精主明目化铜。生平泽。\n33",
+    "content": "铁落　味辛平。主治风热恶创，疡疽创痂疥，气在皮肤中。　铁，主坚肌耐痛。　铁精主明目化铜。生平泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "玉石部中品",
-      "drug_name": "铁落"
+      "drug_name": "铁落",
+      "cleaning_version": 1,
+      "raw_body_sha256": "0d8ffd5c8543a467be57493f480f1d6747de98a0aa52bac11b33ea714a32e0ea",
+      "removed_source_ranges": [
+        [
+          49,
+          51
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0034",
-    "content": "石膏　味辛微寒。主治中风寒热，心下逆气惊喘，口干舌焦不得息，腹中坚痛，除邪鬼，产乳，金创。生山谷。\n35",
+    "content": "石膏　味辛微寒。主治中风寒热，心下逆气惊喘，口干舌焦不得息，腹中坚痛，除邪鬼，产乳，金创。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "玉石部下品",
-      "drug_name": "石膏"
+      "drug_name": "石膏",
+      "cleaning_version": 1,
+      "raw_body_sha256": "647a81462566991015bf05158ebb3fc2e5afac0b14e75e518b9fc12c082a9990",
+      "removed_source_ranges": [
+        [
+          50,
+          52
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0035",
-    "content": "青瑯玕　味辛平。主治身痒、火创、痈伤、疥瘙、死肌。一名石珠。生平泽。\n36",
+    "content": "青瑯玕　味辛平。主治身痒、火创、痈伤、疥瘙、死肌。一名石珠。生平泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "玉石部下品",
-      "drug_name": "青瑯玕"
+      "drug_name": "青瑯玕",
+      "cleaning_version": 1,
+      "raw_body_sha256": "f7e888715da639cadf9e08c438a4c2d98b4910048e6b36c13dfaf90122d7605c",
+      "removed_source_ranges": [
+        [
+          35,
+          37
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0036",
-    "content": "矾石　味辛有毒。主治寒热鼠瘘，蚀疮、死肌、风痺，腹中坚，邪气，除热。一名青分石，一名立制石，一名固羊石。生山谷。\n37",
+    "content": "矾石　味辛有毒。主治寒热鼠瘘，蚀疮、死肌、风痺，腹中坚，邪气，除热。一名青分石，一名立制石，一名固羊石。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "玉石部下品",
-      "drug_name": "矾石"
+      "drug_name": "矾石",
+      "cleaning_version": 1,
+      "raw_body_sha256": "5a3a6bb4b1d25ae0bb9edcfd34058305b463bda9b9e3c208282a973d1ce046e3",
+      "removed_source_ranges": [
+        [
+          57,
+          59
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0037",
-    "content": "代赭　味苦寒。主治鬼注、贼风、蛊毒，杀精物恶鬼，腹中毒邪气，女子赤沃漏下。一名须丸。生山谷。\n38",
+    "content": "代赭　味苦寒。主治鬼注、贼风、蛊毒，杀精物恶鬼，腹中毒邪气，女子赤沃漏下。一名须丸。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "玉石部下品",
-      "drug_name": "代赭"
+      "drug_name": "代赭",
+      "cleaning_version": 1,
+      "raw_body_sha256": "bb2deadf775ac4fed302ea2818694565c1b58114098ef9aed1a2daf9ecd7b1ea",
+      "removed_source_ranges": [
+        [
+          47,
+          49
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0038",
-    "content": "卤咸　味苦咸寒。主治大热，消渴，狂烦，除邪，及吐下蛊毒，柔肌肤。大盐，令人吐。戎盐，明目，目痛，益气，坚肌骨，去蛊毒。生池泽。\n39",
+    "content": "卤咸　味苦咸寒。主治大热，消渴，狂烦，除邪，及吐下蛊毒，柔肌肤。大盐，令人吐。戎盐，明目，目痛，益气，坚肌骨，去蛊毒。生池泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "玉石部下品",
-      "drug_name": "卤咸"
+      "drug_name": "卤咸",
+      "cleaning_version": 1,
+      "raw_body_sha256": "24ccd406aa192266db38356e7f3c1349646e471b876ed358da91fd015b68f371",
+      "removed_source_ranges": [
+        [
+          64,
+          66
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0039",
-    "content": "白垩　味苦温。主治女子寒热症瘕、月闭、积聚、阴肿痛，漏下，无子。生山谷。\n40",
+    "content": "白垩　味苦温。主治女子寒热症瘕、月闭、积聚、阴肿痛，漏下，无子。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "玉石部下品",
-      "drug_name": "白垩"
+      "drug_name": "白垩",
+      "cleaning_version": 1,
+      "raw_body_sha256": "0463489c46e43e4fc9621f2fdb3908d9b88b1ed5485dab8b8baee674f534819b",
+      "removed_source_ranges": [
+        [
+          37,
+          39
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0040",
-    "content": "铅丹　味辛微寒。主治咳逆胃反，惊痫癫疾，除热下气。炼化还成九光。久服通神明。生平泽。\n41",
+    "content": "铅丹　味辛微寒。主治咳逆胃反，惊痫癫疾，除热下气。炼化还成九光。久服通神明。生平泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "玉石部下品",
-      "drug_name": "铅丹"
+      "drug_name": "铅丹",
+      "cleaning_version": 1,
+      "raw_body_sha256": "773cf3609cc58d3e729869feac01904751a01181879922b723c09d2863c52731",
+      "removed_source_ranges": [
+        [
+          43,
+          45
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0041",
-    "content": "粉锡　味辛寒。主治伏尸毒螫，杀三虫。　锡铜镜鼻，主治女子血闭，症瘕伏肠，绝孕。一名解锡。生贵阳山谷。\n42",
+    "content": "粉锡　味辛寒。主治伏尸毒螫，杀三虫。　锡铜镜鼻，主治女子血闭，症瘕伏肠，绝孕。一名解锡。生贵阳山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "玉石部下品",
-      "drug_name": "粉锡"
+      "drug_name": "粉锡",
+      "cleaning_version": 1,
+      "raw_body_sha256": "4beb0b2e0864a07604585c546fe2b23cfb809d01ef7adf431c1193247704db44",
+      "removed_source_ranges": [
+        [
+          51,
+          53
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0042",
-    "content": "石灰　味辛温。主治痈疡疥瘙，热气，恶疮癞疾，死肌堕眉，杀痔虫，去黑子息肉。一名恶灰。生山谷。\n43",
+    "content": "石灰　味辛温。主治痈疡疥瘙，热气，恶疮癞疾，死肌堕眉，杀痔虫，去黑子息肉。一名恶灰。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "玉石部下品",
-      "drug_name": "石灰"
+      "drug_name": "石灰",
+      "cleaning_version": 1,
+      "raw_body_sha256": "eb8bfbda4eee5b4cf6a4aa64c9f8f9e0c92ce3b1d542b2531e4264f62f8c4ff1",
+      "removed_source_ranges": [
+        [
+          47,
+          49
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0043",
-    "content": "冬灰　味辛微温。主治黑子，去疣息肉，疽蚀疥瘙。一名藜灰。生川泽。\n44",
+    "content": "冬灰　味辛微温。主治黑子，去疣息肉，疽蚀疥瘙。一名藜灰。生川泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "玉石部下品",
-      "drug_name": "冬灰"
+      "drug_name": "冬灰",
+      "cleaning_version": 1,
+      "raw_body_sha256": "700fa139e7ff16339b9e7410e546076fe6956dfa936e48de70f86bdbb1aa0fce",
+      "removed_source_ranges": [
+        [
+          33,
+          35
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0045",
-    "content": "青芝　味酸平。主明目，补肝气，安精魂，仁恕。久食轻身不老，延年神仙。一名龙芝。生山谷。\n46",
+    "content": "青芝　味酸平。主明目，补肝气，安精魂，仁恕。久食轻身不老，延年神仙。一名龙芝。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "青芝"
+      "drug_name": "青芝",
+      "cleaning_version": 1,
+      "raw_body_sha256": "b391a504e9895935a77dfc8bc0121de46876811fc6d749cfc34c97a273447b86",
+      "removed_source_ranges": [
+        [
+          44,
+          46
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0046",
-    "content": "赤芝　味苦平。主治胸中结，益心气，补中，增智慧，不忘。久食轻身不老，延年神仙。一名丹芝。生山谷。\n47",
+    "content": "赤芝　味苦平。主治胸中结，益心气，补中，增智慧，不忘。久食轻身不老，延年神仙。一名丹芝。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "赤芝"
+      "drug_name": "赤芝",
+      "cleaning_version": 1,
+      "raw_body_sha256": "3c380dbadb362b222d4c3a11708cf0609647df7b4cb77808536729e90cbc40d3",
+      "removed_source_ranges": [
+        [
+          49,
+          51
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0047",
-    "content": "黄芝　味甘平。主治心腹五邪，益脾气，安神，忠信和乐。久食轻身不老，延年神仙。一名金芝。生山谷。\n48",
+    "content": "黄芝　味甘平。主治心腹五邪，益脾气，安神，忠信和乐。久食轻身不老，延年神仙。一名金芝。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "黄芝"
+      "drug_name": "黄芝",
+      "cleaning_version": 1,
+      "raw_body_sha256": "7ccb829f3f9b2d0fc3536d763ce6cec0018ea4803eb09e03b5ac80a93bfda408",
+      "removed_source_ranges": [
+        [
+          48,
+          50
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0048",
-    "content": "白芝　味辛平。主治咳逆上气，益肺气，通利口鼻，强志意勇悍，安魄。久食轻身不老，延年神仙。一名玉芝。生山谷。\n49",
+    "content": "白芝　味辛平。主治咳逆上气，益肺气，通利口鼻，强志意勇悍，安魄。久食轻身不老，延年神仙。一名玉芝。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "白芝"
+      "drug_name": "白芝",
+      "cleaning_version": 1,
+      "raw_body_sha256": "ad92586d1b75d0e08f2671d9cf4d40a357efcd47e2b71521f4d5eac09616fc88",
+      "removed_source_ranges": [
+        [
+          54,
+          56
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0049",
-    "content": "黑芝　味咸平。主治癃，利水道，益肾气，通九窍，聪察。久食轻身不老，延年神仙。一名玄芝。生山谷。\n50",
+    "content": "黑芝　味咸平。主治癃，利水道，益肾气，通九窍，聪察。久食轻身不老，延年神仙。一名玄芝。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "黑芝"
+      "drug_name": "黑芝",
+      "cleaning_version": 1,
+      "raw_body_sha256": "6e137fcfee2725d34e4a76d19ca63f433194fcd39a56591bf1beec30c39b57de",
+      "removed_source_ranges": [
+        [
+          48,
+          50
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0050",
-    "content": "紫芝　味甘温。主治耳聋，利关节，保神，益精气，坚筋骨，好颜色。久食轻身不老，延年神仙。一名木芝。生山谷。\n51",
+    "content": "紫芝　味甘温。主治耳聋，利关节，保神，益精气，坚筋骨，好颜色。久食轻身不老，延年神仙。一名木芝。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "紫芝"
+      "drug_name": "紫芝",
+      "cleaning_version": 1,
+      "raw_body_sha256": "e07ee156810fe75d7fddf2d2e76e6fb9805316fab8cf3905f72adfbbf08852c8",
+      "removed_source_ranges": [
+        [
+          53,
+          55
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0051",
-    "content": "天门冬　味苦平，主治诸暴风湿偏痺，强骨随，杀三虫，去伏尸。久服轻身益气延年。一名颠勒。生山谷。\n52\n术  　味苦温。主治湿痺、死肌、痉疸，止汗除热，消食，化煎饵。久服轻身、延年不饥。一名山蓟。生郑山山谷。\n53",
+    "content": "天门冬　味苦平，主治诸暴风湿偏痺，强骨随，杀三虫，去伏尸。久服轻身益气延年。一名颠勒。生山谷。\n术  　味苦温。主治湿痺、死肌、痉疸，止汗除热，消食，化煎饵。久服轻身、延年不饥。一名山蓟。生郑山山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "天门冬"
+      "drug_name": "天门冬",
+      "cleaning_version": 1,
+      "raw_body_sha256": "f60e97e3a9d08951df9113d134e26c35639c6761b9e89efe955e63e5685a4658",
+      "removed_source_ranges": [
+        [
+          48,
+          51
+        ],
+        [
+          104,
+          106
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0052",
-    "content": "委萎　味甘平。主治中风暴热不能动摇，跌筋结肉，诸不足，久服去面*鼾，好颜色润泽，轻身不老。生川谷。\n54",
+    "content": "委萎　味甘平。主治中风暴热不能动摇，跌筋结肉，诸不足，久服去面*鼾，好颜色润泽，轻身不老。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "委萎"
+      "drug_name": "委萎",
+      "cleaning_version": 1,
+      "raw_body_sha256": "12af4a1b320c71065594b8e9579d7547630aeff2c0e3d2c18bd66a6dace6677a",
+      "removed_source_ranges": [
+        [
+          50,
+          52
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0053",
-    "content": "干地黄　味甘寒。主治折跌绝筋伤中，逐血痺，填骨髓，长肌肉。做汤，除寒热积聚，除痺。生者尤良。一名地髓。生川泽。\n55",
+    "content": "干地黄　味甘寒。主治折跌绝筋伤中，逐血痺，填骨髓，长肌肉。做汤，除寒热积聚，除痺。生者尤良。一名地髓。生川泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "干地黄"
+      "drug_name": "干地黄",
+      "cleaning_version": 1,
+      "raw_body_sha256": "70f843d18be4da2bf3c234332c741003467039ec5ccdd703008df72e9bfbc985",
+      "removed_source_ranges": [
+        [
+          56,
+          58
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0054",
-    "content": "菖蒲　味辛温。主治风寒湿痺，咳逆上气，开心孔，补五脏，通九窍，明耳目，出音声。久服轻身，不忘，不迷惑，延年。一名昌阳。生池泽。\n56",
+    "content": "菖蒲　味辛温。主治风寒湿痺，咳逆上气，开心孔，补五脏，通九窍，明耳目，出音声。久服轻身，不忘，不迷惑，延年。一名昌阳。生池泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "菖蒲"
+      "drug_name": "菖蒲",
+      "cleaning_version": 1,
+      "raw_body_sha256": "9fe4a49b67e83c32b02e9735525b8a1db9161d08e35ca4080ede4bc2c6650076",
+      "removed_source_ranges": [
+        [
+          64,
+          66
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0055",
-    "content": "远志　味苦温。主治咳逆伤中，补不足，除邪气，利九窍，益智慧，耳目聪明，不忘，强智倍力。久服轻身不老。叶名小草。一名葽绕，一名细草。生川谷。\n57",
+    "content": "远志　味苦温。主治咳逆伤中，补不足，除邪气，利九窍，益智慧，耳目聪明，不忘，强智倍力。久服轻身不老。叶名小草。一名葽绕，一名细草。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "远志"
+      "drug_name": "远志",
+      "cleaning_version": 1,
+      "raw_body_sha256": "d6d96c0e920724ecd171ea009b935cf2bcd36f637e784c9de9995d8aa22dd439",
+      "removed_source_ranges": [
+        [
+          70,
+          72
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0056",
-    "content": "泽泻　味甘寒。主治风寒湿痺，乳难，消水，养五脏，益气力，肥健。久服耳目聪明，不饥，延年轻身，面生光，能行水上。一名水泻，一名芒芋，一名鹄泻。生池泽。\n58",
+    "content": "泽泻　味甘寒。主治风寒湿痺，乳难，消水，养五脏，益气力，肥健。久服耳目聪明，不饥，延年轻身，面生光，能行水上。一名水泻，一名芒芋，一名鹄泻。生池泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "泽泻"
+      "drug_name": "泽泻",
+      "cleaning_version": 1,
+      "raw_body_sha256": "bea15bba5b73d529f18759ac2729fbef6d5f9707bde0c231664226257159068d",
+      "removed_source_ranges": [
+        [
+          75,
+          77
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0057",
-    "content": "署豫　味甘小温。主治伤中，补虚羸，除寒热邪气，补中益气力，长肌肉。久服耳目聪明，轻身不饥延年。一名山芋。生山谷。\n59",
+    "content": "署豫　味甘小温。主治伤中，补虚羸，除寒热邪气，补中益气力，长肌肉。久服耳目聪明，轻身不饥延年。一名山芋。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "署豫"
+      "drug_name": "署豫",
+      "cleaning_version": 1,
+      "raw_body_sha256": "1d4f4a8cdc1e5352b10fec4739071faf2dfbbe7a03d09bd6f63945a34aad8346",
+      "removed_source_ranges": [
+        [
+          57,
+          59
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0058",
-    "content": "菊华　味苦平。主治风头，头眩肿痛，目欲脱，泪出，皮肤死饥，恶风湿痺。久服利血气，轻身耐老延年。一名节华。生川泽。\n60",
+    "content": "菊华　味苦平。主治风头，头眩肿痛，目欲脱，泪出，皮肤死饥，恶风湿痺。久服利血气，轻身耐老延年。一名节华。生川泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "菊华"
+      "drug_name": "菊华",
+      "cleaning_version": 1,
+      "raw_body_sha256": "dac2b88e2f99bf343b9b90c735b862836d0da581dd673fbc526842ae211bf84a",
+      "removed_source_ranges": [
+        [
+          57,
+          59
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0059",
-    "content": "甘草　味甘平。主治五脏六腑寒热邪气，坚筋骨，长肌肉，倍力，金创，尰，解毒，久服轻身延年。生川谷。\n61",
+    "content": "甘草　味甘平。主治五脏六腑寒热邪气，坚筋骨，长肌肉，倍力，金创，尰，解毒，久服轻身延年。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "甘草"
+      "drug_name": "甘草",
+      "cleaning_version": 1,
+      "raw_body_sha256": "1a50ab6f959f8f5bb5a2b70da5fc9e2d29758b5c3210b9aa5c172ab7bd3948d1",
+      "removed_source_ranges": [
+        [
+          49,
+          51
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0060",
-    "content": "人参　味甘小寒。主补五脏，安精神，定魂魄，止惊悸，除邪气，明目，开心益智。一名人衔，一名鬼盖。生山谷。\n62",
+    "content": "人参　味甘小寒。主补五脏，安精神，定魂魄，止惊悸，除邪气，明目，开心益智。一名人衔，一名鬼盖。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "人参"
+      "drug_name": "人参",
+      "cleaning_version": 1,
+      "raw_body_sha256": "b4e1aeacacbb5d45c130fd6e4d450624d59792d1a946da56aa4bbbc128f9a651",
+      "removed_source_ranges": [
+        [
+          52,
+          54
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0061",
-    "content": "石斛　味甘平。主治伤中，除痺下气，补五脏虚劳羸瘦，强阴。久服厚肠胃，轻身延年。一名林兰。生山谷。\n63",
+    "content": "石斛　味甘平。主治伤中，除痺下气，补五脏虚劳羸瘦，强阴。久服厚肠胃，轻身延年。一名林兰。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "石斛"
+      "drug_name": "石斛",
+      "cleaning_version": 1,
+      "raw_body_sha256": "8d8e146973abf09cf583403ff0e94c820e4117c59d038ffb9fad69b4790075a9",
+      "removed_source_ranges": [
+        [
+          49,
+          51
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0062",
-    "content": "石龙芮　味苦平。主治风寒湿痺，心腹邪气，利关节，止烦满。久服轻身明目不老。一名鲁果能，一名地椹。生川泽。\n64",
+    "content": "石龙芮　味苦平。主治风寒湿痺，心腹邪气，利关节，止烦满。久服轻身明目不老。一名鲁果能，一名地椹。生川泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "石龙芮"
+      "drug_name": "石龙芮",
+      "cleaning_version": 1,
+      "raw_body_sha256": "e6e3f2e2388b35577decee4a853b25d40f0596a132f381f394a52f71e0eea701",
+      "removed_source_ranges": [
+        [
+          53,
+          55
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0063",
-    "content": "牛膝　味苦（酸）平。主治寒湿痿痺，四肢拘挛，膝痛不可屈伸，逐血气，伤热火烂，堕胎。久服轻身耐老。一名石倍。生川谷。\n65",
+    "content": "牛膝　味苦（酸）平。主治寒湿痿痺，四肢拘挛，膝痛不可屈伸，逐血气，伤热火烂，堕胎。久服轻身耐老。一名石倍。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "牛膝"
+      "drug_name": "牛膝",
+      "cleaning_version": 1,
+      "raw_body_sha256": "c680fe088d4815284e511d5f096426d9de3b99670ed0a6fb63322337fbd559f0",
+      "removed_source_ranges": [
+        [
+          58,
+          60
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0064",
-    "content": "独活　味苦平无毒。主治风寒所出，金创，止痛，贲豚痫痉，女子疝瘕。久服轻身耐老。一名羌活，一名羌青，一名护羌使者。生川谷。\n66",
+    "content": "独活　味苦平无毒。主治风寒所出，金创，止痛，贲豚痫痉，女子疝瘕。久服轻身耐老。一名羌活，一名羌青，一名护羌使者。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "独活"
+      "drug_name": "独活",
+      "cleaning_version": 1,
+      "raw_body_sha256": "90e0a093e1961a8617efd226877e8a9162909d56d8a5994d1958d1c1a5786470",
+      "removed_source_ranges": [
+        [
+          61,
+          63
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0065",
-    "content": "升麻　味甘平。主解百毒，杀百精老物殃鬼，辟温疫瘴邪蛊毒。久服不夭，轻身长年，一名周升麻。生山谷。\n67",
+    "content": "升麻　味甘平。主解百毒，杀百精老物殃鬼，辟温疫瘴邪蛊毒。久服不夭，轻身长年，一名周升麻。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "升麻"
+      "drug_name": "升麻",
+      "cleaning_version": 1,
+      "raw_body_sha256": "af8b0198cb0ee10aae032d6a917e94d44fe39c68e0594f1d6fc036acfdaa001d",
+      "removed_source_ranges": [
+        [
+          49,
+          51
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0066",
-    "content": "茨胡　味苦平。主治心腹肠胃中结气、饮食积聚、寒热邪气，推陈致新，久服轻身、明目、益精。一名地薰。生川谷。\n68",
+    "content": "茨胡　味苦平。主治心腹肠胃中结气、饮食积聚、寒热邪气，推陈致新，久服轻身、明目、益精。一名地薰。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "茨胡"
+      "drug_name": "茨胡",
+      "cleaning_version": 1,
+      "raw_body_sha256": "2b48abe8de98442d8bc63dd050b661ab269f29263ec96918eb3be9d42859201d",
+      "removed_source_ranges": [
+        [
+          53,
+          55
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0067",
-    "content": "防葵　味辛寒。主治疝瘕肠泄，膀胱热结溺不下，咳逆，温疟，癫痫，惊邪狂走。久服坚骨髓，益气轻身。一名梨盖。生川谷。\n69",
+    "content": "防葵　味辛寒。主治疝瘕肠泄，膀胱热结溺不下，咳逆，温疟，癫痫，惊邪狂走。久服坚骨髓，益气轻身。一名梨盖。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "防葵"
+      "drug_name": "防葵",
+      "cleaning_version": 1,
+      "raw_body_sha256": "33982d555d1ab49b0ab30bdac9b7967ee3be402198c84d1ad0defa4b9f451fbc",
+      "removed_source_ranges": [
+        [
+          57,
+          59
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0068",
-    "content": "著实　味苦平。主治阴痿、益气，充肌肤，明目聪慧先知。久服不饥、不老轻身。生川谷。\n70",
+    "content": "著实　味苦平。主治阴痿、益气，充肌肤，明目聪慧先知。久服不饥、不老轻身。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "著实"
+      "drug_name": "著实",
+      "cleaning_version": 1,
+      "raw_body_sha256": "6cf1e5b3798b5ee7783035299452a5b75d71164dd05db661070d1f50c305f29d",
+      "removed_source_ranges": [
+        [
+          41,
+          43
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0069",
-    "content": "奄闾子　味苦小温无毒。主治五脏瘀血，腹中水气，胪胀留热，风寒湿痺，身体诸痛。久服轻身延年不老。生川谷。\n71",
+    "content": "奄闾子　味苦小温无毒。主治五脏瘀血，腹中水气，胪胀留热，风寒湿痺，身体诸痛。久服轻身延年不老。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "奄闾子"
+      "drug_name": "奄闾子",
+      "cleaning_version": 1,
+      "raw_body_sha256": "d0112bbb703fe37e9b13d0606c73cbd13a837d159ff478f319cfb495bf2ca070",
+      "removed_source_ranges": [
+        [
+          52,
+          54
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0070",
-    "content": "薏苡人　味甘微寒。主治筋急拘挛不可屈伸，风湿痺，下气。久服轻身益气。其根下三虫。一名解蠡。生平泽。\n72",
+    "content": "薏苡人　味甘微寒。主治筋急拘挛不可屈伸，风湿痺，下气。久服轻身益气。其根下三虫。一名解蠡。生平泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "薏苡人"
+      "drug_name": "薏苡人",
+      "cleaning_version": 1,
+      "raw_body_sha256": "5be25b408145b4e1248d1451d9a2b42d7980c03b46dbe64fd7ac0ecda4564d4a",
+      "removed_source_ranges": [
+        [
+          50,
+          52
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0071",
-    "content": "车前子　味甘寒无毒。主治气癃，止痛、利水道小便，除湿痺。久服轻身耐老。一名当通。生平泽。\n73",
+    "content": "车前子　味甘寒无毒。主治气癃，止痛、利水道小便，除湿痺。久服轻身耐老。一名当通。生平泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "车前子"
+      "drug_name": "车前子",
+      "cleaning_version": 1,
+      "raw_body_sha256": "d27cba533e21ba6c2526bdc3ea99703605fc40db04694d546c1c6a1ef46f7deb",
+      "removed_source_ranges": [
+        [
+          45,
+          47
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0072",
-    "content": "析蓂子　味辛酸温无毒。主明目，目痛泪出，除痺补五脏，益精光。久服轻身不老。一名蔑析，一名大蕺，一名马辛。生山泽。\n74",
+    "content": "析蓂子　味辛酸温无毒。主明目，目痛泪出，除痺补五脏，益精光。久服轻身不老。一名蔑析，一名大蕺，一名马辛。生山泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "析蓂子"
+      "drug_name": "析蓂子",
+      "cleaning_version": 1,
+      "raw_body_sha256": "937f346ad9072ab6a4007cbdae369655eba00793a466772ac4a2d833bbb571e8",
+      "removed_source_ranges": [
+        [
+          57,
+          59
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0073",
-    "content": "充蔚子　味辛微温。主明目益惊，除水气。久服轻身。茎，主瘾疹痒，可作汤浴。一名益母，一名益明，一名大札。生池泽。\n75",
+    "content": "充蔚子　味辛微温。主明目益惊，除水气。久服轻身。茎，主瘾疹痒，可作汤浴。一名益母，一名益明，一名大札。生池泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "充蔚子"
+      "drug_name": "充蔚子",
+      "cleaning_version": 1,
+      "raw_body_sha256": "351f288aea138a6fb9d7332f1c1ccced32c2f8aa9719770d2998a35b35af6409",
+      "removed_source_ranges": [
+        [
+          56,
+          58
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0074",
-    "content": "木香　味辛温。主治邪气，辟毒疫温鬼，强志，主淋露。久服不梦寤魇寐。生山谷。\n76",
+    "content": "木香　味辛温。主治邪气，辟毒疫温鬼，强志，主淋露。久服不梦寤魇寐。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "木香"
+      "drug_name": "木香",
+      "cleaning_version": 1,
+      "raw_body_sha256": "17e239df3f18c7b15b157c1b2ed2d59f97781d8a19710d13eea1471252cd0668",
+      "removed_source_ranges": [
+        [
+          38,
+          40
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0075",
-    "content": "龙胆　味苦涩。主治骨间寒热，惊痫邪气，续绝伤，定五脏，杀蛊毒。久服益智不忘，轻身耐老。一名陵游。生山谷。\n77",
+    "content": "龙胆　味苦涩。主治骨间寒热，惊痫邪气，续绝伤，定五脏，杀蛊毒。久服益智不忘，轻身耐老。一名陵游。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "龙胆"
+      "drug_name": "龙胆",
+      "cleaning_version": 1,
+      "raw_body_sha256": "89425ad5f19fe5756199df4fc9d1df994b8cc8df0a2c77b6b88a4aafc6e5d226",
+      "removed_source_ranges": [
+        [
+          53,
+          55
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0076",
-    "content": "菟丝子　味辛平。主续绝伤，补不足，益气力，肥健。汁，去面鼾*。久服明目轻身延年。一名菟芦。生山谷。\n78",
+    "content": "菟丝子　味辛平。主续绝伤，补不足，益气力，肥健。汁，去面鼾*。久服明目轻身延年。一名菟芦。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "菟丝子"
+      "drug_name": "菟丝子",
+      "cleaning_version": 1,
+      "raw_body_sha256": "b2593810f2b8a8d64137422c96b2804f503091a7ae844ac96629060ab095d416",
+      "removed_source_ranges": [
+        [
+          50,
+          52
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0077",
-    "content": "巴戟天　味辛微温。主治大风邪气，阴痿不起。强筋骨，安五脏，补中，增志，益气。生山谷。\n79",
+    "content": "巴戟天　味辛微温。主治大风邪气，阴痿不起。强筋骨，安五脏，补中，增志，益气。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "巴戟天"
+      "drug_name": "巴戟天",
+      "cleaning_version": 1,
+      "raw_body_sha256": "639b9a3b6b844539bc07c6d420767e7603b7ea84e10cb0af91fc4146ba9e50bb",
+      "removed_source_ranges": [
+        [
+          43,
+          45
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0078",
-    "content": "白莫　味甘寒。主治寒热、八疸、消渴。补中益气。久服轻身延年。一名谷菜。\n80",
+    "content": "白莫　味甘寒。主治寒热、八疸、消渴。补中益气。久服轻身延年。一名谷菜。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "白莫"
+      "drug_name": "白莫",
+      "cleaning_version": 1,
+      "raw_body_sha256": "1aec73ba4374f8b46d1266ccdcc20fe417936007919a60da9d81dac0ad1e429f",
+      "removed_source_ranges": [
+        [
+          36,
+          38
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0079",
-    "content": "白蒿　味甘平。主治五脏邪气，风寒湿痺，补中益气，长毛发令黑，疗心悬，少食常饥。久服轻身，耳目聪明，不老。生川泽。\n81",
+    "content": "白蒿　味甘平。主治五脏邪气，风寒湿痺，补中益气，长毛发令黑，疗心悬，少食常饥。久服轻身，耳目聪明，不老。生川泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "白蒿"
+      "drug_name": "白蒿",
+      "cleaning_version": 1,
+      "raw_body_sha256": "20c503fe52911d8897c4466a23c5d6a2ad64a1c6e99ed3a86f6c9e5563ec5808",
+      "removed_source_ranges": [
+        [
+          57,
+          59
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0080",
-    "content": "地肤子　味苦寒。主治膀胱热，利小便，补中益精气。久服耳目聪明，轻身耐老。一名地葵。生平泽。\n82",
+    "content": "地肤子　味苦寒。主治膀胱热，利小便，补中益精气。久服耳目聪明，轻身耐老。一名地葵。生平泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "地肤子"
+      "drug_name": "地肤子",
+      "cleaning_version": 1,
+      "raw_body_sha256": "252b9d11be3351c9caafece0a057511973d0a42632a43bf379134dfccbe10b0a",
+      "removed_source_ranges": [
+        [
+          46,
+          48
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0081",
-    "content": "石龙刍　味苦微寒。主治心腹邪气，小便不利，淋闭。风湿鬼注恶毒。久服补虚羸，轻身，耳目聪明，延年。一名龙须，一名草续断。生山谷。\n83",
+    "content": "石龙刍　味苦微寒。主治心腹邪气，小便不利，淋闭。风湿鬼注恶毒。久服补虚羸，轻身，耳目聪明，延年。一名龙须，一名草续断。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "石龙刍"
+      "drug_name": "石龙刍",
+      "cleaning_version": 1,
+      "raw_body_sha256": "43c25bb059d235c46f1c9d0940bcbf72fe8828d57dd4568627788e900e38f1df",
+      "removed_source_ranges": [
+        [
+          64,
+          66
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0082",
-    "content": "落石　味苦温。主治风热死肌，痈伤，口干舌焦，痈肿不消，喉舌肿，水浆不下。久服轻身明目，润泽好颜色，不老延年。一名石鲮，生川谷。\n84",
+    "content": "落石　味苦温。主治风热死肌，痈伤，口干舌焦，痈肿不消，喉舌肿，水浆不下。久服轻身明目，润泽好颜色，不老延年。一名石鲮，生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "落石"
+      "drug_name": "落石",
+      "cleaning_version": 1,
+      "raw_body_sha256": "d5c9d0e9a26c692b32aded50f088743175468f19dcdb76a9b45e6f989032c771",
+      "removed_source_ranges": [
+        [
+          64,
+          66
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0083",
-    "content": "黄连　味苦无毒。主治热气，目痛眦伤泣出，明目，肠澼腹痛下利，妇人阴中肿痛。久服令人不忘。一名王连，生川谷。（亦贴生于树木或墙壁上）\n85",
+    "content": "黄连　味苦无毒。主治热气，目痛眦伤泣出，明目，肠澼腹痛下利，妇人阴中肿痛。久服令人不忘。一名王连，生川谷。（亦贴生于树木或墙壁上）",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "黄连"
+      "drug_name": "黄连",
+      "cleaning_version": 1,
+      "raw_body_sha256": "519a55defd1283fc32c15fd8c2d5cab63aff71a6ac0f4b62b4c29b1da5479707",
+      "removed_source_ranges": [
+        [
+          66,
+          68
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0084",
-    "content": "王不留行　味苦平。主治金创，止血、逐痛，出刺，除风痺内寒。久服轻身耐老增寿。生山谷。\n86",
+    "content": "王不留行　味苦平。主治金创，止血、逐痛，出刺，除风痺内寒。久服轻身耐老增寿。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "王不留行"
+      "drug_name": "王不留行",
+      "cleaning_version": 1,
+      "raw_body_sha256": "2c1f2da2e897c19b67958b264a01b8c7d05e42aca6fd99a4adc63c974c63aa1e",
+      "removed_source_ranges": [
+        [
+          43,
+          45
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0085",
-    "content": "蓝实　味苦寒。主解诸毒，杀虫蚑注鬼螫毒。久服头不白，轻身。生平泽。（靛花，即青黛）\n87",
+    "content": "蓝实　味苦寒。主解诸毒，杀虫蚑注鬼螫毒。久服头不白，轻身。生平泽。（靛花，即青黛）",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "蓝实"
+      "drug_name": "蓝实",
+      "cleaning_version": 1,
+      "raw_body_sha256": "6da515d89fa3ad0b4e8dad3dd6d7f48d5eec6a6d31744fb16dbe355fc8b6a579",
+      "removed_source_ranges": [
+        [
+          42,
+          44
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0086",
-    "content": "景天　味苦酸平。主大热火疮，身热烦，邪恶气。华，主女人漏下赤白，轻身明目。一名戒火，一名慎火。生川谷。\n88",
+    "content": "景天　味苦酸平。主大热火疮，身热烦，邪恶气。华，主女人漏下赤白，轻身明目。一名戒火，一名慎火。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "景天"
+      "drug_name": "景天",
+      "cleaning_version": 1,
+      "raw_body_sha256": "2ec7ee22e4a04c726d817f75046c789d902998fee699268745eec11e929135c3",
+      "removed_source_ranges": [
+        [
+          52,
+          54
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0087",
-    "content": "天名精　味甘寒。主治瘀血血瘕欲死，下血，止血，利小便，除小虫，去痺，除胸中结热，止烦渴。久服轻身耐老。一名麦句姜，一名虾蟆蓝，一名豕首。生川泽。（又名地菘，子名鹤虱，根名吐牛膝）\n89",
+    "content": "天名精　味甘寒。主治瘀血血瘕欲死，下血，止血，利小便，除小虫，去痺，除胸中结热，止烦渴。久服轻身耐老。一名麦句姜，一名虾蟆蓝，一名豕首。生川泽。（又名地菘，子名鹤虱，根名吐牛膝）",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "天名精"
+      "drug_name": "天名精",
+      "cleaning_version": 1,
+      "raw_body_sha256": "d25acedd80dc4ba432389a59af281fff2073e9af8b6b62db0cb34dfd03241646",
+      "removed_source_ranges": [
+        [
+          90,
+          92
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0088",
-    "content": "蒲黄　味甘平，主治心腹膀胱寒热，利小便，止血，消瘀血。久服轻身，益气力，延年神仙。生池泽。\n90",
+    "content": "蒲黄　味甘平，主治心腹膀胱寒热，利小便，止血，消瘀血。久服轻身，益气力，延年神仙。生池泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "蒲黄"
+      "drug_name": "蒲黄",
+      "cleaning_version": 1,
+      "raw_body_sha256": "7beba95cbca3c50f0bd3ba901d169cf9f78f34696d68cd44eb5ae162ffa11e5c",
+      "removed_source_ranges": [
+        [
+          46,
+          48
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0089",
-    "content": "香蒲　味甘平，主治五脏心下邪气，口中烂臭，坚齿、明目、聪耳。久服轻身耐劳。一名*。生池泽。\n91",
+    "content": "香蒲　味甘平，主治五脏心下邪气，口中烂臭，坚齿、明目、聪耳。久服轻身耐劳。一名*。生池泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "香蒲"
+      "drug_name": "香蒲",
+      "cleaning_version": 1,
+      "raw_body_sha256": "dcacca225ea17c9929ab294dac3820d8e4486c79a6fbaef38a6cdcc2fb3d4974",
+      "removed_source_ranges": [
+        [
+          46,
+          48
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0090",
-    "content": "兰草　味辛平。主利水道，杀蛊毒，辟不祥。久服益气、轻身、不老，通神明。一名水香。生池泽。\n92",
+    "content": "兰草　味辛平。主利水道，杀蛊毒，辟不祥。久服益气、轻身、不老，通神明。一名水香。生池泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "兰草"
+      "drug_name": "兰草",
+      "cleaning_version": 1,
+      "raw_body_sha256": "4e7ca8d0de93818180ee31852147e39f2bebf42e971bd3ebae64d6d54bcffab8",
+      "removed_source_ranges": [
+        [
+          45,
+          47
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0091",
-    "content": "决明子　味咸平。主治青芒，目淫肤赤白膜，眼赤痛泪出。久服益精光轻身。生川泽。\n93",
+    "content": "决明子　味咸平。主治青芒，目淫肤赤白膜，眼赤痛泪出。久服益精光轻身。生川泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "决明子"
+      "drug_name": "决明子",
+      "cleaning_version": 1,
+      "raw_body_sha256": "6939e9fb0abbf603090532292ca22bd100abbea7544718053b15467879249191",
+      "removed_source_ranges": [
+        [
+          39,
+          41
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0092",
-    "content": "云实　味辛小温。主治泄利肠澼，杀虫蛊毒，去邪恶结气，止痛，除寒热。华，主治见鬼精物。多食令人狂走。久服轻身，通神明。生川谷。（又名员实、天豆、云英）\n94",
+    "content": "云实　味辛小温。主治泄利肠澼，杀虫蛊毒，去邪恶结气，止痛，除寒热。华，主治见鬼精物。多食令人狂走。久服轻身，通神明。生川谷。（又名员实、天豆、云英）",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "云实"
+      "drug_name": "云实",
+      "cleaning_version": 1,
+      "raw_body_sha256": "3a22c767b2b7afd99aed79858a3814c6a0dfcee1e53e7d19aa5ce115f963a0e9",
+      "removed_source_ranges": [
+        [
+          75,
+          77
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0093",
-    "content": "黄芪　味甘微温。主治痈疽久败疮，排脓止痛，大风癞疾，五痔鼠瘘，补虚，小儿百病。一名戴糁。生山谷。\n95",
+    "content": "黄芪　味甘微温。主治痈疽久败疮，排脓止痛，大风癞疾，五痔鼠瘘，补虚，小儿百病。一名戴糁。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "黄芪"
+      "drug_name": "黄芪",
+      "cleaning_version": 1,
+      "raw_body_sha256": "dfb189d23b2c5280e6697ecee7f710e685f06095fc451fc5c484c5a3deda2dd3",
+      "removed_source_ranges": [
+        [
+          49,
+          51
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0094",
-    "content": "蛇床子　味苦平。主治妇人阴中肿痛，男子阴漏，湿痒，除痺气，利关节，癫痫恶疮。久服轻身。一名蛇粟，一名蛇米。生川谷。\n96",
+    "content": "蛇床子　味苦平。主治妇人阴中肿痛，男子阴漏，湿痒，除痺气，利关节，癫痫恶疮。久服轻身。一名蛇粟，一名蛇米。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "蛇床子"
+      "drug_name": "蛇床子",
+      "cleaning_version": 1,
+      "raw_body_sha256": "ef2f4681ab973df6b0da8092a20df8b0c31bae8f8a58045886e676acc7d9995a",
+      "removed_source_ranges": [
+        [
+          58,
+          60
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0095",
-    "content": "漏芦　味苦咸寒。主治皮肤热，恶疮疽痔，湿痺，下乳汁。久服轻身益气，耳目聪明，不老延年。一名野兰。生山谷。\n97",
+    "content": "漏芦　味苦咸寒。主治皮肤热，恶疮疽痔，湿痺，下乳汁。久服轻身益气，耳目聪明，不老延年。一名野兰。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "漏芦"
+      "drug_name": "漏芦",
+      "cleaning_version": 1,
+      "raw_body_sha256": "da515c8bfec7ac9b3434d77d06b630040c54c06290e3692668970674ba034b4b",
+      "removed_source_ranges": [
+        [
+          53,
+          55
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0096",
-    "content": "茜根　味苦寒。主治寒湿风痺，黄疸。补中。生山谷。\n98",
+    "content": "茜根　味苦寒。主治寒湿风痺，黄疸。补中。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "茜根"
+      "drug_name": "茜根",
+      "cleaning_version": 1,
+      "raw_body_sha256": "0616412a430b6ad0f2957aee3d3a3f4465c9c69179c124a523d076c72cdbf181",
+      "removed_source_ranges": [
+        [
+          25,
+          27
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0097",
-    "content": "旋华　味甘温。主益气，去面鼾*黑色，媚好。根，主腹中寒热邪气，利小便。久服不饥轻身。一名筋根华，一名金沸。生平泽。\n99",
+    "content": "旋华　味甘温。主益气，去面鼾*黑色，媚好。根，主腹中寒热邪气，利小便。久服不饥轻身。一名筋根华，一名金沸。生平泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "旋华"
+      "drug_name": "旋华",
+      "cleaning_version": 1,
+      "raw_body_sha256": "847688c0624f4422d67bb7ece81ba8a0fc4545d4632ba56f7cb6e7b16282c525",
+      "removed_source_ranges": [
+        [
+          58,
+          60
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0098",
-    "content": "白兔藿　味苦平。主治蛇虺蜂虿猘狗菜肉蛊毒，鬼注。一名白葛。生山谷。\n100",
+    "content": "白兔藿　味苦平。主治蛇虺蜂虿猘狗菜肉蛊毒，鬼注。一名白葛。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "白兔藿"
+      "drug_name": "白兔藿",
+      "cleaning_version": 1,
+      "raw_body_sha256": "da1ea1c2138b5ee79abeb0b49f9a36b2e43f7cd0580588bfde1fa8067852ff5c",
+      "removed_source_ranges": [
+        [
+          34,
+          37
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0099",
-    "content": "青蘘　味甘寒。主治五脏邪气，风寒湿痺，益气，补脑髓，坚筋骨。久服耳目聪明，不饥、不老、增寿。巨胜苗也。（即胡麻之苗）生川谷。\n101",
+    "content": "青蘘　味甘寒。主治五脏邪气，风寒湿痺，益气，补脑髓，坚筋骨。久服耳目聪明，不饥、不老、增寿。巨胜苗也。（即胡麻之苗）生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "青蘘"
+      "drug_name": "青蘘",
+      "cleaning_version": 1,
+      "raw_body_sha256": "379fc3242f58096bfaeee0316ea033f53ca62600619462a2136a720abfb70e05",
+      "removed_source_ranges": [
+        [
+          63,
+          66
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0100",
-    "content": "当归　味甘温无毒。主治欬逆上气，温疟热洗洗在皮肤中，妇人漏下绝子诸恶疮疡，金创，主饮之。一名干归。生川谷。\n102",
+    "content": "当归　味甘温无毒。主治欬逆上气，温疟热洗洗在皮肤中，妇人漏下绝子诸恶疮疡，金创，主饮之。一名干归。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部上品",
-      "drug_name": "当归"
+      "drug_name": "当归",
+      "cleaning_version": 1,
+      "raw_body_sha256": "29d318857e4835dae919d9186e2f47903dbb98a3ca267ec8593f394df675017e",
+      "removed_source_ranges": [
+        [
+          54,
+          57
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0102",
-    "content": "赤箭　味辛温。主杀鬼精物，蛊毒恶气。久服益气力，长阴，肥健，轻身增年。一名离母，一名鬼督邮。生川谷。\n104",
+    "content": "赤箭　味辛温。主杀鬼精物，蛊毒恶气。久服益气力，长阴，肥健，轻身增年。一名离母，一名鬼督邮。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "赤箭"
+      "drug_name": "赤箭",
+      "cleaning_version": 1,
+      "raw_body_sha256": "3e6c1673e9cdfb8ed93084286fd529afdd2d7e1578bcfd17be507caea79afa63",
+      "removed_source_ranges": [
+        [
+          51,
+          54
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0103",
-    "content": "麦门冬　味甘平。主治心腹结气，伤中伤饱，胃络脉绝，羸瘦短气。久服轻身、不老、不饥。生川谷。\n105",
+    "content": "麦门冬　味甘平。主治心腹结气，伤中伤饱，胃络脉绝，羸瘦短气。久服轻身、不老、不饥。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "麦门冬"
+      "drug_name": "麦门冬",
+      "cleaning_version": 1,
+      "raw_body_sha256": "4e7730e35fd4245da142ceec1b9d12f8a3333bf3aef20c6633c948bdb4e1f9f2",
+      "removed_source_ranges": [
+        [
+          46,
+          49
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0104",
-    "content": "卷柏　味辛平。主治五脏邪气，女子阴中寒热痛，症瘕，血闭，绝子。久服轻身、和颜色。一名万岁。生山谷。\n106",
+    "content": "卷柏　味辛平。主治五脏邪气，女子阴中寒热痛，症瘕，血闭，绝子。久服轻身、和颜色。一名万岁。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "卷柏"
+      "drug_name": "卷柏",
+      "cleaning_version": 1,
+      "raw_body_sha256": "c0d7fe690464abb8311571d08af80d5837fafa59c7d3a7eaac784d66554c1572",
+      "removed_source_ranges": [
+        [
+          50,
+          53
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0105",
-    "content": "肉松容　味咸。主治五劳七伤，补中，除茎中寒热痛，养五脏，强阴，益精气，多子，妇人症瘕。久服轻身。生山谷。\n107",
+    "content": "肉松容　味咸。主治五劳七伤，补中，除茎中寒热痛，养五脏，强阴，益精气，多子，妇人症瘕。久服轻身。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "肉松容"
+      "drug_name": "肉松容",
+      "cleaning_version": 1,
+      "raw_body_sha256": "75275768a63f5c28f2aa182151c7ec84e2f3475eec930a0af3800a3dbc4d5ccd",
+      "removed_source_ranges": [
+        [
+          53,
+          56
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0106",
-    "content": "蒺藜子　味苦温。主治恶血，破症结积聚喉痺，乳难。久服长肌肉，明目轻身。一名旁通，一名屈人，一名止行，一名豺羽，一名升推。生平泽。\n108",
+    "content": "蒺藜子　味苦温。主治恶血，破症结积聚喉痺，乳难。久服长肌肉，明目轻身。一名旁通，一名屈人，一名止行，一名豺羽，一名升推。生平泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "蒺藜子"
+      "drug_name": "蒺藜子",
+      "cleaning_version": 1,
+      "raw_body_sha256": "88b9e6e191f52f89d9ef056c5dd5c07ca32a5a09ee26b6a880f63381f8deedfa",
+      "removed_source_ranges": [
+        [
+          65,
+          68
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0107",
-    "content": "防风　味甘温无毒。主治大风眩痛，恶风风邪，目盲无所见，风行周身，骨节疼痛，烦满。久服轻身。一名铜芸。生川泽。\n109",
+    "content": "防风　味甘温无毒。主治大风眩痛，恶风风邪，目盲无所见，风行周身，骨节疼痛，烦满。久服轻身。一名铜芸。生川泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "防风"
+      "drug_name": "防风",
+      "cleaning_version": 1,
+      "raw_body_sha256": "12fc1650087b8f9858993269de1074da65c336900aad4043b4833e05b100c987",
+      "removed_source_ranges": [
+        [
+          55,
+          58
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0108",
-    "content": "沙参　味苦微寒无毒。主治血积惊气，除寒热，补中益肺气。久服利人。一名知母。生川谷。\n110",
+    "content": "沙参　味苦微寒无毒。主治血积惊气，除寒热，补中益肺气。久服利人。一名知母。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "沙参"
+      "drug_name": "沙参",
+      "cleaning_version": 1,
+      "raw_body_sha256": "6fa9a6c8fa5bf8a49c1c18ec3c53ea28e73fe11ef5fd806171249d1b3a606554",
+      "removed_source_ranges": [
+        [
+          42,
+          45
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0109",
-    "content": "芎穷　味辛温无毒。主治中风入脑头痛，寒痺筋挛缓急，金创，妇人血闭无子。生川谷。\n111",
+    "content": "芎穷　味辛温无毒。主治中风入脑头痛，寒痺筋挛缓急，金创，妇人血闭无子。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "芎穷"
+      "drug_name": "芎穷",
+      "cleaning_version": 1,
+      "raw_body_sha256": "2810cdfccf0db2f06a519b4b24565f5b97e2d3b33dc23fddbb6787012dd965ec",
+      "removed_source_ranges": [
+        [
+          40,
+          43
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0110",
-    "content": "麋芜　味辛温。主治欬逆，定惊气，辟邪恶，除蛊毒鬼注，去三虫。久服通神。一名薇芜。\n112",
+    "content": "麋芜　味辛温。主治欬逆，定惊气，辟邪恶，除蛊毒鬼注，去三虫。久服通神。一名薇芜。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "麋芜"
+      "drug_name": "麋芜",
+      "cleaning_version": 1,
+      "raw_body_sha256": "805e4a14aa1f334fda91335b7e016992fefb07a7355e74c4b33e664fa32a3168",
+      "removed_source_ranges": [
+        [
+          41,
+          44
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0111",
-    "content": "续断　味苦微温。主治伤寒，补不足，金创痈伤折跌，续筋骨，妇人乳难。久服益气力。一名龙豆，一名属折。生山谷。\n113",
+    "content": "续断　味苦微温。主治伤寒，补不足，金创痈伤折跌，续筋骨，妇人乳难。久服益气力。一名龙豆，一名属折。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "续断"
+      "drug_name": "续断",
+      "cleaning_version": 1,
+      "raw_body_sha256": "7ca4eac442fbe92d3242ad209e4de43f9b2af56475647e0887491b8abbc4964d",
+      "removed_source_ranges": [
+        [
+          54,
+          57
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0112",
-    "content": "茵陈蒿　味苦无毒。主治风湿寒热邪气，热结黄疸。久服轻身、益气、耐老。生太山及丘陵坡岸上。\n114",
+    "content": "茵陈蒿　味苦无毒。主治风湿寒热邪气，热结黄疸。久服轻身、益气、耐老。生太山及丘陵坡岸上。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "茵陈蒿"
+      "drug_name": "茵陈蒿",
+      "cleaning_version": 1,
+      "raw_body_sha256": "0be7449d1137d043dbadeeaa6e6be0dd0daebf6e156d77bc4b21537a7f2036d4",
+      "removed_source_ranges": [
+        [
+          45,
+          48
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0113",
-    "content": "五味　味酸温。主益气、咳逆上气，劳伤羸瘦，补不足，强阴，益男子精。生山谷。\n115",
+    "content": "五味　味酸温。主益气、咳逆上气，劳伤羸瘦，补不足，强阴，益男子精。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "五味"
+      "drug_name": "五味",
+      "cleaning_version": 1,
+      "raw_body_sha256": "c5e025845a2b33eca1106c22d490415cda198d0ede4d36d34012dfcaa329f5f2",
+      "removed_source_ranges": [
+        [
+          38,
+          41
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0114",
-    "content": "秦艽　味苦平。主治寒热邪气，寒湿风痺肢节痛，下水利小便。生山谷。\n116",
+    "content": "秦艽　味苦平。主治寒热邪气，寒湿风痺肢节痛，下水利小便。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "秦艽"
+      "drug_name": "秦艽",
+      "cleaning_version": 1,
+      "raw_body_sha256": "243e5d8cebf667faeecff1ad50bb0e076512adf3e2da69e156c1a97154830e2c",
+      "removed_source_ranges": [
+        [
+          33,
+          36
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0115",
-    "content": "黄芩　味苦平。主治诸热黄疸，肠澼泄利，逐水，下血闭，恶疮疽蚀，火疡。一名腐肠。生川谷。\n117",
+    "content": "黄芩　味苦平。主治诸热黄疸，肠澼泄利，逐水，下血闭，恶疮疽蚀，火疡。一名腐肠。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "黄芩"
+      "drug_name": "黄芩",
+      "cleaning_version": 1,
+      "raw_body_sha256": "69a098e41138a60ef7079853f2f3ecc8bc5e42b9913e9300af917b98d65ae04f",
+      "removed_source_ranges": [
+        [
+          44,
+          47
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0116",
-    "content": "勺药　味苦。主治邪气腹痛，除血痺，破坚积寒热疝瘕，止痛，利小便，益气。生川谷。\n118",
+    "content": "勺药　味苦。主治邪气腹痛，除血痺，破坚积寒热疝瘕，止痛，利小便，益气。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "勺药"
+      "drug_name": "勺药",
+      "cleaning_version": 1,
+      "raw_body_sha256": "274b6416537912a08c9ab44a8a95fe863334266255ab05fb50b89ed235038dfe",
+      "removed_source_ranges": [
+        [
+          40,
+          43
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0117",
-    "content": "干姜　味辛温。主治胸满咳逆上气，温中、止血，出汗，逐风湿痺，肠澼下利，生者尤良。久服去臭气，通神明。生川谷。\n119",
+    "content": "干姜　味辛温。主治胸满咳逆上气，温中、止血，出汗，逐风湿痺，肠澼下利，生者尤良。久服去臭气，通神明。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "干姜"
+      "drug_name": "干姜",
+      "cleaning_version": 1,
+      "raw_body_sha256": "d254624b523d108ad43458baf7185409709f599654f59ff3f518632032ee1b34",
+      "removed_source_ranges": [
+        [
+          55,
+          58
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0118",
-    "content": "蒿本　味辛微温。主治妇人疝瘕，阴中寒肿痛，腹中急，除风头痛，长肌肤，悦颜色。一名鬼卿，一名地新。生山谷。\n120",
+    "content": "蒿本　味辛微温。主治妇人疝瘕，阴中寒肿痛，腹中急，除风头痛，长肌肤，悦颜色。一名鬼卿，一名地新。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "蒿本"
+      "drug_name": "蒿本",
+      "cleaning_version": 1,
+      "raw_body_sha256": "f0f7e19c463fd1cddd0261894f1ffcdf236c26d203d2a20ea8bf440b5c6dd727",
+      "removed_source_ranges": [
+        [
+          53,
+          56
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0119",
-    "content": "麻黄　味苦温无毒。主治中风伤寒头痛，温疟，发表出汗，去邪热气，止欬逆上气，除寒热，破症坚积聚。一名龙沙。生山谷。\n121",
+    "content": "麻黄　味苦温无毒。主治中风伤寒头痛，温疟，发表出汗，去邪热气，止欬逆上气，除寒热，破症坚积聚。一名龙沙。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "麻黄"
+      "drug_name": "麻黄",
+      "cleaning_version": 1,
+      "raw_body_sha256": "2c4154d86b2b46a7bca41c11b7b2bad088ba9ae8c587f3d7bbf8778e071fe428",
+      "removed_source_ranges": [
+        [
+          57,
+          60
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0120",
-    "content": "葛根　味甘平。主治消渴，身大热，呕吐，诸痺，起阴气，解诸毒。葛谷，主下利十岁以上。一名鸡齐根。生川谷。\n122",
+    "content": "葛根　味甘平。主治消渴，身大热，呕吐，诸痺，起阴气，解诸毒。葛谷，主下利十岁以上。一名鸡齐根。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "葛根"
+      "drug_name": "葛根",
+      "cleaning_version": 1,
+      "raw_body_sha256": "4edc56184e9c6ee5b6f1fb196b47c537432b31ef5a9f1c02a71040ca5dbc353a",
+      "removed_source_ranges": [
+        [
+          52,
+          55
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0121",
-    "content": "知母　味苦寒无毒。主治消渴热中，除邪气，肢体浮肿，下水，补不足，益气。一名母蚳、连母、野蓼、地参、水参、水浚、货母。生川谷。\n123",
+    "content": "知母　味苦寒无毒。主治消渴热中，除邪气，肢体浮肿，下水，补不足，益气。一名母蚳、连母、野蓼、地参、水参、水浚、货母。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "知母"
+      "drug_name": "知母",
+      "cleaning_version": 1,
+      "raw_body_sha256": "5ef9c6cbb0bb853738ac1113d6be8b0eae6e4ea7ae3ffc69936a6b1aaebceb75",
+      "removed_source_ranges": [
+        [
+          63,
+          66
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0122",
-    "content": "贝母　味辛平。主治伤寒烦热，淋沥、邪气、疝瘕，喉痺，乳难。金疮风痉。一名空草。\n124",
+    "content": "贝母　味辛平。主治伤寒烦热，淋沥、邪气、疝瘕，喉痺，乳难。金疮风痉。一名空草。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "贝母"
+      "drug_name": "贝母",
+      "cleaning_version": 1,
+      "raw_body_sha256": "c1b2a0ee36bc6e9390b572526589c334b8c8492fe17cadc821c11a67ecde5395",
+      "removed_source_ranges": [
+        [
+          40,
+          43
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0123",
-    "content": "栝楼　味苦寒。主治消渴，身热烦满，大热。补虚安中，续绝伤。一名地楼。生川谷及山阴。\n125",
+    "content": "栝楼　味苦寒。主治消渴，身热烦满，大热。补虚安中，续绝伤。一名地楼。生川谷及山阴。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "栝楼"
+      "drug_name": "栝楼",
+      "cleaning_version": 1,
+      "raw_body_sha256": "3972f22f22e632b665a39aee2e6ada29a82262cf6235834d4340e2f689e0ab74",
+      "removed_source_ranges": [
+        [
+          42,
+          45
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0124",
-    "content": "丹参　味苦微寒无毒。主治心腹邪气，肠鸣幽幽如走水，寒热积聚，破症除瘕，止烦满，益气。一名却蝉草。生山谷。\n126",
+    "content": "丹参　味苦微寒无毒。主治心腹邪气，肠鸣幽幽如走水，寒热积聚，破症除瘕，止烦满，益气。一名却蝉草。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "丹参"
+      "drug_name": "丹参",
+      "cleaning_version": 1,
+      "raw_body_sha256": "aec124395745629ab32fe00b72b4e877bb1319d1629d013241c26a228865685d",
+      "removed_source_ranges": [
+        [
+          53,
+          56
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0125",
-    "content": "玄参　味苦微寒无毒。主治腹中寒热积聚，女子产乳余疾。补肾气，令人目明。一名重台。生川谷。\n127",
+    "content": "玄参　味苦微寒无毒。主治腹中寒热积聚，女子产乳余疾。补肾气，令人目明。一名重台。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "玄参"
+      "drug_name": "玄参",
+      "cleaning_version": 1,
+      "raw_body_sha256": "e3a0d7b1acb496da682850bb6471709e90064fbfd133bc1d178f606534d69712",
+      "removed_source_ranges": [
+        [
+          45,
+          48
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0126",
-    "content": "苦参　味苦寒。主治心腹结气，疝瘕积聚，黄疸，溺有余沥，逐水，除痈肿。补中，明目止泪。一名水槐，一名苦识*。生山谷及田野。\n128",
+    "content": "苦参　味苦寒。主治心腹结气，疝瘕积聚，黄疸，溺有余沥，逐水，除痈肿。补中，明目止泪。一名水槐，一名苦识*。生山谷及田野。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "苦参"
+      "drug_name": "苦参",
+      "cleaning_version": 1,
+      "raw_body_sha256": "6426d351391109cd0d8b4f650f2cc0edecafcb4f00116af6e37c17a044f6f65a",
+      "removed_source_ranges": [
+        [
+          61,
+          64
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0127",
-    "content": "狗脊　味苦平。主腰背强，关机缓急，周痺，寒湿膝痛。颇利老人。一名百枝。生川谷。\n129",
+    "content": "狗脊　味苦平。主腰背强，关机缓急，周痺，寒湿膝痛。颇利老人。一名百枝。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "狗脊"
+      "drug_name": "狗脊",
+      "cleaning_version": 1,
+      "raw_body_sha256": "078ee8738700f103b35f4dcd80e59e8a492a23d7c011295a6dc8de92a8811170",
+      "removed_source_ranges": [
+        [
+          40,
+          43
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0128",
-    "content": "萆薢　味苦平。主治腰背痛强，骨节风寒湿周痺。恶疮不瘳，热气。生山谷。\n130",
+    "content": "萆薢　味苦平。主治腰背痛强，骨节风寒湿周痺。恶疮不瘳，热气。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "萆薢"
+      "drug_name": "萆薢",
+      "cleaning_version": 1,
+      "raw_body_sha256": "ec82358a5614714d25f44780de3aa537588f389daccdb148585fd45b58614e05",
+      "removed_source_ranges": [
+        [
+          35,
+          38
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0129",
-    "content": "通草　味辛平。主去恶虫，除脾胃寒热，通利九窍血脉关节，令人不忘。一名附支。生山谷。\n131",
+    "content": "通草　味辛平。主去恶虫，除脾胃寒热，通利九窍血脉关节，令人不忘。一名附支。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "通草"
+      "drug_name": "通草",
+      "cleaning_version": 1,
+      "raw_body_sha256": "380802f1abbb55134e984000ec4c4f9045653825ebfbbe09e732bd9d92b8a10f",
+      "removed_source_ranges": [
+        [
+          42,
+          45
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0130",
-    "content": "瞿麦　味苦寒。主治关格诸癃结，小便不通，出刺，决痈肿，明目去翳，破胎堕子，下闭血。一名巨句麦。生川谷。\n132",
+    "content": "瞿麦　味苦寒。主治关格诸癃结，小便不通，出刺，决痈肿，明目去翳，破胎堕子，下闭血。一名巨句麦。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "瞿麦"
+      "drug_name": "瞿麦",
+      "cleaning_version": 1,
+      "raw_body_sha256": "9a32b780f3443e7e2b1f952c5dacc227e7b876dc6d0459b01dc4eed5534c354e",
+      "removed_source_ranges": [
+        [
+          52,
+          55
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0131",
-    "content": "败酱　味苦平。主治暴热火疮，赤气，疥瘙疽痔，马鞍，热气。一名鹿肠。生川谷。\n133",
+    "content": "败酱　味苦平。主治暴热火疮，赤气，疥瘙疽痔，马鞍，热气。一名鹿肠。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "败酱"
+      "drug_name": "败酱",
+      "cleaning_version": 1,
+      "raw_body_sha256": "c4c10a958b0e6e7b2ad674a2e9dec56cd44382ec4d830ba8171986ec75e6760b",
+      "removed_source_ranges": [
+        [
+          38,
+          41
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0132",
-    "content": "白芷　味辛温。主治女人漏下赤白，血闭，阴肿，寒热，风头，侵目泪出，长肌肤、润泽，可作面脂。一名芳香。生川谷。\n134",
+    "content": "白芷　味辛温。主治女人漏下赤白，血闭，阴肿，寒热，风头，侵目泪出，长肌肤、润泽，可作面脂。一名芳香。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "白芷"
+      "drug_name": "白芷",
+      "cleaning_version": 1,
+      "raw_body_sha256": "8669983bad6dde897c7927325580ff729e708f71edd111894d6210d8bfb17e0c",
+      "removed_source_ranges": [
+        [
+          55,
+          58
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0133",
-    "content": "杜若　味辛微温。主治胸胁下逆气，温中，风入脑户，头肿痛，多涕泪出。久服益精、明目、轻身。一名杜蘅。生川泽。\n135",
+    "content": "杜若　味辛微温。主治胸胁下逆气，温中，风入脑户，头肿痛，多涕泪出。久服益精、明目、轻身。一名杜蘅。生川泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "杜若"
+      "drug_name": "杜若",
+      "cleaning_version": 1,
+      "raw_body_sha256": "64396d9499a98c3254a4f95c8e4506ff2d3820f28ac30d7f712958c26182a850",
+      "removed_source_ranges": [
+        [
+          54,
+          57
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0134",
-    "content": "紫草　味苦寒。主心腹邪气、五疸，补中益气，利九窍，通水道。一名紫丹，一名紫芙，一名地血。生山谷。\n136",
+    "content": "紫草　味苦寒。主心腹邪气、五疸，补中益气，利九窍，通水道。一名紫丹，一名紫芙，一名地血。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "紫草"
+      "drug_name": "紫草",
+      "cleaning_version": 1,
+      "raw_body_sha256": "1d14a17e1a4aca08a94094a8252089cdddeff9a85c3ea02dc38bf67cbae4c3d5",
+      "removed_source_ranges": [
+        [
+          49,
+          52
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0135",
-    "content": "紫菀　味苦温。主治咳逆上气，胸中寒热结气，去蛊毒痿蟨，安五脏。生山谷。\n137",
+    "content": "紫菀　味苦温。主治咳逆上气，胸中寒热结气，去蛊毒痿蟨，安五脏。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "紫菀"
+      "drug_name": "紫菀",
+      "cleaning_version": 1,
+      "raw_body_sha256": "d68af12f89f314eb654bb788ba1f7d55526f69b21fbe96b0dfef57c1d284bf58",
+      "removed_source_ranges": [
+        [
+          36,
+          39
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0136",
-    "content": "白鲜　味苦寒。主治头风，黄疸，咳逆，淋沥，女子阴中肿痛，湿痺死肌，不可屈伸，起止行步。生川谷。\n138",
+    "content": "白鲜　味苦寒。主治头风，黄疸，咳逆，淋沥，女子阴中肿痛，湿痺死肌，不可屈伸，起止行步。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "白鲜"
+      "drug_name": "白鲜",
+      "cleaning_version": 1,
+      "raw_body_sha256": "cdbdb8927b66bb568494faae02ad6eaa31d4008de7bf7c7548861838b94a4198",
+      "removed_source_ranges": [
+        [
+          48,
+          51
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0137",
-    "content": "薇衔　味苦平。主治风湿痺，历节痛，惊痫吐舌，悸气贼风，鼠瘘痈肿。一名麋衔。生川泽。\n139",
+    "content": "薇衔　味苦平。主治风湿痺，历节痛，惊痫吐舌，悸气贼风，鼠瘘痈肿。一名麋衔。生川泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "薇衔"
+      "drug_name": "薇衔",
+      "cleaning_version": 1,
+      "raw_body_sha256": "32b07366d4ce72e2631de8577dd6aee4045e1eedd1704e18f1c98e7a1c67dbb5",
+      "removed_source_ranges": [
+        [
+          42,
+          45
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0138",
-    "content": "白薇　味苦平。主治暴中风身热，肢满，忽忽不知人，狂惑邪气，寒热酸疼，温疟洗洗，发作有时。生川泽。\n140",
+    "content": "白薇　味苦平。主治暴中风身热，肢满，忽忽不知人，狂惑邪气，寒热酸疼，温疟洗洗，发作有时。生川泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "白薇"
+      "drug_name": "白薇",
+      "cleaning_version": 1,
+      "raw_body_sha256": "52e36cb51f4518ae1b2e72b2aba87888ec7f257d163bda7605819b94aa3602e6",
+      "removed_source_ranges": [
+        [
+          49,
+          52
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0139",
-    "content": "葈耳实　味甘温。主治风头寒痛，风湿周痺，四肢拘挛痛，恶肉死肌。久服益气，耳目聪明，强志轻身。一名胡葈，一名地葵。生川谷。\n141",
+    "content": "葈耳实　味甘温。主治风头寒痛，风湿周痺，四肢拘挛痛，恶肉死肌。久服益气，耳目聪明，强志轻身。一名胡葈，一名地葵。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "葈耳实"
+      "drug_name": "葈耳实",
+      "cleaning_version": 1,
+      "raw_body_sha256": "b0763463be570c91d585dea54ad463e7eb9cbcb59eaea3bbe4c84ae2d43611a7",
+      "removed_source_ranges": [
+        [
+          61,
+          64
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0140",
-    "content": "茅根　味甘寒。主治劳伤虚羸，补中益气，除瘀血，血闭寒热，利小便。其苗主下水。一名兰根，一名茹根。生山谷。\n142",
+    "content": "茅根　味甘寒。主治劳伤虚羸，补中益气，除瘀血，血闭寒热，利小便。其苗主下水。一名兰根，一名茹根。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "茅根"
+      "drug_name": "茅根",
+      "cleaning_version": 1,
+      "raw_body_sha256": "94245d1fc3bdc52ba8fd75e7f0f4f8cee99cad7fecb9027ba21a0d9be842c4be",
+      "removed_source_ranges": [
+        [
+          53,
+          56
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0141",
-    "content": "酸酱　味酸平。主治热烦满，定志益气，利水道，产难，吞其实立产。一名酢酱。生川泽。\n143",
+    "content": "酸酱　味酸平。主治热烦满，定志益气，利水道，产难，吞其实立产。一名酢酱。生川泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "酸酱"
+      "drug_name": "酸酱",
+      "cleaning_version": 1,
+      "raw_body_sha256": "aca8c72b9ddb5f4e0f729d1a6f0c7aa8d90f00e43cda82d4a43a88407ce4745e",
+      "removed_source_ranges": [
+        [
+          41,
+          44
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0142",
-    "content": "淫羊藿　味辛寒。主治阴痿，绝伤，茎中痛，利小便。益气力，强志。一名刚前。生山谷。\n144",
+    "content": "淫羊藿　味辛寒。主治阴痿，绝伤，茎中痛，利小便。益气力，强志。一名刚前。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "淫羊藿"
+      "drug_name": "淫羊藿",
+      "cleaning_version": 1,
+      "raw_body_sha256": "9629d1ecdc1273ab0f0518d07e07abbaa14f2c96647e370fe038fc3d3abd9e54",
+      "removed_source_ranges": [
+        [
+          41,
+          44
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0143",
-    "content": "蠡实　味甘平。主治皮肤寒热，胃中热气，风寒湿痺。坚筋骨，令人嗜食。久服轻身。华叶，去白虫。一名剧草，一名三坚，一名豕首。生川谷。\n145",
+    "content": "蠡实　味甘平。主治皮肤寒热，胃中热气，风寒湿痺。坚筋骨，令人嗜食。久服轻身。华叶，去白虫。一名剧草，一名三坚，一名豕首。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "蠡实"
+      "drug_name": "蠡实",
+      "cleaning_version": 1,
+      "raw_body_sha256": "99ccfc026be7235feb8736757068872e07544fd042abf9d0775e6d42cbf4f73d",
+      "removed_source_ranges": [
+        [
+          65,
+          68
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0144",
-    "content": "款冬　味辛温。主治咳逆上气，善喘，喉痺，诸惊痫，寒热邪气。一名槖吾、颗东、虎虚、菟奚。生山谷。\n146",
+    "content": "款冬　味辛温。主治咳逆上气，善喘，喉痺，诸惊痫，寒热邪气。一名槖吾、颗东、虎虚、菟奚。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "款冬"
+      "drug_name": "款冬",
+      "cleaning_version": 1,
+      "raw_body_sha256": "ab9295526d78e6373503c358ac6b9fc53043cb5444797e2824464f637079f6ee",
+      "removed_source_ranges": [
+        [
+          48,
+          51
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0145",
-    "content": "防己　味辛平。主治风寒温疟热气，诸痫，除邪利大小便。一名解离。生川谷。\n147",
+    "content": "防己　味辛平。主治风寒温疟热气，诸痫，除邪利大小便。一名解离。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "防己"
+      "drug_name": "防己",
+      "cleaning_version": 1,
+      "raw_body_sha256": "ea3cf041ccfc08f80b132fa1495272349154701b6e3c0ddef60b76fe909e3a20",
+      "removed_source_ranges": [
+        [
+          36,
+          39
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0146",
-    "content": "女菀　味辛温。主治风寒洗洗，霍乱泄痢，肠鸣上下无常处，惊痫寒热百疾。生川谷。\n148",
+    "content": "女菀　味辛温。主治风寒洗洗，霍乱泄痢，肠鸣上下无常处，惊痫寒热百疾。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "女菀"
+      "drug_name": "女菀",
+      "cleaning_version": 1,
+      "raw_body_sha256": "d3d728489e8d5f12716569794a3e14d5c3ef9b6728ba45df3c75d0175f78295e",
+      "removed_source_ranges": [
+        [
+          39,
+          42
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0147",
-    "content": "泽兰　味酸无毒。主治乳妇衄血，中风余疾，大腹水肿，身面四支浮肿，骨节中水，金创，痈肿疮脓。一名虎兰，一名龙枣。生泽傍。\n149",
+    "content": "泽兰　味酸无毒。主治乳妇衄血，中风余疾，大腹水肿，身面四支浮肿，骨节中水，金创，痈肿疮脓。一名虎兰，一名龙枣。生泽傍。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "泽兰"
+      "drug_name": "泽兰",
+      "cleaning_version": 1,
+      "raw_body_sha256": "888f30ea90c730d34f34ac744bcb32a4b6f9b7e1e0356326b76bcb52531b8bfc",
+      "removed_source_ranges": [
+        [
+          60,
+          63
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0148",
-    "content": "地榆　味苦微寒。主治妇人乳痛，七伤，带下病，止痛，除恶肉，止汗，疗金创。生山谷。\n150",
+    "content": "地榆　味苦微寒。主治妇人乳痛，七伤，带下病，止痛，除恶肉，止汗，疗金创。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "地榆"
+      "drug_name": "地榆",
+      "cleaning_version": 1,
+      "raw_body_sha256": "e4940bbb39b6f9425885c428caf77a4712af9803f9f1ac558ea4e4eb093f742a",
+      "removed_source_ranges": [
+        [
+          41,
+          44
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0149",
-    "content": "王孙　味苦平无毒。主治五脏邪气，寒湿痺，四肢疼酸，膝冷痛。生川谷。\n151",
+    "content": "王孙　味苦平无毒。主治五脏邪气，寒湿痺，四肢疼酸，膝冷痛。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "王孙"
+      "drug_name": "王孙",
+      "cleaning_version": 1,
+      "raw_body_sha256": "00daa86c29b4c9d3676453814f451cfecc637de2bd5a10a2257e964290c25535",
+      "removed_source_ranges": [
+        [
+          34,
+          37
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0150",
-    "content": "爵床　味咸寒。主治腰脊痛不得著床，俯仰艰难，除热，可作浴汤。生山谷。\n152",
+    "content": "爵床　味咸寒。主治腰脊痛不得著床，俯仰艰难，除热，可作浴汤。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "爵床"
+      "drug_name": "爵床",
+      "cleaning_version": 1,
+      "raw_body_sha256": "e2838f68b6c6fbc923d89f3285b2c5ff8d34113945d521a9257e5a5ff243b2fb",
+      "removed_source_ranges": [
+        [
+          35,
+          38
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0151",
-    "content": "马先蒿　味苦平。主治寒热鬼注，中风湿痺，女子带下病，无子。一名马矢蒿。生川泽。\n153",
+    "content": "马先蒿　味苦平。主治寒热鬼注，中风湿痺，女子带下病，无子。一名马矢蒿。生川泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "马先蒿"
+      "drug_name": "马先蒿",
+      "cleaning_version": 1,
+      "raw_body_sha256": "7aeaabebc26b3ce496f914aaceacd4d91b59129d6fceee3ead964ccf33c2d524",
+      "removed_source_ranges": [
+        [
+          40,
+          43
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0152",
-    "content": "蜀羊泉　味苦微寒。主治头秃恶疮，热气疥瘙痂癣虫，疗龋齿。生川谷。\n154",
+    "content": "蜀羊泉　味苦微寒。主治头秃恶疮，热气疥瘙痂癣虫，疗龋齿。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "蜀羊泉"
+      "drug_name": "蜀羊泉",
+      "cleaning_version": 1,
+      "raw_body_sha256": "12f688a821d1abbd7c19cfc8f9bd63e1b9e403e537ead7db22ba9f002640a7f0",
+      "removed_source_ranges": [
+        [
+          33,
+          36
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0153",
-    "content": "积雪草　味苦寒，主治大热，恶疮痈疽，浸淫赤熛，皮肤赤，身热。生川谷。\n155",
+    "content": "积雪草　味苦寒，主治大热，恶疮痈疽，浸淫赤熛，皮肤赤，身热。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "积雪草"
+      "drug_name": "积雪草",
+      "cleaning_version": 1,
+      "raw_body_sha256": "b9226caad1c4b6287007fb8da2632008135407893924f174c216fe4a976fb8c0",
+      "removed_source_ranges": [
+        [
+          35,
+          38
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0154",
-    "content": "垣衣　味酸无毒。主治黄疸，心烦咳逆，血气，暴热在肠胃，金创内寒。久服补中益气，长肌，好颜色。一名昔邪，一名乌韭，一名垣嬴，一名天韭，一名鼠韭。生古垣墙阴或屋上。\n156",
+    "content": "垣衣　味酸无毒。主治黄疸，心烦咳逆，血气，暴热在肠胃，金创内寒。久服补中益气，长肌，好颜色。一名昔邪，一名乌韭，一名垣嬴，一名天韭，一名鼠韭。生古垣墙阴或屋上。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "垣衣"
+      "drug_name": "垣衣",
+      "cleaning_version": 1,
+      "raw_body_sha256": "b0123da5e75a4e0a1806dc1a02cdfdc4e619b584e786bb7a7b8479ae01c84636",
+      "removed_source_ranges": [
+        [
+          81,
+          84
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0155",
-    "content": "水萍　味辛寒。主治暴热身痒，下水气，胜酒，长须发，止消渴。久服轻身。一名水华。生池泽。\n157",
+    "content": "水萍　味辛寒。主治暴热身痒，下水气，胜酒，长须发，止消渴。久服轻身。一名水华。生池泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "水萍"
+      "drug_name": "水萍",
+      "cleaning_version": 1,
+      "raw_body_sha256": "5f11a2265bb2da86c951494d7dd70157cfeb59e5ea5c52cae89453cb7b328909",
+      "removed_source_ranges": [
+        [
+          44,
+          47
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0156",
-    "content": "海藻　味苦寒。主治瘿瘤气，颈下核，破散结气，痈肿，症瘕坚气，腹中上下鸣，下十二水肿。一名落首。生池泽。\n158",
+    "content": "海藻　味苦寒。主治瘿瘤气，颈下核，破散结气，痈肿，症瘕坚气，腹中上下鸣，下十二水肿。一名落首。生池泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "海藻"
+      "drug_name": "海藻",
+      "cleaning_version": 1,
+      "raw_body_sha256": "a2d2601183e6cdc0018c72b2306c623d979834fc13eef822b1de3e8f06d758ca",
+      "removed_source_ranges": [
+        [
+          52,
+          55
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0157",
-    "content": "桔梗　味苦无毒。主治胸胁痛如刀刺，腹满肠鸣幽幽，惊恐悸气。生山谷。\n159",
+    "content": "桔梗　味苦无毒。主治胸胁痛如刀刺，腹满肠鸣幽幽，惊恐悸气。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "桔梗"
+      "drug_name": "桔梗",
+      "cleaning_version": 1,
+      "raw_body_sha256": "ab14d1d3c773d0aafdea84f4f2d738bd32ec0f51c6c6d8056998220e34ba3912",
+      "removed_source_ranges": [
+        [
+          34,
+          37
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0158",
-    "content": "旋覆花　味咸温。主治结气，胁下满，惊悸，除水，去五脏间寒热。补中下气。一名金沸草，一名盛湛。生川谷。\n160",
+    "content": "旋覆花　味咸温。主治结气，胁下满，惊悸，除水，去五脏间寒热。补中下气。一名金沸草，一名盛湛。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "旋覆花"
+      "drug_name": "旋覆花",
+      "cleaning_version": 1,
+      "raw_body_sha256": "ce0cbe4ee7a338c8da42456d1970ae182d3770f9b3e816c87348dfb0ddcec7fa",
+      "removed_source_ranges": [
+        [
+          51,
+          54
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0159",
-    "content": "蛇全　味苦微寒。主治惊痫寒热邪气，除热，金创，疽痔鼠瘘，恶疮头疡。一名蛇衔。生山谷。\n161",
+    "content": "蛇全　味苦微寒。主治惊痫寒热邪气，除热，金创，疽痔鼠瘘，恶疮头疡。一名蛇衔。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "蛇全"
+      "drug_name": "蛇全",
+      "cleaning_version": 1,
+      "raw_body_sha256": "664de57a9821b97079315f9ec6d731f0b0028c94060d0bfa7f683ad16147a689",
+      "removed_source_ranges": [
+        [
+          43,
+          46
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0160",
-    "content": "假苏　味辛温。主治寒热鼠瘘瘰痨生疮，破结聚气，下瘀血，除湿痺。一名鼠蓂。生川泽。\n162",
+    "content": "假苏　味辛温。主治寒热鼠瘘瘰痨生疮，破结聚气，下瘀血，除湿痺。一名鼠蓂。生川泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部中品",
-      "drug_name": "假苏"
+      "drug_name": "假苏",
+      "cleaning_version": 1,
+      "raw_body_sha256": "53727fe56ab1aaefcc73ab94d6f2ce856cc81f58250f848d02e8be5de06954ea",
+      "removed_source_ranges": [
+        [
+          41,
+          44
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0162",
-    "content": "营实　味酸温。主治痈疽恶疮，结肉跌筋，败疮热气，阴蚀不瘳，利关节。一名墙薇，一名墙麻，一名牛棘。生山谷。\n164",
+    "content": "营实　味酸温。主治痈疽恶疮，结肉跌筋，败疮热气，阴蚀不瘳，利关节。一名墙薇，一名墙麻，一名牛棘。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "营实"
+      "drug_name": "营实",
+      "cleaning_version": 1,
+      "raw_body_sha256": "8419f9b4be66b0642a079da5d1d80d8e5c4f250f4d07331202869c3b1faa5b35",
+      "removed_source_ranges": [
+        [
+          53,
+          56
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0163",
-    "content": "牡丹　味辛寒。主治寒热中风，瘈疭痉，惊痫邪气，除症坚，瘀血，留舍肠胃，安五脏，疗痈疮。一名鹿韭，一名鼠姑。生山谷。\n165",
+    "content": "牡丹　味辛寒。主治寒热中风，瘈疭痉，惊痫邪气，除症坚，瘀血，留舍肠胃，安五脏，疗痈疮。一名鹿韭，一名鼠姑。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "牡丹"
+      "drug_name": "牡丹",
+      "cleaning_version": 1,
+      "raw_body_sha256": "fbbb8f2a42d04f767da5b3d3d20cbda12a1ac91e927cc0ff8dac20bbfb0cf595",
+      "removed_source_ranges": [
+        [
+          58,
+          61
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0164",
-    "content": "石韦　味苦平。主治劳热邪气，五癃闭不通，利小便水道。一名石*樜。生山谷石上。\n166",
+    "content": "石韦　味苦平。主治劳热邪气，五癃闭不通，利小便水道。一名石*樜。生山谷石上。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "石韦"
+      "drug_name": "石韦",
+      "cleaning_version": 1,
+      "raw_body_sha256": "4a2be359a5236999dc85abba0643a0788afa4696ed485deefabee0ae78be13a8",
+      "removed_source_ranges": [
+        [
+          39,
+          42
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0165",
-    "content": "百合　味甘平。主治邪气腹胀心痛，利大小便。补中益气。生川谷。\n167",
+    "content": "百合　味甘平。主治邪气腹胀心痛，利大小便。补中益气。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "百合"
+      "drug_name": "百合",
+      "cleaning_version": 1,
+      "raw_body_sha256": "d98d7efc2a227b8ac23e953d68abad5d8ab3a2a897a9c5dedaff142e7eca028b",
+      "removed_source_ranges": [
+        [
+          31,
+          34
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0166",
-    "content": "紫参　味苦寒。主治心腹积聚，寒热邪气，通九窍，利大小便。一名牡蒙。生山谷。\n168",
+    "content": "紫参　味苦寒。主治心腹积聚，寒热邪气，通九窍，利大小便。一名牡蒙。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "紫参"
+      "drug_name": "紫参",
+      "cleaning_version": 1,
+      "raw_body_sha256": "7c5b720dc4538550178d849a855a840d3c2e80f00674117acfa7557e400c98e9",
+      "removed_source_ranges": [
+        [
+          38,
+          41
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0167",
-    "content": "王瓜　味苦寒。主治消渴内痺，瘀血月闭，寒热酸疼，益气愈聋。一名土瓜。生平泽。\n169",
+    "content": "王瓜　味苦寒。主治消渴内痺，瘀血月闭，寒热酸疼，益气愈聋。一名土瓜。生平泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "王瓜"
+      "drug_name": "王瓜",
+      "cleaning_version": 1,
+      "raw_body_sha256": "09b000ece4c3798585368eabe49706882ba7517ecd4c5f2691729fec7273c640",
+      "removed_source_ranges": [
+        [
+          39,
+          42
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0168",
-    "content": "大黄　味苦寒有毒。主下瘀血，血闭，寒热，破症瘕积聚，留饮宿食，荡涤肠胃，推陈致新，通利水谷，调中化食，安和五脏。生山谷。\n170",
+    "content": "大黄　味苦寒有毒。主下瘀血，血闭，寒热，破症瘕积聚，留饮宿食，荡涤肠胃，推陈致新，通利水谷，调中化食，安和五脏。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "大黄"
+      "drug_name": "大黄",
+      "cleaning_version": 1,
+      "raw_body_sha256": "b7a3001ee3b58df71740c5904c789c14bc0314752407b0dd10b9349777125d1a",
+      "removed_source_ranges": [
+        [
+          61,
+          64
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0169",
-    "content": "甘遂　味苦寒有毒。主治大腹疝瘕，腹满，面目浮肿，留饮宿食，破症坚积聚，利水谷道。一名主田。生川谷。\n171",
+    "content": "甘遂　味苦寒有毒。主治大腹疝瘕，腹满，面目浮肿，留饮宿食，破症坚积聚，利水谷道。一名主田。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "甘遂"
+      "drug_name": "甘遂",
+      "cleaning_version": 1,
+      "raw_body_sha256": "2b5c98e2bbf288e16432d6eb431f965a6a178af8e4037eb524cee6750c88cf8e",
+      "removed_source_ranges": [
+        [
+          50,
+          53
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0170",
-    "content": "亭历　味辛寒。主治症瘕积聚结气，饮食寒热，破坚逐邪，通利水道。一名大室，一名大适。生平泽及田野。\n172",
+    "content": "亭历　味辛寒。主治症瘕积聚结气，饮食寒热，破坚逐邪，通利水道。一名大室，一名大适。生平泽及田野。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "亭历"
+      "drug_name": "亭历",
+      "cleaning_version": 1,
+      "raw_body_sha256": "0f4b946102a7700d0f6e43a5bcfb5efe46f2e8706b877ed66265d94711bad4fc",
+      "removed_source_ranges": [
+        [
+          49,
+          52
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0171",
-    "content": "芫华　味苦温有毒。主治欬逆上气，喉鸣喘，咽肿气短，蛊毒鬼疟，疝瘕痈肿，杀虫鱼。一名去水。生川谷。\n173",
+    "content": "芫华　味苦温有毒。主治欬逆上气，喉鸣喘，咽肿气短，蛊毒鬼疟，疝瘕痈肿，杀虫鱼。一名去水。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "芫华"
+      "drug_name": "芫华",
+      "cleaning_version": 1,
+      "raw_body_sha256": "8a737757b36409f5136989286fd8b1a77378386753f468eb1aeaf44655bdc164",
+      "removed_source_ranges": [
+        [
+          49,
+          52
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0172",
-    "content": "泽漆　味苦微寒。主治皮肤热，大腹水气，四肢面目浮肿，丈夫阴气不足。生川泽。\n174",
+    "content": "泽漆　味苦微寒。主治皮肤热，大腹水气，四肢面目浮肿，丈夫阴气不足。生川泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "泽漆"
+      "drug_name": "泽漆",
+      "cleaning_version": 1,
+      "raw_body_sha256": "b6b335b296a855163a6be4a82cd878dfc7ec4bb50b2b21e59ca29b24bbb74924",
+      "removed_source_ranges": [
+        [
+          38,
+          41
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0173",
-    "content": "大戟　味苦寒。主治蛊毒十二水。腹满急痛，积聚，中风，皮肤疼痛，吐逆。一名卯*巨。\n175",
+    "content": "大戟　味苦寒。主治蛊毒十二水。腹满急痛，积聚，中风，皮肤疼痛，吐逆。一名卯*巨。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "大戟"
+      "drug_name": "大戟",
+      "cleaning_version": 1,
+      "raw_body_sha256": "936a0de8dc244a74b318ee15110293d96ad3f62d98cfc6d251d131ecbcec5c68",
+      "removed_source_ranges": [
+        [
+          41,
+          44
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0174",
-    "content": "荛华　味苦寒。主治伤寒温疟，下十二水，破积聚大坚症瘕，荡涤肠胃中留癖饮食，寒热邪气，利水道。生川谷。\n176",
+    "content": "荛华　味苦寒。主治伤寒温疟，下十二水，破积聚大坚症瘕，荡涤肠胃中留癖饮食，寒热邪气，利水道。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "荛华"
+      "drug_name": "荛华",
+      "cleaning_version": 1,
+      "raw_body_sha256": "6cbcbde7b04eeded409f99f75ef792b80d94f3f930801aba646b14d4b1d2b6f2",
+      "removed_source_ranges": [
+        [
+          51,
+          54
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0175",
-    "content": "钩吻　味辛温。主治金疮乳，中恶风，咳逆上气，水肿，杀鬼注蛊毒。一名治葛。生山谷。\n177",
+    "content": "钩吻　味辛温。主治金疮乳，中恶风，咳逆上气，水肿，杀鬼注蛊毒。一名治葛。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "钩吻"
+      "drug_name": "钩吻",
+      "cleaning_version": 1,
+      "raw_body_sha256": "1ffbe571051978c75d4eaa4fece8c240b96af492a14ae769ec1e28e867a23f7f",
+      "removed_source_ranges": [
+        [
+          41,
+          44
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0176",
-    "content": "藜芦　味辛寒有毒。主治蛊毒，咳逆，泄痢肠澼，头疡疥瘙恶疮，杀诸虫毒，去死肌。一名黄苒。生山谷。\n178",
+    "content": "藜芦　味辛寒有毒。主治蛊毒，咳逆，泄痢肠澼，头疡疥瘙恶疮，杀诸虫毒，去死肌。一名黄苒。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "藜芦"
+      "drug_name": "藜芦",
+      "cleaning_version": 1,
+      "raw_body_sha256": "67f0f4390b7cf8594da24a63a983795ce3778074896dc2a91d57fbe2edabddb9",
+      "removed_source_ranges": [
+        [
+          48,
+          51
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0177",
-    "content": "乌头　味辛温有毒。主治中风恶风洗洗，出汗，除寒湿痺，咳逆上气，破积聚寒热。其汁煎之，名射罔，杀禽兽。一名奚毒，一名即子，一名乌喙。生山谷。\n179",
+    "content": "乌头　味辛温有毒。主治中风恶风洗洗，出汗，除寒湿痺，咳逆上气，破积聚寒热。其汁煎之，名射罔，杀禽兽。一名奚毒，一名即子，一名乌喙。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "乌头"
+      "drug_name": "乌头",
+      "cleaning_version": 1,
+      "raw_body_sha256": "291a2aa3150cc4c2882214922a88a5d36f269d37433c369c5417a6a8817e15b6",
+      "removed_source_ranges": [
+        [
+          70,
+          73
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0178",
-    "content": "天雄　味辛温。主治大风，寒湿痺，历节痛，拘挛缓急，破积聚，邪气，金创，强筋骨，轻身健行。一名白幕。生山谷。\n180",
+    "content": "天雄　味辛温。主治大风，寒湿痺，历节痛，拘挛缓急，破积聚，邪气，金创，强筋骨，轻身健行。一名白幕。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "天雄"
+      "drug_name": "天雄",
+      "cleaning_version": 1,
+      "raw_body_sha256": "d7d06c33d99d9300f605b63f39fd9d26b372e90ff98d2ec7f950508c1b0fdd2b",
+      "removed_source_ranges": [
+        [
+          54,
+          57
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0179",
-    "content": "附子　味辛温有毒。主治风寒咳逆邪气，温中，金创，破症坚积聚，血瘕寒湿，踒躄拘挛，膝痛不能行走。生山谷。\n181",
+    "content": "附子　味辛温有毒。主治风寒咳逆邪气，温中，金创，破症坚积聚，血瘕寒湿，踒躄拘挛，膝痛不能行走。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "附子"
+      "drug_name": "附子",
+      "cleaning_version": 1,
+      "raw_body_sha256": "07758866d81a7f1c9a64af8005f49a9570755352472aa7a0fb7460642009d660",
+      "removed_source_ranges": [
+        [
+          52,
+          55
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0180",
-    "content": "羊踯躅　味辛温有毒。主治贼风在皮肤中淫淫痛，温疟，恶毒，诸痺。生川谷。\n182",
+    "content": "羊踯躅　味辛温有毒。主治贼风在皮肤中淫淫痛，温疟，恶毒，诸痺。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "羊踯躅"
+      "drug_name": "羊踯躅",
+      "cleaning_version": 1,
+      "raw_body_sha256": "2b99c75a4e39b2d4fdee63f470fdde8b589854565f65b36e3106f54a3673eda0",
+      "removed_source_ranges": [
+        [
+          36,
+          39
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0181",
-    "content": "茵芋　味苦温。主治五脏邪气，心腹寒热羸瘦，如疟状发作有时，诸关节风湿痺痛。生川谷。\n183",
+    "content": "茵芋　味苦温。主治五脏邪气，心腹寒热羸瘦，如疟状发作有时，诸关节风湿痺痛。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "茵芋"
+      "drug_name": "茵芋",
+      "cleaning_version": 1,
+      "raw_body_sha256": "e83027cda3789b050fbac4a6e671fface3cd4fd325731379a3061aab1ed0b1ad",
+      "removed_source_ranges": [
+        [
+          42,
+          45
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0182",
-    "content": "射干　味苦平。主治咳逆上气，喉痺咽痛不得消息，散结气，腹中邪逆，食饮大热。一名乌扇，一名乌蒲。生川谷。\n184",
+    "content": "射干　味苦平。主治咳逆上气，喉痺咽痛不得消息，散结气，腹中邪逆，食饮大热。一名乌扇，一名乌蒲。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "射干"
+      "drug_name": "射干",
+      "cleaning_version": 1,
+      "raw_body_sha256": "58b231064aec26dd96532f4a57a844ffaa268ba0aaca5bf8900838e42c09d2b0",
+      "removed_source_ranges": [
+        [
+          52,
+          55
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0183",
-    "content": "鸢尾　味苦平。主治蛊毒邪气，鬼注诸毒，破症瘕积聚，去水，下三虫。生山谷。\n185",
+    "content": "鸢尾　味苦平。主治蛊毒邪气，鬼注诸毒，破症瘕积聚，去水，下三虫。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "鸢尾"
+      "drug_name": "鸢尾",
+      "cleaning_version": 1,
+      "raw_body_sha256": "a34b77bf1d090df91fa81beb172d86072a1ba61628001f8b1bbd088672f14424",
+      "removed_source_ranges": [
+        [
+          37,
+          40
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0184",
-    "content": "贯众　味苦微寒有毒。主治腹中邪热气，诸毒，杀三虫。一名贯节，一名贯渠，一名百头，一名虎卷，一名扁苻。生山谷。\n186",
+    "content": "贯众　味苦微寒有毒。主治腹中邪热气，诸毒，杀三虫。一名贯节，一名贯渠，一名百头，一名虎卷，一名扁苻。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "贯众"
+      "drug_name": "贯众",
+      "cleaning_version": 1,
+      "raw_body_sha256": "0e58d8f8d5510d1e55a718967daa72359a18eb031b62194731edfdbc517f1d29",
+      "removed_source_ranges": [
+        [
+          55,
+          58
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0185",
-    "content": "飞廉　味苦平。主治骨节热，胫重酸疼。久服令人身轻。一名飞轻。生川泽。\n187",
+    "content": "飞廉　味苦平。主治骨节热，胫重酸疼。久服令人身轻。一名飞轻。生川泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "飞廉"
+      "drug_name": "飞廉",
+      "cleaning_version": 1,
+      "raw_body_sha256": "3a5fe6a623434da6fc145f98a9f02edde5b08cf4ca46537da799c0014f3856a5",
+      "removed_source_ranges": [
+        [
+          35,
+          38
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0186",
-    "content": "半夏　味辛平。主治伤寒寒热，心下坚，下气，喉咽肿痛，头眩胸胀，咳逆肠鸣，止汗。一名地文，一名水玉。生川谷。\n188",
+    "content": "半夏　味辛平。主治伤寒寒热，心下坚，下气，喉咽肿痛，头眩胸胀，咳逆肠鸣，止汗。一名地文，一名水玉。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "半夏"
+      "drug_name": "半夏",
+      "cleaning_version": 1,
+      "raw_body_sha256": "805a8381a2b5c00567243e4b5a76d1903ce92c8aa3f45f829d5a33346dac8824",
+      "removed_source_ranges": [
+        [
+          54,
+          57
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0187",
-    "content": "虎掌　味苦温无毒。主治心痛，寒热，结气，积聚伏梁，伤筋痿拘缓，利水道。生山谷。\n189",
+    "content": "虎掌　味苦温无毒。主治心痛，寒热，结气，积聚伏梁，伤筋痿拘缓，利水道。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "虎掌"
+      "drug_name": "虎掌",
+      "cleaning_version": 1,
+      "raw_body_sha256": "9615bfa3028386f880f6bd5a737a11841e4b17b25d49f664de9cea3fa4ba0cd7",
+      "removed_source_ranges": [
+        [
+          40,
+          43
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0188",
-    "content": "莨荡子　味苦寒。主治齿痛，出虫，肉痺拘急，使人健行，见鬼，多食令人狂走。久服轻身。走及奔马，强志、益力、通神。一名横唐。生川谷。\n190",
+    "content": "莨荡子　味苦寒。主治齿痛，出虫，肉痺拘急，使人健行，见鬼，多食令人狂走。久服轻身。走及奔马，强志、益力、通神。一名横唐。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "莨荡子"
+      "drug_name": "莨荡子",
+      "cleaning_version": 1,
+      "raw_body_sha256": "1db285a788c6e94fcfebcd10583e9e5f3862bd35b5ecdd94e8dd1f46730efc02",
+      "removed_source_ranges": [
+        [
+          65,
+          68
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0189",
-    "content": "蜀漆　味辛平有毒。主治疟及咳逆寒热，腹中症坚痞结，结聚邪气，蛊毒鬼注。生川谷。\n191",
+    "content": "蜀漆　味辛平有毒。主治疟及咳逆寒热，腹中症坚痞结，结聚邪气，蛊毒鬼注。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "蜀漆"
+      "drug_name": "蜀漆",
+      "cleaning_version": 1,
+      "raw_body_sha256": "e6902d645cee8cce0cef8c743019ea4f18cd7d087d7cab58fc21ad75098919e2",
+      "removed_source_ranges": [
+        [
+          40,
+          43
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0190",
-    "content": "恒山　味苦寒。主治伤寒寒热，热发温疟，鬼毒，胸中痰结，吐逆。一名互草。生川谷。\n192",
+    "content": "恒山　味苦寒。主治伤寒寒热，热发温疟，鬼毒，胸中痰结，吐逆。一名互草。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "恒山"
+      "drug_name": "恒山",
+      "cleaning_version": 1,
+      "raw_body_sha256": "3c2a163ea407075da18bc41c2c9ac5fd80cd2075d8d2e502f8422634c4eaa895",
+      "removed_source_ranges": [
+        [
+          40,
+          43
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0191",
-    "content": "青葙　味苦微寒。主治邪气，皮肤中热，风瘙身痒，杀三虫。子名草决明，疗唇口青。一名草蒿，一鸣蒌蒿。生平谷。\n193",
+    "content": "青葙　味苦微寒。主治邪气，皮肤中热，风瘙身痒，杀三虫。子名草决明，疗唇口青。一名草蒿，一鸣蒌蒿。生平谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "青葙"
+      "drug_name": "青葙",
+      "cleaning_version": 1,
+      "raw_body_sha256": "3177b9d086c9a28e5ccf1a08d7c75f900eba5f163ba61fa8692a38ddcbd6cc5b",
+      "removed_source_ranges": [
+        [
+          53,
+          56
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0192",
-    "content": "狼牙　味苦寒有毒。主治邪气热气，疥瘙恶疡疮痔，去白虫。一名牙子。生川谷。\n194",
+    "content": "狼牙　味苦寒有毒。主治邪气热气，疥瘙恶疡疮痔，去白虫。一名牙子。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "狼牙"
+      "drug_name": "狼牙",
+      "cleaning_version": 1,
+      "raw_body_sha256": "3915300f07080e801b57b5fb73ee7a38d8c5472ec1f6725df6f2f1f3338462f9",
+      "removed_source_ranges": [
+        [
+          37,
+          40
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0193",
-    "content": "白蔹　味苦平。主治痈肿疽疮，散结气，止痛除热，目中赤，小儿惊痫，温疟，女子阴中肿痛。一名菟核，一名白草。生山谷。\n195",
+    "content": "白蔹　味苦平。主治痈肿疽疮，散结气，止痛除热，目中赤，小儿惊痫，温疟，女子阴中肿痛。一名菟核，一名白草。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "白蔹"
+      "drug_name": "白蔹",
+      "cleaning_version": 1,
+      "raw_body_sha256": "d8da82986750d263b0aef67dece6042ca7402218e16188cdcb82dd9f8995252c",
+      "removed_source_ranges": [
+        [
+          57,
+          60
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0194",
-    "content": "白及　味苦平。主治痈肿恶疮败疽，伤阴，死肌，胃中邪气，贼风鬼击，痱缓不收。一名甘根，一名连及草。生川谷。\n196",
+    "content": "白及　味苦平。主治痈肿恶疮败疽，伤阴，死肌，胃中邪气，贼风鬼击，痱缓不收。一名甘根，一名连及草。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "白及"
+      "drug_name": "白及",
+      "cleaning_version": 1,
+      "raw_body_sha256": "09f37d5d6c6230b001972a5c668fdaed3e0126be18dfecfc8f46f64ae51cf786",
+      "removed_source_ranges": [
+        [
+          53,
+          56
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0195",
-    "content": "草蒿　味苦寒。主治疥瘙痂痒恶疮，杀虱，留热在骨节间，明目。一名青蒿，一名方溃。生川泽。\n197",
+    "content": "草蒿　味苦寒。主治疥瘙痂痒恶疮，杀虱，留热在骨节间，明目。一名青蒿，一名方溃。生川泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "草蒿"
+      "drug_name": "草蒿",
+      "cleaning_version": 1,
+      "raw_body_sha256": "a782ef70bfdf08600e2cbdc296ae2c8236ea36d1761d51f203c52fae97789d01",
+      "removed_source_ranges": [
+        [
+          44,
+          47
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0196",
-    "content": "雚菌　味咸平。主治心痛，温中，去长虫、白徙*、蛲虫，蛇螫毒，症瘕诸虫。一名雚芦。生池泽。\n198",
+    "content": "雚菌　味咸平。主治心痛，温中，去长虫、白徙*、蛲虫，蛇螫毒，症瘕诸虫。一名雚芦。生池泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "雚菌"
+      "drug_name": "雚菌",
+      "cleaning_version": 1,
+      "raw_body_sha256": "fc7c1a7cacbb4a634dfc27933bde921b25a37a88dabcc730f2cf8f9c3114ebdb",
+      "removed_source_ranges": [
+        [
+          45,
+          48
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0197",
-    "content": "连翘　味苦平。主治寒热鼠漏，瘰痨痈肿，恶疮瘿瘤，结热蛊毒。一名异翘，一名𫈉华，一名折根，一名三廉。生山谷。\n199",
+    "content": "连翘　味苦平。主治寒热鼠漏，瘰痨痈肿，恶疮瘿瘤，结热蛊毒。一名异翘，一名𫈉华，一名折根，一名三廉。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "连翘"
+      "drug_name": "连翘",
+      "cleaning_version": 1,
+      "raw_body_sha256": "9bf3d96b312a11c238496711cd7a0a8a18fbafb356c47022a9ab60747f24d964",
+      "removed_source_ranges": [
+        [
+          54,
+          57
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0198",
-    "content": "白头公　味苦温无毒。主治温疟狂易，寒热，症瘕积聚，瘿气，逐血止痛，疗金创。一名野丈人，一名胡王使者。生川谷。\n200",
+    "content": "白头公　味苦温无毒。主治温疟狂易，寒热，症瘕积聚，瘿气，逐血止痛，疗金创。一名野丈人，一名胡王使者。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "白头公"
+      "drug_name": "白头公",
+      "cleaning_version": 1,
+      "raw_body_sha256": "984943a8ff96dda5f3d915aaef63a38a51d826e180ff1a850e3419d5fc5586ad",
+      "removed_source_ranges": [
+        [
+          55,
+          58
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0199",
-    "content": "闾茹　味酸咸有毒。主蚀恶肉，败疮，死肌，杀疥虫，排脓恶血，除大风热气，善忘不乐。生川谷。\n201",
+    "content": "闾茹　味酸咸有毒。主蚀恶肉，败疮，死肌，杀疥虫，排脓恶血，除大风热气，善忘不乐。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "闾茹"
+      "drug_name": "闾茹",
+      "cleaning_version": 1,
+      "raw_body_sha256": "d7525132c96ee933b2b28ac3780dd8cca0ab953fbae2f9be727550bec6d1dd9d",
+      "removed_source_ranges": [
+        [
+          45,
+          48
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0200",
-    "content": "羊桃　味苦寒。主治熛热身暴赤色，风水积聚，恶疡，除小儿热。一名鬼桃，一名羊肠。生川谷。\n202",
+    "content": "羊桃　味苦寒。主治熛热身暴赤色，风水积聚，恶疡，除小儿热。一名鬼桃，一名羊肠。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "羊桃"
+      "drug_name": "羊桃",
+      "cleaning_version": 1,
+      "raw_body_sha256": "98018dbeace413eb9a78ec22bfc423ae503d2728240d9a1d355e019aed98b7e6",
+      "removed_source_ranges": [
+        [
+          44,
+          47
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0201",
-    "content": "羊蹄　味苦寒。主治头秃疥瘙，除热，女子阴蚀。一名东方宿，一名连虫陆，一名鬼目。生川泽。\n203",
+    "content": "羊蹄　味苦寒。主治头秃疥瘙，除热，女子阴蚀。一名东方宿，一名连虫陆，一名鬼目。生川泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "羊蹄"
+      "drug_name": "羊蹄",
+      "cleaning_version": 1,
+      "raw_body_sha256": "3c4bd88293dab96224d98223b9498aaf65ba2b88a81802f626ba62238771414d",
+      "removed_source_ranges": [
+        [
+          44,
+          47
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0202",
-    "content": "鹿藿　味苦平。主治蛊毒，女子腰腹痛不乐，肠痈瘰痨疡气。生山谷。　牛扁　味苦微寒。主治身皮疮热气，可作浴汤，杀牛虱小虫，又疗牛病。生川谷。\n204",
+    "content": "鹿藿　味苦平。主治蛊毒，女子腰腹痛不乐，肠痈瘰痨疡气。生山谷。　牛扁　味苦微寒。主治身皮疮热气，可作浴汤，杀牛虱小虫，又疗牛病。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "鹿藿"
+      "drug_name": "鹿藿",
+      "cleaning_version": 1,
+      "raw_body_sha256": "b25f02fa4d57735f1303148e43e1b4dfcb3ba93b4948c9d2a036e1edaa68357a",
+      "removed_source_ranges": [
+        [
+          69,
+          72
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0203",
-    "content": "陆英　味苦寒。主治骨间诸痺，四肢拘挛疼酸，膝寒痛，阴痿，短气不足，脚肿。生川谷。\n205",
+    "content": "陆英　味苦寒。主治骨间诸痺，四肢拘挛疼酸，膝寒痛，阴痿，短气不足，脚肿。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "陆英"
+      "drug_name": "陆英",
+      "cleaning_version": 1,
+      "raw_body_sha256": "2b0c7eea560949e18be010f1b47a0da686149aa78257be7fba85abae083ffb26",
+      "removed_source_ranges": [
+        [
+          41,
+          44
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0204",
-    "content": "荩草　味苦平。主治久咳上气，喘逆久寒，惊悸，痂疥，白秃，疡气，杀皮肤小虫。生川谷。\n206",
+    "content": "荩草　味苦平。主治久咳上气，喘逆久寒，惊悸，痂疥，白秃，疡气，杀皮肤小虫。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "荩草"
+      "drug_name": "荩草",
+      "cleaning_version": 1,
+      "raw_body_sha256": "a00185d59ae26de7b5bb51b7c54c1759125cc107adacaeeb18d3a7313eb5c43f",
+      "removed_source_ranges": [
+        [
+          42,
+          45
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0205",
-    "content": "夏枯草　味苦辛寒。主治寒热瘰痨，鼠瘘头疮，破症，散瘿结气，脚肿湿痺。轻身。一名夕句，一名乃东。生川谷。\n207",
+    "content": "夏枯草　味苦辛寒。主治寒热瘰痨，鼠瘘头疮，破症，散瘿结气，脚肿湿痺。轻身。一名夕句，一名乃东。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "夏枯草"
+      "drug_name": "夏枯草",
+      "cleaning_version": 1,
+      "raw_body_sha256": "320e514495ccd56c6b16d6e8a9b9d89256a1a0e10a2bb05c77adf5d19c67b549",
+      "removed_source_ranges": [
+        [
+          52,
+          55
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0206",
-    "content": "乌韭　味甘寒。主治皮肤往来寒热，利小肠、膀胱气。生山谷。\n208",
+    "content": "乌韭　味甘寒。主治皮肤往来寒热，利小肠、膀胱气。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "乌韭"
+      "drug_name": "乌韭",
+      "cleaning_version": 1,
+      "raw_body_sha256": "6ec5a5ff9a1054f97ea4e0f989a8c1f046b121b3be60fdb4bdb61a2c68b019b1",
+      "removed_source_ranges": [
+        [
+          29,
+          32
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0207",
-    "content": "蚤休　味苦微寒。主治惊痫摇头弄舌，热气在腹中，癫疾，痈疮阴蚀，下三虫，去蛇毒。一名螫休。生川谷。\n209",
+    "content": "蚤休　味苦微寒。主治惊痫摇头弄舌，热气在腹中，癫疾，痈疮阴蚀，下三虫，去蛇毒。一名螫休。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "蚤休"
+      "drug_name": "蚤休",
+      "cleaning_version": 1,
+      "raw_body_sha256": "c4e2256ae501774b93a3d510b8f59ebbc83ab884340f8ce83918d509f288cb28",
+      "removed_source_ranges": [
+        [
+          49,
+          52
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0208",
-    "content": "石长生　味咸微寒。主治寒热恶疮大热，辟鬼气不祥。一名丹草。生山谷。\n210",
+    "content": "石长生　味咸微寒。主治寒热恶疮大热，辟鬼气不祥。一名丹草。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "石长生"
+      "drug_name": "石长生",
+      "cleaning_version": 1,
+      "raw_body_sha256": "93b9f7d26753781477a2fc509253369455b460a12066008e6819948b44d65f02",
+      "removed_source_ranges": [
+        [
+          34,
+          37
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0209",
-    "content": "狼毒　味辛平。主治咳逆上气，破积聚饮食，寒热水气，恶疮鼠瘘疽蚀，鬼精蛊毒，杀飞鸟走兽。一名续毒。生山谷。\n211",
+    "content": "狼毒　味辛平。主治咳逆上气，破积聚饮食，寒热水气，恶疮鼠瘘疽蚀，鬼精蛊毒，杀飞鸟走兽。一名续毒。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "狼毒"
+      "drug_name": "狼毒",
+      "cleaning_version": 1,
+      "raw_body_sha256": "7e1ddcf1deecda8648037e47dab3ec3333d59ff3b02436e119a5513b6509c63f",
+      "removed_source_ranges": [
+        [
+          53,
+          56
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0210",
-    "content": "鬼臼　味辛温。主杀蛊毒鬼注精物，辟恶气不祥，逐邪解百毒。一名爵犀，一名马目毒公，一名九臼。生山谷。\n212",
+    "content": "鬼臼　味辛温。主杀蛊毒鬼注精物，辟恶气不祥，逐邪解百毒。一名爵犀，一名马目毒公，一名九臼。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "鬼臼"
+      "drug_name": "鬼臼",
+      "cleaning_version": 1,
+      "raw_body_sha256": "aab7156e6d080b0997889b9b49698a2f3d9e3c07bcf8c7896d4af0ffcd7442e5",
+      "removed_source_ranges": [
+        [
+          50,
+          53
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0211",
-    "content": "扁蓄　味苦平。主治浸淫疥瘙疽痔，杀三虫。生山谷。\n213",
+    "content": "扁蓄　味苦平。主治浸淫疥瘙疽痔，杀三虫。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "扁蓄"
+      "drug_name": "扁蓄",
+      "cleaning_version": 1,
+      "raw_body_sha256": "d58df5bfd38e0088cae56b035276230dc60661336955148347a9ad02b784f2ad",
+      "removed_source_ranges": [
+        [
+          25,
+          28
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0212",
-    "content": "商陆　味辛平。主治水胀，疝瘕痺，熨除痈肿。杀鬼精物。一名*根，一名夜呼。生川谷。\n214",
+    "content": "商陆　味辛平。主治水胀，疝瘕痺，熨除痈肿。杀鬼精物。一名*根，一名夜呼。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "商陆"
+      "drug_name": "商陆",
+      "cleaning_version": 1,
+      "raw_body_sha256": "a81eac24549af2b878444332473bdee5c58bdcf94a93c939a30ee1f035374a5b",
+      "removed_source_ranges": [
+        [
+          41,
+          44
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0213",
-    "content": "女青　味辛平。主治蛊毒，逐邪恶气，杀鬼温疟，辟不祥。一名雀瓢。生山谷。　白附子　主治心痛血痺，面上百病，行药势。生蜀郡。\n215",
+    "content": "女青　味辛平。主治蛊毒，逐邪恶气，杀鬼温疟，辟不祥。一名雀瓢。生山谷。　白附子　主治心痛血痺，面上百病，行药势。生蜀郡。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "女青"
+      "drug_name": "女青",
+      "cleaning_version": 1,
+      "raw_body_sha256": "f43af7b0f83abd2ed85650be4102d13071d99fccd1e01de31cf72fadbafe34ab",
+      "removed_source_ranges": [
+        [
+          61,
+          64
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0214",
-    "content": "姑活　味甘温。主治大风邪气，湿痺寒痛。九服轻身益寿耐老。一名冬葵子。生川泽。\n216",
+    "content": "姑活　味甘温。主治大风邪气，湿痺寒痛。九服轻身益寿耐老。一名冬葵子。生川泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "姑活"
+      "drug_name": "姑活",
+      "cleaning_version": 1,
+      "raw_body_sha256": "0ac50fe4f2b7265291f1d5ae7e12b89746f77fc60ed22249834f3ededdb1974f",
+      "removed_source_ranges": [
+        [
+          39,
+          42
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0215",
-    "content": "别羁　味苦微温。主治风寒湿痺，身重，四肢疼酸寒邪历节痛。生川谷。\n217",
+    "content": "别羁　味苦微温。主治风寒湿痺，身重，四肢疼酸寒邪历节痛。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "别羁"
+      "drug_name": "别羁",
+      "cleaning_version": 1,
+      "raw_body_sha256": "493c25b0ca93a578444e1212524f7a8008c74cf30fde0915b0da8c418aef6c4b",
+      "removed_source_ranges": [
+        [
+          33,
+          36
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0216",
-    "content": "石下长卿　味咸平。主治鬼注精物，邪恶气，杀百精蛊毒，老魅注易，亡走啼哭，悲伤恍惚。一名徐长卿。生池泽。\n218",
+    "content": "石下长卿　味咸平。主治鬼注精物，邪恶气，杀百精蛊毒，老魅注易，亡走啼哭，悲伤恍惚。一名徐长卿。生池泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "石下长卿"
+      "drug_name": "石下长卿",
+      "cleaning_version": 1,
+      "raw_body_sha256": "9b00678d358f2134ba719c7e82d5968a93fbe22e3097155767feb6dbc2f54741",
+      "removed_source_ranges": [
+        [
+          52,
+          55
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0217",
-    "content": "翘根　味苦寒。主治下热气，益阴精，令人面悦好，明目。久服轻身耐老。生平泽。\n219",
+    "content": "翘根　味苦寒。主治下热气，益阴精，令人面悦好，明目。久服轻身耐老。生平泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "草部下品",
-      "drug_name": "翘根"
+      "drug_name": "翘根",
+      "cleaning_version": 1,
+      "raw_body_sha256": "470953e48133a001ca3987db007da9bbeda77a168699e7e88a6a168c1039b5ce",
+      "removed_source_ranges": [
+        [
+          38,
+          41
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0219",
-    "content": "茯苓　味甘平。主治胸胁逆气，忧恚惊恐，心下结痛，寒热烦满咳逆，口焦舌干，利小便。久服安魂养神，不饥延年。一名伏兔。生山谷。\n221",
+    "content": "茯苓　味甘平。主治胸胁逆气，忧恚惊恐，心下结痛，寒热烦满咳逆，口焦舌干，利小便。久服安魂养神，不饥延年。一名伏兔。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部上品",
-      "drug_name": "茯苓"
+      "drug_name": "茯苓",
+      "cleaning_version": 1,
+      "raw_body_sha256": "04c78ab56fb3e80d4529f510e92abba6c6fd6f7576c4e872c6f6ad2f749b9db5",
+      "removed_source_ranges": [
+        [
+          62,
+          65
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0220",
-    "content": "松脂　味苦温。主治痈疽恶疮，头疡白秃，疥瘙风气，安五脏，除热。久服轻身延年。一名松膏，一名松肪。生山谷。\n222",
+    "content": "松脂　味苦温。主治痈疽恶疮，头疡白秃，疥瘙风气，安五脏，除热。久服轻身延年。一名松膏，一名松肪。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部上品",
-      "drug_name": "松脂"
+      "drug_name": "松脂",
+      "cleaning_version": 1,
+      "raw_body_sha256": "08ed908e1d46ae9279124c1427fb66144df9f6dd8612c146c62daf40f73496f8",
+      "removed_source_ranges": [
+        [
+          53,
+          56
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0221",
-    "content": "柏实　味甘平。主治惊悸，安五脏，益气，除风湿痺。久服令人润泽美色，耳目聪明，不饥不老，轻身延年。生山谷。\n223",
+    "content": "柏实　味甘平。主治惊悸，安五脏，益气，除风湿痺。久服令人润泽美色，耳目聪明，不饥不老，轻身延年。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部上品",
-      "drug_name": "柏实"
+      "drug_name": "柏实",
+      "cleaning_version": 1,
+      "raw_body_sha256": "33e0510f4398faeee6714a6481808074979697c807f3cbfe7636e13b5f075894",
+      "removed_source_ranges": [
+        [
+          53,
+          56
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0222",
-    "content": "箘桂　味辛温。主治百病，养精神，和颜色，为诸药先娉通使。久服轻身不老，面生光华，媚好常如童子。生交止*山谷。\n224",
+    "content": "箘桂　味辛温。主治百病，养精神，和颜色，为诸药先娉通使。久服轻身不老，面生光华，媚好常如童子。生交止*山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部上品",
-      "drug_name": "箘桂"
+      "drug_name": "箘桂",
+      "cleaning_version": 1,
+      "raw_body_sha256": "9ffb6fbdb043026b3b1fb079908d51f046f5e07dc218ca8c81f6aad52b141f75",
+      "removed_source_ranges": [
+        [
+          55,
+          58
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0223",
-    "content": "牡桂　味辛温。主治上气咳逆、结气，喉痺吐吸，利关节，补中益气。久服通神，轻身不老。生山谷。\n225",
+    "content": "牡桂　味辛温。主治上气咳逆、结气，喉痺吐吸，利关节，补中益气。久服通神，轻身不老。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部上品",
-      "drug_name": "牡桂"
+      "drug_name": "牡桂",
+      "cleaning_version": 1,
+      "raw_body_sha256": "cdc9063fff9daab9cab88a9a40c4b03bb1d6cb3f2f6dc61f9793e8a23212fb35",
+      "removed_source_ranges": [
+        [
+          46,
+          49
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0224",
-    "content": "杜仲　味辛平。主治腰膝痛，补中，益精气，坚筋骨，强志，除阴下痒湿，小便余沥。久服轻身耐老。一名思仙。生山谷。\n226",
+    "content": "杜仲　味辛平。主治腰膝痛，补中，益精气，坚筋骨，强志，除阴下痒湿，小便余沥。久服轻身耐老。一名思仙。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部上品",
-      "drug_name": "杜仲"
+      "drug_name": "杜仲",
+      "cleaning_version": 1,
+      "raw_body_sha256": "dc803ed88c1f823a133c13bb161e736860011824dfc046d3ad6457a9b158082e",
+      "removed_source_ranges": [
+        [
+          55,
+          58
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0225",
-    "content": "蔓荆实　味苦微寒。主治筋骨间寒热，湿痺拘挛，明目坚齿，利九窍，去白虫。久服轻身耐老。小荆实亦等。\n227",
+    "content": "蔓荆实　味苦微寒。主治筋骨间寒热，湿痺拘挛，明目坚齿，利九窍，去白虫。久服轻身耐老。小荆实亦等。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部上品",
-      "drug_name": "蔓荆实"
+      "drug_name": "蔓荆实",
+      "cleaning_version": 1,
+      "raw_body_sha256": "7111678c334d992fb1dbee2b618ff3c51c2390deb030b339cffff5ea767e8b01",
+      "removed_source_ranges": [
+        [
+          49,
+          52
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0226",
-    "content": "蘗木　味苦寒。主治五脏肠胃中结气热，黄疸，肠痔，止泄利，女子漏下赤白，阴阳蚀疮。根，一名檀桓。生山谷。\n228",
+    "content": "蘗木　味苦寒。主治五脏肠胃中结气热，黄疸，肠痔，止泄利，女子漏下赤白，阴阳蚀疮。根，一名檀桓。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部上品",
-      "drug_name": "蘗木"
+      "drug_name": "蘗木",
+      "cleaning_version": 1,
+      "raw_body_sha256": "599fdca5a0e85ba1311412973bb283894210ade232c841b3c39f8d9fa1ae8c55",
+      "removed_source_ranges": [
+        [
+          52,
+          55
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0227",
-    "content": "辛夷　味辛温。主治五脏身体寒热，风头脑痛，面鼾*。久服下气，轻身明目，增年能老。一名辛引，一名侯桃，一名房木。生川谷。\n229",
+    "content": "辛夷　味辛温。主治五脏身体寒热，风头脑痛，面鼾*。久服下气，轻身明目，增年能老。一名辛引，一名侯桃，一名房木。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部上品",
-      "drug_name": "辛夷"
+      "drug_name": "辛夷",
+      "cleaning_version": 1,
+      "raw_body_sha256": "3f4360f40449f1a2676dcf98edf8bea761bcd1630109f9456cd21b8da65dd9b3",
+      "removed_source_ranges": [
+        [
+          60,
+          63
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0228",
-    "content": "榆皮　味甘平。主治大小便不通，利水道，除邪气。久服轻身不饥。其实尤良。一名零榆。生山谷。\n230",
+    "content": "榆皮　味甘平。主治大小便不通，利水道，除邪气。久服轻身不饥。其实尤良。一名零榆。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部上品",
-      "drug_name": "榆皮"
+      "drug_name": "榆皮",
+      "cleaning_version": 1,
+      "raw_body_sha256": "4b11abd196be7ec4630e9eee98fd464bc933eb64f0a0b30cfa012fabb38fdd37",
+      "removed_source_ranges": [
+        [
+          45,
+          48
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0229",
-    "content": "酸枣　味酸平。主治心腹寒热邪结气，四肢酸疼，湿痺。久服安五脏，轻身延年。生川泽。\n231",
+    "content": "酸枣　味酸平。主治心腹寒热邪结气，四肢酸疼，湿痺。久服安五脏，轻身延年。生川泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部上品",
-      "drug_name": "酸枣"
+      "drug_name": "酸枣",
+      "cleaning_version": 1,
+      "raw_body_sha256": "ba5e930d0f2cc10d3f384c1b876329a2f6745ca49bfa080f4e9874e0d3c2f453",
+      "removed_source_ranges": [
+        [
+          41,
+          44
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0230",
-    "content": "槐子　味苦寒。主治五内邪气热，止涎唾，补绝伤，五痔火疮，妇人乳瘕，子藏急痛。生平泽。\n232",
+    "content": "槐子　味苦寒。主治五内邪气热，止涎唾，补绝伤，五痔火疮，妇人乳瘕，子藏急痛。生平泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部上品",
-      "drug_name": "槐子"
+      "drug_name": "槐子",
+      "cleaning_version": 1,
+      "raw_body_sha256": "9886ed9dc6fc137830a58c951fcfd694307a9a970426b43425264ce0d6d57e72",
+      "removed_source_ranges": [
+        [
+          43,
+          46
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0231",
-    "content": "枸杞　味苦寒。主治五内邪气，热中消渴，周痺。久服坚筋骨，轻身耐老。一名杞根，一名地骨，一名枸忌，一名地辅。生平泽。\n233",
+    "content": "枸杞　味苦寒。主治五内邪气，热中消渴，周痺。久服坚筋骨，轻身耐老。一名杞根，一名地骨，一名枸忌，一名地辅。生平泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部上品",
-      "drug_name": "枸杞"
+      "drug_name": "枸杞",
+      "cleaning_version": 1,
+      "raw_body_sha256": "7b2df7d11067da349c6688cd3c38e5e77a058f5b623fcf016fe0b3c9c06dde24",
+      "removed_source_ranges": [
+        [
+          58,
+          61
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0232",
-    "content": "橘柚　味辛温。主治胸中瘕热逆气，利水谷。久服去口臭，下气通神。一名橘皮。生南山川谷。\n234",
+    "content": "橘柚　味辛温。主治胸中瘕热逆气，利水谷。久服去口臭，下气通神。一名橘皮。生南山川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部上品",
-      "drug_name": "橘柚"
+      "drug_name": "橘柚",
+      "cleaning_version": 1,
+      "raw_body_sha256": "3370fea58f84c58bab54fdc0222d804a7926ee49be9ad36aa068471521d3e228",
+      "removed_source_ranges": [
+        [
+          43,
+          46
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0234",
-    "content": "干漆　味辛温，无毒。主治绝伤，补中，续筋骨，填髓脑，安五脏，五缓六急，风寒湿痺。生漆，去长虫。久服轻身耐老。生川谷。\n236",
+    "content": "干漆　味辛温，无毒。主治绝伤，补中，续筋骨，填髓脑，安五脏，五缓六急，风寒湿痺。生漆，去长虫。久服轻身耐老。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部中品",
-      "drug_name": "干漆"
+      "drug_name": "干漆",
+      "cleaning_version": 1,
+      "raw_body_sha256": "a667b7bef2aa9f1e4f2361187a2681a2c1888ff75d3acbe8b29b40a68c948281",
+      "removed_source_ranges": [
+        [
+          59,
+          62
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0235",
-    "content": "木兰　味苦寒。主治身大热在皮肤中，去面热赤疱酒皶，恶风癞疾，阴下痒湿，明目。一名林兰。生山谷。\n237",
+    "content": "木兰　味苦寒。主治身大热在皮肤中，去面热赤疱酒皶，恶风癞疾，阴下痒湿，明目。一名林兰。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部中品",
-      "drug_name": "木兰"
+      "drug_name": "木兰",
+      "cleaning_version": 1,
+      "raw_body_sha256": "32d87fffc535b4fbba287107f809006f818f3b679fe3ee3e4728e9aba521cb3c",
+      "removed_source_ranges": [
+        [
+          48,
+          51
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0236",
-    "content": "女贞实　味苦平。主补中安五脏，养精神，除百疾。久服肥健、轻身、不老。生川谷。\n238",
+    "content": "女贞实　味苦平。主补中安五脏，养精神，除百疾。久服肥健、轻身、不老。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部中品",
-      "drug_name": "女贞实"
+      "drug_name": "女贞实",
+      "cleaning_version": 1,
+      "raw_body_sha256": "d70cf018823b361a243474cc1c525b634bb1c21d7b17a418822aa7deded1e23b",
+      "removed_source_ranges": [
+        [
+          39,
+          42
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0237",
-    "content": "桑上寄生　味苦平。主治腰痛，小儿背强，痈肿，安胎，充肌肤，坚齿发，长须眉。其实，明目、轻身、通神。一名寄屑，一名寓木，一名宛童。生山谷。\n239",
+    "content": "桑上寄生　味苦平。主治腰痛，小儿背强，痈肿，安胎，充肌肤，坚齿发，长须眉。其实，明目、轻身、通神。一名寄屑，一名寓木，一名宛童。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部中品",
-      "drug_name": "桑上寄生"
+      "drug_name": "桑上寄生",
+      "cleaning_version": 1,
+      "raw_body_sha256": "ca6490565e8b43913fe8ea8ce6af640e105d187ae6531c3eb121cff6c6949496",
+      "removed_source_ranges": [
+        [
+          69,
+          72
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0238",
-    "content": "苏核　味甘平无毒。主治心腹邪结气，明目，目赤痛伤泪出。久服轻身、益气、不饥。生川谷。\n240",
+    "content": "苏核　味甘平无毒。主治心腹邪结气，明目，目赤痛伤泪出。久服轻身、益气、不饥。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部中品",
-      "drug_name": "苏核"
+      "drug_name": "苏核",
+      "cleaning_version": 1,
+      "raw_body_sha256": "202a7b9b02d53fcb759801e127f2d8806fd56cac9e39e95b25e808f290abe152",
+      "removed_source_ranges": [
+        [
+          43,
+          46
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0239",
-    "content": "龙眼　味甘平。主治五脏邪气，安志，厌食。久服强魂，聪明，轻身不老，通神明。生山谷。\n241",
+    "content": "龙眼　味甘平。主治五脏邪气，安志，厌食。久服强魂，聪明，轻身不老，通神明。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部中品",
-      "drug_name": "龙眼"
+      "drug_name": "龙眼",
+      "cleaning_version": 1,
+      "raw_body_sha256": "32b948b9f00b8e9a3e663d0959dafb2bb444d0d558852979582d866ab78e07a3",
+      "removed_source_ranges": [
+        [
+          42,
+          45
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0240",
-    "content": "厚朴　味苦温无毒。主治中风、伤寒、头痛，寒热惊气，血痺死肌，去三虫。生山谷。\n242",
+    "content": "厚朴　味苦温无毒。主治中风、伤寒、头痛，寒热惊气，血痺死肌，去三虫。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部中品",
-      "drug_name": "厚朴"
+      "drug_name": "厚朴",
+      "cleaning_version": 1,
+      "raw_body_sha256": "f0eeffeb44c2e69660e9f041b5053aab9c3b885b2745e7e1bdd01189a87e123d",
+      "removed_source_ranges": [
+        [
+          39,
+          42
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0241",
-    "content": "竹叶　味苦平。主治咳逆上气，溢筋急恶疡，杀小虫。根，作汤，益气止渴，补虚下气。汁，主风痉痺。实，通神明，轻身益气。\n243",
+    "content": "竹叶　味苦平。主治咳逆上气，溢筋急恶疡，杀小虫。根，作汤，益气止渴，补虚下气。汁，主风痉痺。实，通神明，轻身益气。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部中品",
-      "drug_name": "竹叶"
+      "drug_name": "竹叶",
+      "cleaning_version": 1,
+      "raw_body_sha256": "ede94a342763b8e8571faf69e864f9d2aafb446f1ae0833d2166c0e027d24018",
+      "removed_source_ranges": [
+        [
+          58,
+          61
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0242",
-    "content": "枳实　味苦寒。主治大风在皮肤中如麻豆苦痒，除寒热热结，止利。长肌肉，利五脏，益气轻身。生川泽。\n244",
+    "content": "枳实　味苦寒。主治大风在皮肤中如麻豆苦痒，除寒热热结，止利。长肌肉，利五脏，益气轻身。生川泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部中品",
-      "drug_name": "枳实"
+      "drug_name": "枳实",
+      "cleaning_version": 1,
+      "raw_body_sha256": "d6ed3bc836373c116e03166750ca9d35cefc9a82c9797e952ba18b0686bf6343",
+      "removed_source_ranges": [
+        [
+          48,
+          51
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0243",
-    "content": "山茱萸　味酸无毒。主治心下邪气寒热，温中，逐寒湿痺，去三虫。久服轻身。一名蜀枣。生山谷。\n245",
+    "content": "山茱萸　味酸无毒。主治心下邪气寒热，温中，逐寒湿痺，去三虫。久服轻身。一名蜀枣。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部中品",
-      "drug_name": "山茱萸"
+      "drug_name": "山茱萸",
+      "cleaning_version": 1,
+      "raw_body_sha256": "0631e08d9478da943834eb9fae63ceb2930bfbd32628dcb42e39865314786522",
+      "removed_source_ranges": [
+        [
+          45,
+          48
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0244",
-    "content": "吴茱萸　味辛温。主温中下气止痛，咳逆寒热，除湿血痺，逐风邪，开腠理。根，杀三虫。一名藙。生川谷。\n246",
+    "content": "吴茱萸　味辛温。主温中下气止痛，咳逆寒热，除湿血痺，逐风邪，开腠理。根，杀三虫。一名藙。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部中品",
-      "drug_name": "吴茱萸"
+      "drug_name": "吴茱萸",
+      "cleaning_version": 1,
+      "raw_body_sha256": "50a4ec1e6b517e14db25bba68797a8eb235df7183d685cb49557b465398685c3",
+      "removed_source_ranges": [
+        [
+          49,
+          52
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0245",
-    "content": "秦皮　味酸无毒。主治风寒湿痺，洗洗寒气，除热，目中青翳白膜。久服头不白，轻身。生川谷。\n247",
+    "content": "秦皮　味酸无毒。主治风寒湿痺，洗洗寒气，除热，目中青翳白膜。久服头不白，轻身。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部中品",
-      "drug_name": "秦皮"
+      "drug_name": "秦皮",
+      "cleaning_version": 1,
+      "raw_body_sha256": "887c39f2c6642a4fc4b41e6b8d6c47e5d8a336c518073183f9b884c6e4fc08ac",
+      "removed_source_ranges": [
+        [
+          44,
+          47
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0246",
-    "content": "支子　味苦寒。主治五内邪气，胃中热气，面赤酒疱皶鼻，白癞赤癞疮疡。一名木丹。生川谷。\n248",
+    "content": "支子　味苦寒。主治五内邪气，胃中热气，面赤酒疱皶鼻，白癞赤癞疮疡。一名木丹。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部中品",
-      "drug_name": "支子"
+      "drug_name": "支子",
+      "cleaning_version": 1,
+      "raw_body_sha256": "8ff68b3bb84cd1b53f36c1277f3d905f46e6bb8b33c1a79365e68ecc2bfc7599",
+      "removed_source_ranges": [
+        [
+          43,
+          46
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0247",
-    "content": "合欢　味甘平。主安五脏，和心志，令人欢乐无忧。久服轻身明目，得所欲。生益州山谷。\n249",
+    "content": "合欢　味甘平。主安五脏，和心志，令人欢乐无忧。久服轻身明目，得所欲。生益州山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部中品",
-      "drug_name": "合欢"
+      "drug_name": "合欢",
+      "cleaning_version": 1,
+      "raw_body_sha256": "b4e339faa33fba68b412982a7291f7cf743b7a209c0640ddba83f9d95b3bffac",
+      "removed_source_ranges": [
+        [
+          41,
+          44
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0248",
-    "content": "秦椒　味辛温。主治风邪气，温中，除寒痺，坚齿长发，明目。久服轻身好颜色，耐老增年通神。生川谷。\n250",
+    "content": "秦椒　味辛温。主治风邪气，温中，除寒痺，坚齿长发，明目。久服轻身好颜色，耐老增年通神。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部中品",
-      "drug_name": "秦椒"
+      "drug_name": "秦椒",
+      "cleaning_version": 1,
+      "raw_body_sha256": "67b1d484baa66e8903ef33dcbe7d30d8239ab1931b3c9314c8563c2718f1016e",
+      "removed_source_ranges": [
+        [
+          48,
+          51
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0249",
-    "content": "紫葳　味酸微寒。主治妇人乳余疾，崩中症瘕血闭，寒热羸瘦，养胎。生川谷。\n251",
+    "content": "紫葳　味酸微寒。主治妇人乳余疾，崩中症瘕血闭，寒热羸瘦，养胎。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部中品",
-      "drug_name": "紫葳"
+      "drug_name": "紫葳",
+      "cleaning_version": 1,
+      "raw_body_sha256": "70c4940c635607cb7806026568793fdff7da535691324a1fc6b26bf6e14af208",
+      "removed_source_ranges": [
+        [
+          36,
+          39
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0250",
-    "content": "芜荑　味辛。主治五内邪气，散皮肤骨节中淫淫行毒。去三虫，化食。一名无姑，一名殿*塘䕱。生川谷。\n252",
+    "content": "芜荑　味辛。主治五内邪气，散皮肤骨节中淫淫行毒。去三虫，化食。一名无姑，一名殿*塘䕱。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部中品",
-      "drug_name": "芜荑"
+      "drug_name": "芜荑",
+      "cleaning_version": 1,
+      "raw_body_sha256": "e9ca3d181e0b35d19f561e428633f51752f1c06eff6f46c0d1eb5516a1e4a60a",
+      "removed_source_ranges": [
+        [
+          48,
+          51
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0251",
-    "content": "桑根白皮　味甘寒。主治伤中五劳六极羸瘦，崩中脉绝，补虚益气。叶，除寒热，出汗。桑耳，黑者，主女子漏下，赤白汁，血病，症瘕积聚腹痛，阴阳寒热，无子。五木耳，名薷（木旁），益气不饥，轻身强志。\n253",
+    "content": "桑根白皮　味甘寒。主治伤中五劳六极羸瘦，崩中脉绝，补虚益气。叶，除寒热，出汗。桑耳，黑者，主女子漏下，赤白汁，血病，症瘕积聚腹痛，阴阳寒热，无子。五木耳，名薷（木旁），益气不饥，轻身强志。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部中品",
-      "drug_name": "桑根白皮"
+      "drug_name": "桑根白皮",
+      "cleaning_version": 1,
+      "raw_body_sha256": "4545167752fc928d5565e471739595a24b35b45797842c0beb8a06e1add7b0f3",
+      "removed_source_ranges": [
+        [
+          95,
+          98
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0253",
-    "content": "松萝　味苦平。主治瞋怒邪气，止虚汗出，风头，女子阴寒肿痛。一名女萝。生山谷。\n255",
+    "content": "松萝　味苦平。主治瞋怒邪气，止虚汗出，风头，女子阴寒肿痛。一名女萝。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部下品",
-      "drug_name": "松萝"
+      "drug_name": "松萝",
+      "cleaning_version": 1,
+      "raw_body_sha256": "480a6634c46b6997b151be26fa02781a774ae9cd163888bda671c4eafac3e123",
+      "removed_source_ranges": [
+        [
+          39,
+          42
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0254",
-    "content": "五加　味辛温。主治心腹疝气，腹痛，益气，疗躄。小儿立能行，疽疮阴蚀。一名豺漆。\n256",
+    "content": "五加　味辛温。主治心腹疝气，腹痛，益气，疗躄。小儿立能行，疽疮阴蚀。一名豺漆。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部下品",
-      "drug_name": "五加"
+      "drug_name": "五加",
+      "cleaning_version": 1,
+      "raw_body_sha256": "b26b24050f3f90011e30e68d23beb89e61138e22e76a3d5991d0af5179dbbdd8",
+      "removed_source_ranges": [
+        [
+          40,
+          43
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0255",
-    "content": "猪苓　味甘平。主治痎疟，解毒，蛊毒、蛊注，不祥，利水道。久服轻身耐老。一名叚（犬旁）猪矢。生山谷。\n257",
+    "content": "猪苓　味甘平。主治痎疟，解毒，蛊毒、蛊注，不祥，利水道。久服轻身耐老。一名叚（犬旁）猪矢。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部下品",
-      "drug_name": "猪苓"
+      "drug_name": "猪苓",
+      "cleaning_version": 1,
+      "raw_body_sha256": "ff6f928af10a82fa6657bedf7aa223bf7d0459a2e1b7c924dcc914b5cb97fd3d",
+      "removed_source_ranges": [
+        [
+          50,
+          53
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0256",
-    "content": "白棘　味辛寒。主治心腹痛，痈肿溃脓止痛。一名棘针。生川谷。\n258",
+    "content": "白棘　味辛寒。主治心腹痛，痈肿溃脓止痛。一名棘针。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部下品",
-      "drug_name": "白棘"
+      "drug_name": "白棘",
+      "cleaning_version": 1,
+      "raw_body_sha256": "ad38edc68f17b2eaba03cc0edf022214a6d09edc825af29fca6b9e17fe3ae603",
+      "removed_source_ranges": [
+        [
+          30,
+          33
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0257",
-    "content": "卫矛　味苦寒无毒。主治女子崩中下血，腹满汗出，除邪，杀鬼毒蛊注。一名鬼箭。\n259",
+    "content": "卫矛　味苦寒无毒。主治女子崩中下血，腹满汗出，除邪，杀鬼毒蛊注。一名鬼箭。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部下品",
-      "drug_name": "卫矛"
+      "drug_name": "卫矛",
+      "cleaning_version": 1,
+      "raw_body_sha256": "df3b5d121367f948a809d37627dac1d996c1c1d6f7468b1dd5fd02d51b35be96",
+      "removed_source_ranges": [
+        [
+          38,
+          41
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0258",
-    "content": "黄环　味苦有毒。主治蛊毒鬼注鬼魅，邪气在藏中，除咳逆寒热。一名陵泉，一名大就。生山谷。\n260",
+    "content": "黄环　味苦有毒。主治蛊毒鬼注鬼魅，邪气在藏中，除咳逆寒热。一名陵泉，一名大就。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部下品",
-      "drug_name": "黄环"
+      "drug_name": "黄环",
+      "cleaning_version": 1,
+      "raw_body_sha256": "d3fe50075b118c27b471ffbc3d8fd2b363d14f17444f942a48bc937a6557d6c5",
+      "removed_source_ranges": [
+        [
+          44,
+          47
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0259",
-    "content": "石南草　味辛平。主养肾气，内伤阴衰，利筋骨皮毛。实，杀蛊毒，破积聚，逐风痺。一名鬼目。生山谷。\n261",
+    "content": "石南草　味辛平。主养肾气，内伤阴衰，利筋骨皮毛。实，杀蛊毒，破积聚，逐风痺。一名鬼目。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部下品",
-      "drug_name": "石南草"
+      "drug_name": "石南草",
+      "cleaning_version": 1,
+      "raw_body_sha256": "c0791d787f06196a87f51634f8b547d7f87f4f843987bb3530a2a3cd104616fb",
+      "removed_source_ranges": [
+        [
+          48,
+          51
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0260",
-    "content": "巴豆　味辛温有毒。主治伤寒温疟寒热，破症瘕结聚坚积，留饮痰癖，大腹水胀，荡涤五脏六腑，开通闭塞，利水谷道，去恶肉，除鬼毒蛊注邪物，杀虫鱼。一名巴椒。生川谷。\n262",
+    "content": "巴豆　味辛温有毒。主治伤寒温疟寒热，破症瘕结聚坚积，留饮痰癖，大腹水胀，荡涤五脏六腑，开通闭塞，利水谷道，去恶肉，除鬼毒蛊注邪物，杀虫鱼。一名巴椒。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部下品",
-      "drug_name": "巴豆"
+      "drug_name": "巴豆",
+      "cleaning_version": 1,
+      "raw_body_sha256": "18fd94d0cdd8121b91c4e5f54b814b1b289d483e1a38c1247fa77de2527edaf2",
+      "removed_source_ranges": [
+        [
+          79,
+          82
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0261",
-    "content": "蜀椒　味辛温。主治邪气咳逆，温中，逐骨节皮肤死肌，寒湿痺痛，下气。久服之头不白，轻身增年。生川谷。\n263",
+    "content": "蜀椒　味辛温。主治邪气咳逆，温中，逐骨节皮肤死肌，寒湿痺痛，下气。久服之头不白，轻身增年。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部下品",
-      "drug_name": "蜀椒"
+      "drug_name": "蜀椒",
+      "cleaning_version": 1,
+      "raw_body_sha256": "70597459d563e940fead9b1af71b56c23cd0bfb05241d29d54d9786006adc5e7",
+      "removed_source_ranges": [
+        [
+          50,
+          53
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0262",
-    "content": "莽草　味辛温。主治风头，痈肿乳痈，疝瘕，除结气，疥瘙疽疮。杀虫鱼。生山谷。\n264",
+    "content": "莽草　味辛温。主治风头，痈肿乳痈，疝瘕，除结气，疥瘙疽疮。杀虫鱼。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部下品",
-      "drug_name": "莽草"
+      "drug_name": "莽草",
+      "cleaning_version": 1,
+      "raw_body_sha256": "7c42640845de9fa36af2d56203137652bd5a39b709e1423da7f42e6a45def3d5",
+      "removed_source_ranges": [
+        [
+          38,
+          41
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0263",
-    "content": "郁核　味酸平。主治大腹水肿，面目四肢浮肿，利小便水道。根，主治齿断肿、龋齿，坚齿。鼠李，主治寒热瘰痨疮。一名爵李。生川谷。\n265",
+    "content": "郁核　味酸平。主治大腹水肿，面目四肢浮肿，利小便水道。根，主治齿断肿、龋齿，坚齿。鼠李，主治寒热瘰痨疮。一名爵李。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部下品",
-      "drug_name": "郁核"
+      "drug_name": "郁核",
+      "cleaning_version": 1,
+      "raw_body_sha256": "c664da9fd2287dad8f90476252f114bd85736657fa816df757c83f38c1cfd240",
+      "removed_source_ranges": [
+        [
+          62,
+          65
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0264",
-    "content": "栾华　味苦寒。主治目痛泪出伤眦，消目肿。生川谷。\n266",
+    "content": "栾华　味苦寒。主治目痛泪出伤眦，消目肿。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部下品",
-      "drug_name": "栾华"
+      "drug_name": "栾华",
+      "cleaning_version": 1,
+      "raw_body_sha256": "a4a122d6635a27be70ef23bf892b571869f2f4a9cee684dcdde564ee2381f4fe",
+      "removed_source_ranges": [
+        [
+          25,
+          28
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0265",
-    "content": "蔓椒　味苦温。主治风寒湿痺，历节痛，除四肢厥气，膝痛。一名豕椒。生川谷。\n267",
+    "content": "蔓椒　味苦温。主治风寒湿痺，历节痛，除四肢厥气，膝痛。一名豕椒。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部下品",
-      "drug_name": "蔓椒"
+      "drug_name": "蔓椒",
+      "cleaning_version": 1,
+      "raw_body_sha256": "ef14af397189d4b0b7ea8009d010a5087a21f5bebd16953ffd79cdb96f2cd9d3",
+      "removed_source_ranges": [
+        [
+          37,
+          40
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0266",
-    "content": "雷丸　味苦寒。主杀三虫，逐毒气，胃中热，利丈夫，不利女子。作摩膏，除小儿百病。生山谷。\n268",
+    "content": "雷丸　味苦寒。主杀三虫，逐毒气，胃中热，利丈夫，不利女子。作摩膏，除小儿百病。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部下品",
-      "drug_name": "雷丸"
+      "drug_name": "雷丸",
+      "cleaning_version": 1,
+      "raw_body_sha256": "65c749e7434ba03467b70baa162a168f536a74a8be34616d82447e45ea082231",
+      "removed_source_ranges": [
+        [
+          44,
+          47
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0267",
-    "content": "溲疏　味辛寒。主治身皮肤中热，除邪气，止遗溺，可作浴汤。生川谷。\n269",
+    "content": "溲疏　味辛寒。主治身皮肤中热，除邪气，止遗溺，可作浴汤。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部下品",
-      "drug_name": "溲疏"
+      "drug_name": "溲疏",
+      "cleaning_version": 1,
+      "raw_body_sha256": "54fbae91027b48b5e404392164fdd6e7dd2102b9f498c4faa5723b7b5e5402da",
+      "removed_source_ranges": [
+        [
+          33,
+          36
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0268",
-    "content": "药食根　味辛温。主治邪气，诸痺疼酸，续绝伤，补骨髓。一名连木。（即贝母之根）生山谷。\n270",
+    "content": "药食根　味辛温。主治邪气，诸痺疼酸，续绝伤，补骨髓。一名连木。（即贝母之根）生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部下品",
-      "drug_name": "药食根"
+      "drug_name": "药食根",
+      "cleaning_version": 1,
+      "raw_body_sha256": "832a9e454d7b0074e69771666c98544289f31685191f25097634d3eb3229286d",
+      "removed_source_ranges": [
+        [
+          43,
+          46
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0269",
-    "content": "皂荚　味辛咸温。主治风痺死肌，邪气，风头泪出。利九窍，杀精物。生川谷。\n271",
+    "content": "皂荚　味辛咸温。主治风痺死肌，邪气，风头泪出。利九窍，杀精物。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部下品",
-      "drug_name": "皂荚"
+      "drug_name": "皂荚",
+      "cleaning_version": 1,
+      "raw_body_sha256": "9c7d19c662f907031e6ccab428f9f123ea28adeb6bb1a518c0595d61e9d38ae0",
+      "removed_source_ranges": [
+        [
+          36,
+          39
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0270",
-    "content": "练实　味苦寒。主治温疾伤寒大热烦狂，杀三虫，疥疡，利小便水道。（即楝实）生山谷。\n272",
+    "content": "练实　味苦寒。主治温疾伤寒大热烦狂，杀三虫，疥疡，利小便水道。（即楝实）生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部下品",
-      "drug_name": "练实"
+      "drug_name": "练实",
+      "cleaning_version": 1,
+      "raw_body_sha256": "383e4c77fbf113870d3be3ed662f7ab346076cade61fe50227cc8b1958c635a0",
+      "removed_source_ranges": [
+        [
+          41,
+          44
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0271",
-    "content": "柳华　味苦寒。主治风水，黄疸，面热黑。叶，主治马疥痂疮。实，主治溃痈，逐脓血。一名柳絮。生瑯邪川泽。\n273",
+    "content": "柳华　味苦寒。主治风水，黄疸，面热黑。叶，主治马疥痂疮。实，主治溃痈，逐脓血。一名柳絮。生瑯邪川泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部下品",
-      "drug_name": "柳华"
+      "drug_name": "柳华",
+      "cleaning_version": 1,
+      "raw_body_sha256": "9104f67c79a5510a8f1a866ffa65e6277ea48ecd86dd68ce0951eb1dad3c29bb",
+      "removed_source_ranges": [
+        [
+          51,
+          54
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0272",
-    "content": "桐叶　味苦寒。主治恶蚀疮著阴。皮，主五痔，杀三虫。华，傅猪疮，饲猪肥大三倍。生山谷。\n下卷》",
+    "content": "桐叶　味苦寒。主治恶蚀疮著阴。皮，主五痔，杀三虫。华，傅猪疮，饲猪肥大三倍。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "木部下品",
-      "drug_name": "桐叶"
+      "drug_name": "桐叶",
+      "cleaning_version": 1,
+      "raw_body_sha256": "3614af915b1a1db25333e350c7ea10dc5a8b6fa5c51ebf0d7d2e3c67a4ef17af",
+      "removed_source_ranges": [
+        [
+          43,
+          46
+        ]
+      ]
     }
   },
   {
@@ -2451,781 +4623,1679 @@
   },
   {
     "id": "SNBCJ_0280",
-    "content": "丹雄鸡　味甘微温。主治女子崩中漏下，赤白沃，补虚，温中，止血通神，杀毒，辟不祥。头，主杀鬼。肪，主治耳聋。肠，主治遗溺。肶胵裹黄皮，主治泄利。屎白，主治消渴，伤寒寒热。翮羽，主下血闭。鸡子，除热火疮，痫痓，可作虎魄神物。鸡白蠹，肥猪。生平泽。\n10",
+    "content": "丹雄鸡　味甘微温。主治女子崩中漏下，赤白沃，补虚，温中，止血通神，杀毒，辟不祥。头，主杀鬼。肪，主治耳聋。肠，主治遗溺。肶胵裹黄皮，主治泄利。屎白，主治消渴，伤寒寒热。翮羽，主下血闭。鸡子，除热火疮，痫痓，可作虎魄神物。鸡白蠹，肥猪。生平泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部上品",
-      "drug_name": "丹雄鸡"
+      "drug_name": "丹雄鸡",
+      "cleaning_version": 1,
+      "raw_body_sha256": "67d6d3eaa4308b94c356b11fa8a2b9216addf73fec9ad2ab9b2ec065e6a121e1",
+      "removed_source_ranges": [
+        [
+          122,
+          124
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0281",
-    "content": "雁肪　味甘平无毒。主治风挛拘急，偏枯，气不通利。久服益气不饥，轻身耐老。一名鹜肪。生池泽。\n11",
+    "content": "雁肪　味甘平无毒。主治风挛拘急，偏枯，气不通利。久服益气不饥，轻身耐老。一名鹜肪。生池泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部上品",
-      "drug_name": "雁肪"
+      "drug_name": "雁肪",
+      "cleaning_version": 1,
+      "raw_body_sha256": "af078819d870605efd66db3528881cc503a490f06392e368fd7ee81b27c0e778",
+      "removed_source_ranges": [
+        [
+          46,
+          48
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0282",
-    "content": "石蜜　味甘平。主治心腹邪气，诸惊痫痓，安五藏诸不足，益气补中，止痛解毒，除众病，和百药。久服强志轻身，不饥不老。生山谷。\n12",
+    "content": "石蜜　味甘平。主治心腹邪气，诸惊痫痓，安五藏诸不足，益气补中，止痛解毒，除众病，和百药。久服强志轻身，不饥不老。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部上品",
-      "drug_name": "石蜜"
+      "drug_name": "石蜜",
+      "cleaning_version": 1,
+      "raw_body_sha256": "8c30dc93eb4b741ddeb69e07c66ecd58f7f0798b4a4f538dbd9fd723d057ef60",
+      "removed_source_ranges": [
+        [
+          61,
+          63
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0283",
-    "content": "蜜蜡　味甘微温。主治下利脓血，补中，续绝伤，金创，益气，不饥耐老。生山谷。\n13",
+    "content": "蜜蜡　味甘微温。主治下利脓血，补中，续绝伤，金创，益气，不饥耐老。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部上品",
-      "drug_name": "蜜蜡"
+      "drug_name": "蜜蜡",
+      "cleaning_version": 1,
+      "raw_body_sha256": "e3e4ca102333381eacf6144621a0b224e83ddac9fb5ad257e39c7c35be5897f5",
+      "removed_source_ranges": [
+        [
+          38,
+          40
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0284",
-    "content": "蜂子　味甘平。主治风头，除蛊毒，补虚羸，伤中。久服令人光泽，好颜色，不老。大黄蜂子，主治心腹胀满痛，轻身益气。土蜂子，主治痈肿。一名蜚零。生山谷。\n14",
+    "content": "蜂子　味甘平。主治风头，除蛊毒，补虚羸，伤中。久服令人光泽，好颜色，不老。大黄蜂子，主治心腹胀满痛，轻身益气。土蜂子，主治痈肿。一名蜚零。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部上品",
-      "drug_name": "蜂子"
+      "drug_name": "蜂子",
+      "cleaning_version": 1,
+      "raw_body_sha256": "b45b2bf5e7b9f7a2bd25134eff22dbf6ed3fd7aa8995e69da85d150f1645c6b4",
+      "removed_source_ranges": [
+        [
+          74,
+          76
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0285",
-    "content": "牡蛎　味咸平。主治伤寒寒热，温疟洒洒，惊恚怒气，除拘缓，鼠瘘，女子带下赤白。久服强骨节，杀邪鬼，延年。一名蛎蛤。生池泽。\n15",
+    "content": "牡蛎　味咸平。主治伤寒寒热，温疟洒洒，惊恚怒气，除拘缓，鼠瘘，女子带下赤白。久服强骨节，杀邪鬼，延年。一名蛎蛤。生池泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部上品",
-      "drug_name": "牡蛎"
+      "drug_name": "牡蛎",
+      "cleaning_version": 1,
+      "raw_body_sha256": "3e37f36a1da63359bc34c031bcc2de23cd3a86c17fc5ab80c7d9da8617c08c85",
+      "removed_source_ranges": [
+        [
+          61,
+          63
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0286",
-    "content": "鲤鱼胆　味苦寒。主治目热赤痛，青盲，明目。久服强悍益志气。生池泽。\n16",
+    "content": "鲤鱼胆　味苦寒。主治目热赤痛，青盲，明目。久服强悍益志气。生池泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部上品",
-      "drug_name": "鲤鱼胆"
+      "drug_name": "鲤鱼胆",
+      "cleaning_version": 1,
+      "raw_body_sha256": "0c915658fe145b95def45c50c62e208f4f03cb18f20426df2fe7d70268255f0e",
+      "removed_source_ranges": [
+        [
+          34,
+          36
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0287",
-    "content": "鳢鱼　味甘寒。主治湿痺面目浮肿，下大水。一名酮鱼。生池泽。\n17",
+    "content": "鳢鱼　味甘寒。主治湿痺面目浮肿，下大水。一名酮鱼。生池泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部上品",
-      "drug_name": "鳢鱼"
+      "drug_name": "鳢鱼",
+      "cleaning_version": 1,
+      "raw_body_sha256": "1f128fbe9ffb9dc87d32daa2f8a9c8b8670ec2d6f0f1161253f3c1da8ad59fb6",
+      "removed_source_ranges": [
+        [
+          30,
+          32
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0289",
-    "content": "犀角　味苦寒。主治百毒蛊注，邪鬼瘴气，杀钩吻鸠羽蛇毒，除邪，不迷惑魇寐。久服轻身。生川谷。\n19",
+    "content": "犀角　味苦寒。主治百毒蛊注，邪鬼瘴气，杀钩吻鸠羽蛇毒，除邪，不迷惑魇寐。久服轻身。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部中品",
-      "drug_name": "犀角"
+      "drug_name": "犀角",
+      "cleaning_version": 1,
+      "raw_body_sha256": "80534eeb7447db793b0edbd018fd632667c880090247b7eb9c6f902ef6b75719",
+      "removed_source_ranges": [
+        [
+          46,
+          48
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0290",
-    "content": "羚羊角　味咸寒。主明目益气起阴，去恶血注下，辟蛊毒恶鬼不祥，安心气，常不魇寐。久服强筋骨轻身。生川谷。\n20",
+    "content": "羚羊角　味咸寒。主明目益气起阴，去恶血注下，辟蛊毒恶鬼不祥，安心气，常不魇寐。久服强筋骨轻身。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部中品",
-      "drug_name": "羚羊角"
+      "drug_name": "羚羊角",
+      "cleaning_version": 1,
+      "raw_body_sha256": "bb61f3ac089585d7cbbb4e28e521aacac0cfd1924531995613e05c6c56bd358c",
+      "removed_source_ranges": [
+        [
+          52,
+          54
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0291",
-    "content": "羖羊角　味咸温。主治青盲、明目，杀疥虫，止寒泄，辟恶鬼虎狼，止惊悸。久服安心益气轻身。生川谷。\n21",
+    "content": "羖羊角　味咸温。主治青盲、明目，杀疥虫，止寒泄，辟恶鬼虎狼，止惊悸。久服安心益气轻身。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部中品",
-      "drug_name": "羖羊角"
+      "drug_name": "羖羊角",
+      "cleaning_version": 1,
+      "raw_body_sha256": "ee034f8ba2aab3160dff1b48d5a877cbdf9e1100cd45adafbf7d56cb8ff40271",
+      "removed_source_ranges": [
+        [
+          48,
+          50
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0292",
-    "content": "白马茎　味咸平。主治伤中脉绝，阴不起。强志益气，长肌肉，肥健生子。眼，主治惊痫腹满疟疾。悬蹄，主治惊邪瘈疭，乳难，辟恶气鬼毒蛊注不祥。生平泽。\n22",
+    "content": "白马茎　味咸平。主治伤中脉绝，阴不起。强志益气，长肌肉，肥健生子。眼，主治惊痫腹满疟疾。悬蹄，主治惊邪瘈疭，乳难，辟恶气鬼毒蛊注不祥。生平泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部中品",
-      "drug_name": "白马茎"
+      "drug_name": "白马茎",
+      "cleaning_version": 1,
+      "raw_body_sha256": "5fc644f9bd6fc45d405026630aa4e0a6df3a0cebe9f92c5b20865b53cdbd425d",
+      "removed_source_ranges": [
+        [
+          72,
+          74
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0293",
-    "content": "狗阴茎　味咸平。主治伤中，阴痿不起，令强热大生子，除女子带下十二疾。胆，明目。一名狗精。生平泽。\n23",
+    "content": "狗阴茎　味咸平。主治伤中，阴痿不起，令强热大生子，除女子带下十二疾。胆，明目。一名狗精。生平泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部中品",
-      "drug_name": "狗阴茎"
+      "drug_name": "狗阴茎",
+      "cleaning_version": 1,
+      "raw_body_sha256": "bdc1027b9cff0f0b66e1103a108553a7e7c946a9a761dd7c7ffe153c3e3c2bfa",
+      "removed_source_ranges": [
+        [
+          49,
+          51
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0294",
-    "content": "鹿茸　味甘温。主治漏下恶血，寒热惊痫，益气强志，生齿不老。角，主治恶疮痈肿，逐邪恶气，留血在阴中。\n24",
+    "content": "鹿茸　味甘温。主治漏下恶血，寒热惊痫，益气强志，生齿不老。角，主治恶疮痈肿，逐邪恶气，留血在阴中。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部中品",
-      "drug_name": "鹿茸"
+      "drug_name": "鹿茸",
+      "cleaning_version": 1,
+      "raw_body_sha256": "8a3bb5af317c2fc0b655c8f748f88d03c6c81ed81539742f795a83c061786ccf",
+      "removed_source_ranges": [
+        [
+          50,
+          52
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0295",
-    "content": "伏翼　味咸平。主治目暝，明目，夜视有精光。久服令人喜乐媚好无忧。一名蝙蝠。生太山川谷。\n25",
+    "content": "伏翼　味咸平。主治目暝，明目，夜视有精光。久服令人喜乐媚好无忧。一名蝙蝠。生太山川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部中品",
-      "drug_name": "伏翼"
+      "drug_name": "伏翼",
+      "cleaning_version": 1,
+      "raw_body_sha256": "16e025e5fbdf1c8de0b384e403a7fb6e715888389e5a92759ec0b1dcbb179bd1",
+      "removed_source_ranges": [
+        [
+          44,
+          46
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0296",
-    "content": "猬皮　味苦平。主治五痔阴蚀，下血赤白，五色血汁不止，阴肿痛引腰背。酒煮杀之。生川谷。\n26",
+    "content": "猬皮　味苦平。主治五痔阴蚀，下血赤白，五色血汁不止，阴肿痛引腰背。酒煮杀之。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部中品",
-      "drug_name": "猬皮"
+      "drug_name": "猬皮",
+      "cleaning_version": 1,
+      "raw_body_sha256": "3101288cba6510af15f51f1cf2f46fa5a0724f30d3f6bf464d9488651f120dfa",
+      "removed_source_ranges": [
+        [
+          43,
+          45
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0297",
-    "content": "石龙子　味咸寒。主治五癃，邪结气，破石淋，下血，利小便水道。一名蜥蜴。生川谷。\n27",
+    "content": "石龙子　味咸寒。主治五癃，邪结气，破石淋，下血，利小便水道。一名蜥蜴。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部中品",
-      "drug_name": "石龙子"
+      "drug_name": "石龙子",
+      "cleaning_version": 1,
+      "raw_body_sha256": "cc9b6ba7843e1e9a0973c7d03bb2791f38b1d124723c819d418683f2489ec8e4",
+      "removed_source_ranges": [
+        [
+          40,
+          42
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0298",
-    "content": "桑螵蛸　味咸平。主治伤中，疝瘕阴痿，益精生子，女子血闭腰痛，通五淋，利小便水道。生桑枝上，采蒸之。一名蚀肬。\n28",
+    "content": "桑螵蛸　味咸平。主治伤中，疝瘕阴痿，益精生子，女子血闭腰痛，通五淋，利小便水道。生桑枝上，采蒸之。一名蚀肬。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部中品",
-      "drug_name": "桑螵蛸"
+      "drug_name": "桑螵蛸",
+      "cleaning_version": 1,
+      "raw_body_sha256": "4464783618036005a938644b00c772174976db0df9622c192f7a24c1e84b27dd",
+      "removed_source_ranges": [
+        [
+          55,
+          57
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0299",
-    "content": "蚱蝉　味咸寒。主治小儿惊痫，夜啼，癫病，寒热。生杨柳上。\n29",
+    "content": "蚱蝉　味咸寒。主治小儿惊痫，夜啼，癫病，寒热。生杨柳上。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部中品",
-      "drug_name": "蚱蝉"
+      "drug_name": "蚱蝉",
+      "cleaning_version": 1,
+      "raw_body_sha256": "89eea8988ab2fcc4b6f8df5fc3162ee2f900802a6bcc0bb278e66244e4e7c690",
+      "removed_source_ranges": [
+        [
+          29,
+          31
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0300",
-    "content": "白僵蚕　味咸。主治小儿惊痫夜啼，去三虫，灭黑鼾*，令人面色好，男子阴疡病。生平泽。\n30",
+    "content": "白僵蚕　味咸。主治小儿惊痫夜啼，去三虫，灭黑鼾*，令人面色好，男子阴疡病。生平泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部中品",
-      "drug_name": "白僵蚕"
+      "drug_name": "白僵蚕",
+      "cleaning_version": 1,
+      "raw_body_sha256": "6f858a08c4d2ad441feea8a0466ebb589db04d0dfbe1824404ef4e8b1906ed33",
+      "removed_source_ranges": [
+        [
+          42,
+          44
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0301",
-    "content": "木虻　味苦平。主治目赤痛，眦伤泪出，瘀血血闭，寒热酸斯*，无子。一名魂常。生川泽。\n31",
+    "content": "木虻　味苦平。主治目赤痛，眦伤泪出，瘀血血闭，寒热酸斯*，无子。一名魂常。生川泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部中品",
-      "drug_name": "木虻"
+      "drug_name": "木虻",
+      "cleaning_version": 1,
+      "raw_body_sha256": "1a799cc4baf676a21419151a1201445bfef0209319a4ee1563b28fa82e154d33",
+      "removed_source_ranges": [
+        [
+          42,
+          44
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0302",
-    "content": "蜚虻　味苦微寒。主逐瘀血，破下血积坚癖症瘕寒热，通利血脉及九窍。生川谷。\n32",
+    "content": "蜚虻　味苦微寒。主逐瘀血，破下血积坚癖症瘕寒热，通利血脉及九窍。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部中品",
-      "drug_name": "蜚虻"
+      "drug_name": "蜚虻",
+      "cleaning_version": 1,
+      "raw_body_sha256": "ce7f1d4b3e345d3ecea9ab569eed450a8242dcfcebc29043c8aca4aa21365ae0",
+      "removed_source_ranges": [
+        [
+          37,
+          39
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0303",
-    "content": "蜚廉　味咸。主治血瘀，症坚寒热，破积聚，喉咽痺，内寒无子。生川泽。\n33",
+    "content": "蜚廉　味咸。主治血瘀，症坚寒热，破积聚，喉咽痺，内寒无子。生川泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部中品",
-      "drug_name": "蜚廉"
+      "drug_name": "蜚廉",
+      "cleaning_version": 1,
+      "raw_body_sha256": "6a096854768a3bb64c045226933846cc4f3e2fc861f4234ac635f3a88411e8e8",
+      "removed_source_ranges": [
+        [
+          34,
+          36
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0304",
-    "content": "蛴螬　味咸微温。主治恶血血瘀，痺气，破折血在胁下坚满痛，月闭，目中淫肤，青翳白膜。一名愤（虫旁）蛴。生平泽。\n34",
+    "content": "蛴螬　味咸微温。主治恶血血瘀，痺气，破折血在胁下坚满痛，月闭，目中淫肤，青翳白膜。一名愤（虫旁）蛴。生平泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部中品",
-      "drug_name": "蛴螬"
+      "drug_name": "蛴螬",
+      "cleaning_version": 1,
+      "raw_body_sha256": "d695d1dbbaa9793ddecccab0a32d2da03f5873fa7cfc5ef5add0da5cb3b2eb3c",
+      "removed_source_ranges": [
+        [
+          55,
+          57
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0305",
-    "content": "蛞蝓　味咸寒。主治贼风㖞僻，轶筋及脱肛，惊痫挛缩。一名陵蠡。生池泽。\n35",
+    "content": "蛞蝓　味咸寒。主治贼风㖞僻，轶筋及脱肛，惊痫挛缩。一名陵蠡。生池泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部中品",
-      "drug_name": "蛞蝓"
+      "drug_name": "蛞蝓",
+      "cleaning_version": 1,
+      "raw_body_sha256": "eb777204ebd68df8bdae2d807004a6c1106cb9af3bb84a104220559281419389",
+      "removed_source_ranges": [
+        [
+          35,
+          37
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0306",
-    "content": "海蛤　味苦平。主治咳逆上气，喘息烦满，胸痛寒热。一名魁蛤。生池泽。文蛤，主治恶疮，蚀五痔。\n36",
+    "content": "海蛤　味苦平。主治咳逆上气，喘息烦满，胸痛寒热。一名魁蛤。生池泽。文蛤，主治恶疮，蚀五痔。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部中品",
-      "drug_name": "海蛤"
+      "drug_name": "海蛤",
+      "cleaning_version": 1,
+      "raw_body_sha256": "0aad6e4882a70050753c1addde45cd60785475c1026295fcd6eed986d6ba56bc",
+      "removed_source_ranges": [
+        [
+          46,
+          48
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0307",
-    "content": "龟甲　味咸平。主治漏下赤白，破症瘕，痎疟，五痔阴蚀，湿痺，四肢重弱，小儿囟不合。久服轻身不饥。一名神屋。生池泽。\n37",
+    "content": "龟甲　味咸平。主治漏下赤白，破症瘕，痎疟，五痔阴蚀，湿痺，四肢重弱，小儿囟不合。久服轻身不饥。一名神屋。生池泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部中品",
-      "drug_name": "龟甲"
+      "drug_name": "龟甲",
+      "cleaning_version": 1,
+      "raw_body_sha256": "9d33187828290d53e2f0d096be46c06feeb8fdd58c264629baa28dea1f45a36b",
+      "removed_source_ranges": [
+        [
+          57,
+          59
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0308",
-    "content": "鳖甲　味咸平。主治心腹症瘕，坚积寒热，去痞、息肉，阴蚀，痔，恶肉。生池泽。\n38",
+    "content": "鳖甲　味咸平。主治心腹症瘕，坚积寒热，去痞、息肉，阴蚀，痔，恶肉。生池泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部中品",
-      "drug_name": "鳖甲"
+      "drug_name": "鳖甲",
+      "cleaning_version": 1,
+      "raw_body_sha256": "babdefeb39778ad93520d9eb7ed8c81b92dba4cdb0234659082b0e08d04996d9",
+      "removed_source_ranges": [
+        [
+          38,
+          40
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0309",
-    "content": "𬶍鱼甲　味辛微温。主治心腹症瘕，伏坚积聚，寒热，女子崩中下血五色，小腹阴中相引痛，疥疮死肌。生池泽。\n39",
+    "content": "𬶍鱼甲　味辛微温。主治心腹症瘕，伏坚积聚，寒热，女子崩中下血五色，小腹阴中相引痛，疥疮死肌。生池泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部中品",
-      "drug_name": "𬶍鱼甲"
+      "drug_name": "𬶍鱼甲",
+      "cleaning_version": 1,
+      "raw_body_sha256": "84e7f51b0e3b8cb88d3d232b33682f26c8d431b0f19f77d85f5ede2597cf5744",
+      "removed_source_ranges": [
+        [
+          51,
+          53
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0310",
-    "content": "乌贼鱼骨　味咸微温。主治女子漏下赤白经汁，血闭，阴蚀肿痛，寒热，症瘕，无子。生池泽。\n40",
+    "content": "乌贼鱼骨　味咸微温。主治女子漏下赤白经汁，血闭，阴蚀肿痛，寒热，症瘕，无子。生池泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部中品",
-      "drug_name": "乌贼鱼骨"
+      "drug_name": "乌贼鱼骨",
+      "cleaning_version": 1,
+      "raw_body_sha256": "1053490fe508bc604b2798a2ee6f95209aa91f82cf4bfe29411949dcbeb673dd",
+      "removed_source_ranges": [
+        [
+          43,
+          45
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0311",
-    "content": "蟹　味咸寒。主治胸中邪气，热结痛，㖞僻面肿。败漆。烧之致鼠。生池泽。\n41",
+    "content": "蟹　味咸寒。主治胸中邪气，热结痛，㖞僻面肿。败漆。烧之致鼠。生池泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部中品",
-      "drug_name": "蟹"
+      "drug_name": "蟹",
+      "cleaning_version": 1,
+      "raw_body_sha256": "50fd5e5de0aebebe4c478d3b9630dd52a153685369c55756a9135163456c1123",
+      "removed_source_ranges": [
+        [
+          35,
+          37
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0312",
-    "content": "虾蟇　味辛寒。主治邪气，破症坚血，痈肿阴疮。服之不患热病。生池泽。\n42",
+    "content": "虾蟇　味辛寒。主治邪气，破症坚血，痈肿阴疮。服之不患热病。生池泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部中品",
-      "drug_name": "虾蟇"
+      "drug_name": "虾蟇",
+      "cleaning_version": 1,
+      "raw_body_sha256": "d9cd4abfc49cebee23997b71e3908c7f8104aa68ca56cb964ecaa385cbbd49b0",
+      "removed_source_ranges": [
+        [
+          34,
+          36
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0314",
-    "content": "六畜毛蹄甲　味咸平。主治鬼注蛊毒，寒热，惊痫，癫痓狂走。骆驼毛尤良。\n44\n鼯鼠　主堕胎，令易产。\n45",
+    "content": "六畜毛蹄甲　味咸平。主治鬼注蛊毒，寒热，惊痫，癫痓狂走。骆驼毛尤良。\n鼯鼠　主堕胎，令易产。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部下品",
-      "drug_name": "六畜毛蹄甲"
+      "drug_name": "六畜毛蹄甲",
+      "cleaning_version": 1,
+      "raw_body_sha256": "b19c67066bf529cd421ddb6718b63019d1f6970cbe26f14630b0db61adf0752d",
+      "removed_source_ranges": [
+        [
+          35,
+          38
+        ],
+        [
+          50,
+          52
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0315",
-    "content": "麋脂　味辛温。主治痈肿恶疮死饥，寒风湿痺，四肢拘缓不收，风头肿气，通凑理。一名宫脂。生山谷。\n46",
+    "content": "麋脂　味辛温。主治痈肿恶疮死饥，寒风湿痺，四肢拘缓不收，风头肿气，通凑理。一名宫脂。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部下品",
-      "drug_name": "麋脂"
+      "drug_name": "麋脂",
+      "cleaning_version": 1,
+      "raw_body_sha256": "674ed792fe0ec736f93b9b0b7b3cf595653ba232c97e669bd1a420c2d3ab675b",
+      "removed_source_ranges": [
+        [
+          47,
+          49
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0316",
-    "content": "豚卵　味甘温。主治惊痫癫疾，鬼注蛊毒，除寒热，贲豚，五癃，邪气，挛缩。悬蹄，主治五痔，伏热在肠，肠痈内蚀。一名豚颠。\n47",
+    "content": "豚卵　味甘温。主治惊痫癫疾，鬼注蛊毒，除寒热，贲豚，五癃，邪气，挛缩。悬蹄，主治五痔，伏热在肠，肠痈内蚀。一名豚颠。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部下品",
-      "drug_name": "豚卵"
+      "drug_name": "豚卵",
+      "cleaning_version": 1,
+      "raw_body_sha256": "0b3ec5d56115a5d39d026e4cdca0b20abd5bb7ecee78f398586daa50be889e82",
+      "removed_source_ranges": [
+        [
+          59,
+          61
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0317",
-    "content": "鷰屎　味心平。主治蛊毒，鬼注，逐不祥邪气，破五癃，利小便。生高谷山平谷。\n48",
+    "content": "鷰屎　味心平。主治蛊毒，鬼注，逐不祥邪气，破五癃，利小便。生高谷山平谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部下品",
-      "drug_name": "鷰屎"
+      "drug_name": "鷰屎",
+      "cleaning_version": 1,
+      "raw_body_sha256": "4d6df2dcfa37369023e14c075c75416b928b4ab73de7271eefbd6b4f8b243c91",
+      "removed_source_ranges": [
+        [
+          37,
+          39
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0318",
-    "content": "天鼠屎　味辛寒。主治面目痈肿，皮肤洗洗时痛，腹中血气，破寒热积聚，除惊悸。一名鼠沽，一名石肝。生合浦山谷。\n49",
+    "content": "天鼠屎　味辛寒。主治面目痈肿，皮肤洗洗时痛，腹中血气，破寒热积聚，除惊悸。一名鼠沽，一名石肝。生合浦山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部下品",
-      "drug_name": "天鼠屎"
+      "drug_name": "天鼠屎",
+      "cleaning_version": 1,
+      "raw_body_sha256": "0298983ac46032d20b1e49ea23e52fad2909fc86c72c25b5e4701edbc1a33b1b",
+      "removed_source_ranges": [
+        [
+          54,
+          56
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0319",
-    "content": "露蜂房　味苦平。主治惊痫瘈疭，寒热邪气，癫疾，鬼精蛊毒，肠痔。火熬之良。一名蜂场。生山谷。\n50",
+    "content": "露蜂房　味苦平。主治惊痫瘈疭，寒热邪气，癫疾，鬼精蛊毒，肠痔。火熬之良。一名蜂场。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部下品",
-      "drug_name": "露蜂房"
+      "drug_name": "露蜂房",
+      "cleaning_version": 1,
+      "raw_body_sha256": "74cdec28824bf82b36481a135def4840551264a0c14af1b778e8a822334a13b3",
+      "removed_source_ranges": [
+        [
+          46,
+          48
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0320",
-    "content": "樗鸡　味苦平。主治心腹邪气，阴痿，益精强志，生子，好色。补中轻身。生川谷。\n51",
+    "content": "樗鸡　味苦平。主治心腹邪气，阴痿，益精强志，生子，好色。补中轻身。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部下品",
-      "drug_name": "樗鸡"
+      "drug_name": "樗鸡",
+      "cleaning_version": 1,
+      "raw_body_sha256": "56d06e55070681aedc82b5e3ddde06afa7d59239215a1eb44a4b3e88bd35d64f",
+      "removed_source_ranges": [
+        [
+          38,
+          40
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0321",
-    "content": "蟅虫　味咸寒。主治心腹寒热洗洗，血积症瘕，破坚，下血闭，生子大良。一名地鳖。生川泽。\n52",
+    "content": "蟅虫　味咸寒。主治心腹寒热洗洗，血积症瘕，破坚，下血闭，生子大良。一名地鳖。生川泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部下品",
-      "drug_name": "蟅虫"
+      "drug_name": "蟅虫",
+      "cleaning_version": 1,
+      "raw_body_sha256": "b9fb358fb36deca4eee75d1392aface95518d6a5b95d0e77cbb1f576315a994c",
+      "removed_source_ranges": [
+        [
+          43,
+          45
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0322",
-    "content": "水蛭　味咸平。主逐恶血瘀血月闭，破血瘕积聚，无子，利水道。生池泽。\n53",
+    "content": "水蛭　味咸平。主逐恶血瘀血月闭，破血瘕积聚，无子，利水道。生池泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部下品",
-      "drug_name": "水蛭"
+      "drug_name": "水蛭",
+      "cleaning_version": 1,
+      "raw_body_sha256": "b281260bc30f667a088fe2963cf2c402fb090a45613dd8c3ec4957a9ddf4528e",
+      "removed_source_ranges": [
+        [
+          34,
+          36
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0323",
-    "content": "石蚕　味酸无毒。主治五癃，破五淋，堕胎。肉，解结气，利水道，除热。一名沙虱。生池泽。\n54",
+    "content": "石蚕　味酸无毒。主治五癃，破五淋，堕胎。肉，解结气，利水道，除热。一名沙虱。生池泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部下品",
-      "drug_name": "石蚕"
+      "drug_name": "石蚕",
+      "cleaning_version": 1,
+      "raw_body_sha256": "466aa8128e3fb59e4c6c71f221e90907fcebd1bcb19c6ee8841bdec48ac6f918",
+      "removed_source_ranges": [
+        [
+          43,
+          45
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0324",
-    "content": "蛇蜕　味咸平。主治小儿百二十种惊痫，瘈疭，癫疾，寒热，肠痔，虫毒，蛇痫。火熬之良。一名龙子衣，一名蛇符，一名龙子单衣，一名弓皮。生山谷。\n55",
+    "content": "蛇蜕　味咸平。主治小儿百二十种惊痫，瘈疭，癫疾，寒热，肠痔，虫毒，蛇痫。火熬之良。一名龙子衣，一名蛇符，一名龙子单衣，一名弓皮。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部下品",
-      "drug_name": "蛇蜕"
+      "drug_name": "蛇蜕",
+      "cleaning_version": 1,
+      "raw_body_sha256": "0baa150cfcaa3d53df629e60f313d6d2c232a7eaacb87c534435f926a0e47ca9",
+      "removed_source_ranges": [
+        [
+          69,
+          71
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0325",
-    "content": "吴公　味辛温。主鬼注蛊毒，噉诸蛇虫鱼毒，杀鬼物老精，温疟，去三虫。生川谷。\n56",
+    "content": "吴公　味辛温。主鬼注蛊毒，噉诸蛇虫鱼毒，杀鬼物老精，温疟，去三虫。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部下品",
-      "drug_name": "吴公"
+      "drug_name": "吴公",
+      "cleaning_version": 1,
+      "raw_body_sha256": "629bf0389679a400945bb971dcc384cac3af33b0679e30562323ab117c2aa59d",
+      "removed_source_ranges": [
+        [
+          38,
+          40
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0326",
-    "content": "马陆　味辛温。主治腹中大坚蒸，破积聚，息肉恶疮，白秃。一名百足。生川谷。\n57",
+    "content": "马陆　味辛温。主治腹中大坚蒸，破积聚，息肉恶疮，白秃。一名百足。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部下品",
-      "drug_name": "马陆"
+      "drug_name": "马陆",
+      "cleaning_version": 1,
+      "raw_body_sha256": "b797b4d8f39d43b3f4d7a5ffd27f810fe2971ef7724eb2f2993b530d3c954081",
+      "removed_source_ranges": [
+        [
+          37,
+          39
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0327",
-    "content": "翳螉　味辛平。主治久聋，欬逆，毒气，出刺，出汗。生川谷。\n58",
+    "content": "翳螉　味辛平。主治久聋，欬逆，毒气，出刺，出汗。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部下品",
-      "drug_name": "翳螉"
+      "drug_name": "翳螉",
+      "cleaning_version": 1,
+      "raw_body_sha256": "b4d11062435ac25e948821d10afb16b1c1458e2e3066d993a1e3d7b2a7729a52",
+      "removed_source_ranges": [
+        [
+          29,
+          31
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0328",
-    "content": "雀瓮　味甘平。主治小儿惊痫，寒热结气，蛊毒，鬼注。一名躁舍。\n59",
+    "content": "雀瓮　味甘平。主治小儿惊痫，寒热结气，蛊毒，鬼注。一名躁舍。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部下品",
-      "drug_name": "雀瓮"
+      "drug_name": "雀瓮",
+      "cleaning_version": 1,
+      "raw_body_sha256": "f89f9be5e61ce0227c2013cf8c985e2aa4b6dde6f688375f3910bd42b9bb0892",
+      "removed_source_ranges": [
+        [
+          31,
+          33
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0329",
-    "content": "彼子　味甘温。主治腹中邪气，去三虫，蛇螫，蛊毒，鬼注，伏尸。\n60",
+    "content": "彼子　味甘温。主治腹中邪气，去三虫，蛇螫，蛊毒，鬼注，伏尸。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部下品",
-      "drug_name": "彼子"
+      "drug_name": "彼子",
+      "cleaning_version": 1,
+      "raw_body_sha256": "1ab5840e4874f57c68de8541d44d1b7d4ad492d78e266f45ae58408ba02cef4d",
+      "removed_source_ranges": [
+        [
+          31,
+          33
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0330",
-    "content": "鼠妇　味酸温。主治气癃不得小便，妇人月闭血瘕，痫痓寒热，利水道。一名蟠贞，一名伊咸。生平谷。\n61",
+    "content": "鼠妇　味酸温。主治气癃不得小便，妇人月闭血瘕，痫痓寒热，利水道。一名蟠贞，一名伊咸。生平谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部下品",
-      "drug_name": "鼠妇"
+      "drug_name": "鼠妇",
+      "cleaning_version": 1,
+      "raw_body_sha256": "c96825a6d9480f09c12aecb7ad3ba0a75b502485ca6c23f090a9b42927cdae5a",
+      "removed_source_ranges": [
+        [
+          47,
+          49
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0331",
-    "content": "萤火　味辛微温。主明目，小儿火疮伤，热气，蛊毒鬼注，通神精。一名夜光。生池泽。生池泽。\n62",
+    "content": "萤火　味辛微温。主明目，小儿火疮伤，热气，蛊毒鬼注，通神精。一名夜光。生池泽。生池泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部下品",
-      "drug_name": "萤火"
+      "drug_name": "萤火",
+      "cleaning_version": 1,
+      "raw_body_sha256": "dd96ecf675e80f5215f83a9b0eb71e353b402d47993b572514048b9a35cf3c23",
+      "removed_source_ranges": [
+        [
+          44,
+          46
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0332",
-    "content": "衣鱼　味咸温无毒。主治妇人疝瘕，小便不利，小儿中风项强，皆宜摩之。一名白鱼。生平泽。\n63",
+    "content": "衣鱼　味咸温无毒。主治妇人疝瘕，小便不利，小儿中风项强，皆宜摩之。一名白鱼。生平泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部下品",
-      "drug_name": "衣鱼"
+      "drug_name": "衣鱼",
+      "cleaning_version": 1,
+      "raw_body_sha256": "eeca3da33c0402ffb744164a05e5659918133127feb1e0abdd76d90c0516a3f8",
+      "removed_source_ranges": [
+        [
+          43,
+          45
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0333",
-    "content": "白颈蚯蚓　味咸寒。主治蛇瘕，去三虫，伏尸，鬼注蛊毒，杀长虫。仍自化作水。生平土。\n64",
+    "content": "白颈蚯蚓　味咸寒。主治蛇瘕，去三虫，伏尸，鬼注蛊毒，杀长虫。仍自化作水。生平土。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部下品",
-      "drug_name": "白颈蚯蚓"
+      "drug_name": "白颈蚯蚓",
+      "cleaning_version": 1,
+      "raw_body_sha256": "e5d118aa0f0661ddd55a1288b674d32e6f27917dee1e84dca48136dd1b598303",
+      "removed_source_ranges": [
+        [
+          41,
+          43
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0334",
-    "content": "蝼蛄　味咸寒。主治产难，出肉中刺，溃痈肿，下哽噎，解毒，除恶疮。夜出者良。一名蟪蛄，一名天蝼，一名螜。生平泽。\n65",
+    "content": "蝼蛄　味咸寒。主治产难，出肉中刺，溃痈肿，下哽噎，解毒，除恶疮。夜出者良。一名蟪蛄，一名天蝼，一名螜。生平泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部下品",
-      "drug_name": "蝼蛄"
+      "drug_name": "蝼蛄",
+      "cleaning_version": 1,
+      "raw_body_sha256": "f3fc6765e023fa705836173255be9222ddbefe002c48a0ca5e3c386462e180c8",
+      "removed_source_ranges": [
+        [
+          56,
+          58
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0335",
-    "content": "蜣蜋　味咸寒。主治小儿惊痫瘈疭，腹胀寒热，大人癫疾狂易。火熬之良。一名吉（虫旁）蜣。生池泽。\n66",
+    "content": "蜣蜋　味咸寒。主治小儿惊痫瘈疭，腹胀寒热，大人癫疾狂易。火熬之良。一名吉（虫旁）蜣。生池泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部下品",
-      "drug_name": "蜣蜋"
+      "drug_name": "蜣蜋",
+      "cleaning_version": 1,
+      "raw_body_sha256": "c7d1cb44e4d2272f8b8de98fbbc39e2ffa8f217e016e6746b9e5372878d25712",
+      "removed_source_ranges": [
+        [
+          47,
+          49
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0336",
-    "content": "螌蝥　味辛寒。主治寒热鬼注蛊毒，鼠瘘，恶疮，疽蚀，死肌，破石癃。一名龙尾。生川谷。\n67",
+    "content": "螌蝥　味辛寒。主治寒热鬼注蛊毒，鼠瘘，恶疮，疽蚀，死肌，破石癃。一名龙尾。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部下品",
-      "drug_name": "螌蝥"
+      "drug_name": "螌蝥",
+      "cleaning_version": 1,
+      "raw_body_sha256": "16259a33b60089a54a6adcc9436d2e64a0f89a4e8fd384f52f9df55a7d170ddc",
+      "removed_source_ranges": [
+        [
+          42,
+          44
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0337",
-    "content": "地胆　味辛寒。主治鬼注寒热，鼠瘘恶疮，死积，破症瘕，堕胎。一名元青。生川谷。\n68",
+    "content": "地胆　味辛寒。主治鬼注寒热，鼠瘘恶疮，死积，破症瘕，堕胎。一名元青。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部下品",
-      "drug_name": "地胆"
+      "drug_name": "地胆",
+      "cleaning_version": 1,
+      "raw_body_sha256": "af6db7fff5987cdc349752c40ba60280fe29dfa8911b3094fa91aebe82134da7",
+      "removed_source_ranges": [
+        [
+          39,
+          41
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0338",
-    "content": "马刀　味辛微寒有毒。主治漏下。\n69",
+    "content": "马刀　味辛微寒有毒。主治漏下。",
     "metadata": {
       "book": "神农本草经",
       "category": "虫兽部下品",
-      "drug_name": "马刀"
+      "drug_name": "马刀",
+      "cleaning_version": 1,
+      "raw_body_sha256": "b2be0d6e3f5cef28ba6c208cf472086215ed8363274e9075f55c4735d828a8c7",
+      "removed_source_ranges": [
+        [
+          16,
+          18
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0340",
-    "content": "蒲陶　味甘平。主治筋骨湿痺，益气倍力强志，令人肥健，耐饥忍风寒。久食轻身不老延年。可作酒。生山谷。\n71",
+    "content": "蒲陶　味甘平。主治筋骨湿痺，益气倍力强志，令人肥健，耐饥忍风寒。久食轻身不老延年。可作酒。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "果菜部上品",
-      "drug_name": "蒲陶"
+      "drug_name": "蒲陶",
+      "cleaning_version": 1,
+      "raw_body_sha256": "b4ed0bd84bca005de148f4991259efe2b4954b4c9f67b3c30874b5d805103f07",
+      "removed_source_ranges": [
+        [
+          50,
+          52
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0341",
-    "content": "蓬蔂　味酸平。主安五藏，益精气，长阴令坚，强志倍力，有子。久服轻身不老。一名覆盆。生平泽。\n72",
+    "content": "蓬蔂　味酸平。主安五藏，益精气，长阴令坚，强志倍力，有子。久服轻身不老。一名覆盆。生平泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "果菜部上品",
-      "drug_name": "蓬蔂"
+      "drug_name": "蓬蔂",
+      "cleaning_version": 1,
+      "raw_body_sha256": "671bf7ad81029bf61b444ab921736d344ad431b9aef1e5216ae0c52a5bf614ae",
+      "removed_source_ranges": [
+        [
+          46,
+          48
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0342",
-    "content": "大枣　味甘平。主治心腹邪气，安中养脾，助十二经，平胃气，通九窍，补少气少津液，身中不足，大惊，四肢重。和百药。久服轻身长年。叶覆麻黄，能令出汗。生平泽。\n73",
+    "content": "大枣　味甘平。主治心腹邪气，安中养脾，助十二经，平胃气，通九窍，补少气少津液，身中不足，大惊，四肢重。和百药。久服轻身长年。叶覆麻黄，能令出汗。生平泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "果菜部上品",
-      "drug_name": "大枣"
+      "drug_name": "大枣",
+      "cleaning_version": 1,
+      "raw_body_sha256": "11147a904fb4cb521457aa19bfef9cec0161bfb0765d6680f331052bbe8da1fa",
+      "removed_source_ranges": [
+        [
+          77,
+          79
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0343",
-    "content": "藕实茎　味甘平。主补中养神，益气力，除百疾。久服轻身耐老，不饥延年。一名水芝。生池泽。\n74",
+    "content": "藕实茎　味甘平。主补中养神，益气力，除百疾。久服轻身耐老，不饥延年。一名水芝。生池泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "果菜部上品",
-      "drug_name": "藕实茎"
+      "drug_name": "藕实茎",
+      "cleaning_version": 1,
+      "raw_body_sha256": "29dafdaee6eca1ad1bdb717b990620341faa8a161cc459dba87f3ccc0ed8525a",
+      "removed_source_ranges": [
+        [
+          44,
+          46
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0344",
-    "content": "鸡头　味甘平。主治湿痺，腰脊膝痛，补中，除百疾，益精气，强志，耳目聪明。久服轻身不饥，耐老神仙。一名雁喙。生池泽。\n75",
+    "content": "鸡头　味甘平。主治湿痺，腰脊膝痛，补中，除百疾，益精气，强志，耳目聪明。久服轻身不饥，耐老神仙。一名雁喙。生池泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "果菜部上品",
-      "drug_name": "鸡头"
+      "drug_name": "鸡头",
+      "cleaning_version": 1,
+      "raw_body_sha256": "50648520e2d2312de91c7917243299f7e7ad44df18128c7837568f23d7736718",
+      "removed_source_ranges": [
+        [
+          58,
+          60
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0345",
-    "content": "甘瓜子　味甘平。主令人悦泽，好颜色，益气不饥。久服轻身耐老。\n76\n瓜蒂味苦寒。主治大水，身面四肢浮肿，下水，杀蛊毒，欬逆上气；食诸果不消，病在胸腹中，皆吐下之。一名土芝。生平泽。\n77",
+    "content": "甘瓜子　味甘平。主令人悦泽，好颜色，益气不饥。久服轻身耐老。\n瓜蒂味苦寒。主治大水，身面四肢浮肿，下水，杀蛊毒，欬逆上气；食诸果不消，病在胸腹中，皆吐下之。一名土芝。生平泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "果菜部上品",
-      "drug_name": "甘瓜子"
+      "drug_name": "甘瓜子",
+      "cleaning_version": 1,
+      "raw_body_sha256": "60e11d30f318f35a28de7c85a6cb93855a3955570dfe468a604fb6bd3d5bb6c7",
+      "removed_source_ranges": [
+        [
+          31,
+          34
+        ],
+        [
+          91,
+          93
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0346",
-    "content": "冬葵子　味甘寒。主治五藏六腑寒热羸瘦，破五淋，利小便。久服坚骨长肌肉，轻身延年。\n78",
+    "content": "冬葵子　味甘寒。主治五藏六腑寒热羸瘦，破五淋，利小便。久服坚骨长肌肉，轻身延年。",
     "metadata": {
       "book": "神农本草经",
       "category": "果菜部上品",
-      "drug_name": "冬葵子"
+      "drug_name": "冬葵子",
+      "cleaning_version": 1,
+      "raw_body_sha256": "26398d4757744c2120ca6dfb04a720270cefb9ecdf33e22fe7123a9d5dfd0391",
+      "removed_source_ranges": [
+        [
+          41,
+          43
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0347",
-    "content": "苋实　味甘寒。主治青盲明目，除邪，利大小便，去寒热。久服益气力，不饥轻身。一名马苋。生川泽。\n79",
+    "content": "苋实　味甘寒。主治青盲明目，除邪，利大小便，去寒热。久服益气力，不饥轻身。一名马苋。生川泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "果菜部上品",
-      "drug_name": "苋实"
+      "drug_name": "苋实",
+      "cleaning_version": 1,
+      "raw_body_sha256": "5c3af826c6c11822c8b80c075c8e6d85fdd189f17c6bcf3e0ceff81468be3fab",
+      "removed_source_ranges": [
+        [
+          47,
+          49
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0348",
-    "content": "苦菜　味苦寒。主治五藏邪气，厌榖胃痺。久服安心益气，聪察少卧，轻身耐老。一名荼草，一名选。生川谷。\n80",
+    "content": "苦菜　味苦寒。主治五藏邪气，厌榖胃痺。久服安心益气，聪察少卧，轻身耐老。一名荼草，一名选。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "果菜部上品",
-      "drug_name": "苦菜"
+      "drug_name": "苦菜",
+      "cleaning_version": 1,
+      "raw_body_sha256": "decf6163763b0421e3cca7ee91d64ffaab037891c67423bedb50fc5e8cb2c022",
+      "removed_source_ranges": [
+        [
+          50,
+          52
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0350",
-    "content": "樱桃　味甘平无毒。主调中，益脾气。令人好颜色，美志。\n82",
+    "content": "樱桃　味甘平无毒。主调中，益脾气。令人好颜色，美志。",
     "metadata": {
       "book": "神农本草经",
       "category": "果菜部中品",
-      "drug_name": "樱桃"
+      "drug_name": "樱桃",
+      "cleaning_version": 1,
+      "raw_body_sha256": "8a538a12adbc647b900910471775ceda0946f6cccb3afdcb1abca83064d00c61",
+      "removed_source_ranges": [
+        [
+          27,
+          29
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0351",
-    "content": "梅实　味酸平。主下气，除热烦满，安心，肢体痛，偏枯不仁，死肌。去青黑志，恶疾。生川谷。\n83",
+    "content": "梅实　味酸平。主下气，除热烦满，安心，肢体痛，偏枯不仁，死肌。去青黑志，恶疾。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "果菜部中品",
-      "drug_name": "梅实"
+      "drug_name": "梅实",
+      "cleaning_version": 1,
+      "raw_body_sha256": "73bd4e007e8aa805603c2fd2e83131a107e8fd9ab0eac0b8c1dd31967446ecf2",
+      "removed_source_ranges": [
+        [
+          44,
+          46
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0352",
-    "content": "蓼实　味辛温。主明目温中，耐风寒，下水气，面目浮肿，痈疡。马蓼，去肠中蛭虫。轻身。生川泽。\n84",
+    "content": "蓼实　味辛温。主明目温中，耐风寒，下水气，面目浮肿，痈疡。马蓼，去肠中蛭虫。轻身。生川泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "果菜部中品",
-      "drug_name": "蓼实"
+      "drug_name": "蓼实",
+      "cleaning_version": 1,
+      "raw_body_sha256": "0e328e3400c3ca6b896b81acc587716b3abf1b1bc9e1cc6bb88b308761493b88",
+      "removed_source_ranges": [
+        [
+          46,
+          48
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0353",
-    "content": "葱实　味辛温。主明目、补中不足。其茎，可作汤，主治伤寒寒热，出汗，中风面目肿。薤，味辛，主治金创创败。轻身不饥耐老。生平泽。\n85",
+    "content": "葱实　味辛温。主明目、补中不足。其茎，可作汤，主治伤寒寒热，出汗，中风面目肿。薤，味辛，主治金创创败。轻身不饥耐老。生平泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "果菜部中品",
-      "drug_name": "葱实"
+      "drug_name": "葱实",
+      "cleaning_version": 1,
+      "raw_body_sha256": "564704527f8b77e5f0d8578fda9323e3487909b624f9c2840fdced80cfe849bc",
+      "removed_source_ranges": [
+        [
+          63,
+          65
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0354",
-    "content": "水苏　味辛微温。主下气杀榖，辟口臭，去毒，辟恶气。久服通神明，轻身耐老。生池泽。\n86",
+    "content": "水苏　味辛微温。主下气杀榖，辟口臭，去毒，辟恶气。久服通神明，轻身耐老。生池泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "果菜部中品",
-      "drug_name": "水苏"
+      "drug_name": "水苏",
+      "cleaning_version": 1,
+      "raw_body_sha256": "33ad3d51af45d6903cc7ee72a1eaedcf92b2a98c78da5d1a2438aedf66c8c260",
+      "removed_source_ranges": [
+        [
+          41,
+          43
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0355",
-    "content": "杏核　味甘温。主治欬逆上气，雷鸣，喉痺，下气，产乳，金创，寒心，贲豚。生川谷。\n87",
+    "content": "杏核　味甘温。主治欬逆上气，雷鸣，喉痺，下气，产乳，金创，寒心，贲豚。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "果菜部中品",
-      "drug_name": "杏核"
+      "drug_name": "杏核",
+      "cleaning_version": 1,
+      "raw_body_sha256": "872a36bff1a2036785cc0460433cf68126fe56581535c66bbc72bfcf306129ef",
+      "removed_source_ranges": [
+        [
+          40,
+          42
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0357",
-    "content": "桃核　味苦平。主治瘀血，血闭，瘕，邪气，杀小虫。桃华，杀注恶鬼。令人好颜色。桃枭，微温，杀百鬼精物。桃毛，主下血瘕，寒热积聚，无子。桃蠹，杀鬼邪恶不祥。生山谷。\n89",
+    "content": "桃核　味苦平。主治瘀血，血闭，瘕，邪气，杀小虫。桃华，杀注恶鬼。令人好颜色。桃枭，微温，杀百鬼精物。桃毛，主下血瘕，寒热积聚，无子。桃蠹，杀鬼邪恶不祥。生山谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "果菜部下品",
-      "drug_name": "桃核"
+      "drug_name": "桃核",
+      "cleaning_version": 1,
+      "raw_body_sha256": "66770d0cdaabb7975240e3b93582e68d03215d06a5392d9777cc95d9c0279999",
+      "removed_source_ranges": [
+        [
+          81,
+          83
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0358",
-    "content": "苦瓠　味苦寒。主治大水面目四肢浮肿，下水。令人吐。生山泽。\n90",
+    "content": "苦瓠　味苦寒。主治大水面目四肢浮肿，下水。令人吐。生山泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "果菜部下品",
-      "drug_name": "苦瓠"
+      "drug_name": "苦瓠",
+      "cleaning_version": 1,
+      "raw_body_sha256": "8dcb0ad0f944739caf7325d318cf4282917934278bf581c95fecfe6d206449ad",
+      "removed_source_ranges": [
+        [
+          30,
+          32
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0359",
-    "content": "水靳　味甘平。主治女子赤沃，止血，养精，保血脉，益气，令人肥健嗜食。一名水英。生池泽。\n91",
+    "content": "水靳　味甘平。主治女子赤沃，止血，养精，保血脉，益气，令人肥健嗜食。一名水英。生池泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "果菜部下品",
-      "drug_name": "水靳"
+      "drug_name": "水靳",
+      "cleaning_version": 1,
+      "raw_body_sha256": "404953a3cf7c41099eeb0bc8791bf14f7777af4cfa5851ca19bccd25fd34e5c9",
+      "removed_source_ranges": [
+        [
+          44,
+          46
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0361",
-    "content": "胡麻　味甘平无毒。主治伤中虚羸，补五内，益气力，长肌肉，填脑髓。久服轻身不老。叶名青蘘，一名巨胜。生川谷。\n93",
+    "content": "胡麻　味甘平无毒。主治伤中虚羸，补五内，益气力，长肌肉，填脑髓。久服轻身不老。叶名青蘘，一名巨胜。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "米谷部上品",
-      "drug_name": "胡麻"
+      "drug_name": "胡麻",
+      "cleaning_version": 1,
+      "raw_body_sha256": "7574ab2f70d8d1fe83117c34f0d6ed7084d186673f7511976cf5e30485e410d9",
+      "removed_source_ranges": [
+        [
+          54,
+          56
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0362",
-    "content": "麻蕡　味辛平。主治七伤，利五藏，下血寒气，多食令人见鬼狂走。久服通神明轻身。麻子，味甘平。主补中益气。久服肥健不老。一名麻勃。生川谷。\n94",
+    "content": "麻蕡　味辛平。主治七伤，利五藏，下血寒气，多食令人见鬼狂走。久服通神明轻身。麻子，味甘平。主补中益气。久服肥健不老。一名麻勃。生川谷。",
     "metadata": {
       "book": "神农本草经",
       "category": "米谷部上品",
-      "drug_name": "麻蕡"
+      "drug_name": "麻蕡",
+      "cleaning_version": 1,
+      "raw_body_sha256": "23f972a736d4f4eec1d456511757a927bc04ea8a394c0a7da65b51440907ff01",
+      "removed_source_ranges": [
+        [
+          68,
+          70
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0364",
-    "content": "大豆黄卷　味甘平无毒。主治湿痺筋挛膝痛。生大豆，涂痈肿。煮汁饮，杀鬼毒，止痛。赤小豆，主下水，排痈肿脓血。生平泽。\n96",
+    "content": "大豆黄卷　味甘平无毒。主治湿痺筋挛膝痛。生大豆，涂痈肿。煮汁饮，杀鬼毒，止痛。赤小豆，主下水，排痈肿脓血。生平泽。",
     "metadata": {
       "book": "神农本草经",
       "category": "米谷部中品",
-      "drug_name": "大豆黄卷"
+      "drug_name": "大豆黄卷",
+      "cleaning_version": 1,
+      "raw_body_sha256": "9873f388daa0700f8b690faa4089ad2d93ab77eefc590fa62b63eeecfb656bae",
+      "removed_source_ranges": [
+        [
+          58,
+          60
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0365",
-    "content": "粟米　味苦无毒。主养肾气，去胃脾中热，益气。陈者味苦，主治胃热，消渴，利小便。\n97",
+    "content": "粟米　味苦无毒。主养肾气，去胃脾中热，益气。陈者味苦，主治胃热，消渴，利小便。",
     "metadata": {
       "book": "神农本草经",
       "category": "米谷部中品",
-      "drug_name": "粟米"
+      "drug_name": "粟米",
+      "cleaning_version": 1,
+      "raw_body_sha256": "0b417508bb23fb0b3b1efec1fee5ca24ac334138fc5a812a1f4bccfff6d64421",
+      "removed_source_ranges": [
+        [
+          40,
+          42
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0366",
-    "content": "黍米　味甘无毒。主益气补中，多热令人烦。\n98",
+    "content": "黍米　味甘无毒。主益气补中，多热令人烦。",
     "metadata": {
       "book": "神农本草经",
       "category": "米谷部中品",
-      "drug_name": "黍米"
+      "drug_name": "黍米",
+      "cleaning_version": 1,
+      "raw_body_sha256": "0fefcaae222fa873907071fdb88cea131da141c583924519453ab09d6c048bcb",
+      "removed_source_ranges": [
+        [
+          21,
+          23
+        ]
+      ]
     }
   },
   {
     "id": "SNBCJ_0368_1",
-    "content": "腐婢　味辛平。\n主治痎疟寒热，邪气，泄利，阴不起，病酒头痛。\n\nURN\n喜欢\n我们的网站\n请支持\n我们的发展\n网站的设计与内容\n(c)2006-2025\n如果您想引用本网站上的内容，请同时加上至本站的链接：\n。\n请注意：\n软体\n下载本网站的大量网页，，不另行通知。\n\n若有任何意见或建议，请\n### 上卷\n----------\n中国哲学书电子化计划\n中国哲学书电子化计划\n《神农本草经》\n] [\n修改\n] [\n查看历史\n上卷》\n上药一百二十种为君，主养命以应天，无毒，多服久服不伤人，欲轻身益气不老延年者，本《上经》。\n\n中药一百二十种为臣，主养性以应人，无毒，有毒，斟酌其宜，欲遏病补虚羸者，本《中经》。\n\n下药一百二十五种为佐使，主治病以应地，多毒，不可久服，欲除寒热邪气、破积聚、愈疾者，本《下经》。\n\n药有君臣佐使，以相宣摄合和者，宜用一君二臣五佐，又可一君三臣九佐使也。\n\n药有阴阳配合，子母兄弟，根茎花实草石骨肉。\n有单行者，有相须者，有相使者，有相畏者，有相恶者，有相反者，有相杀者。\n凡此七情和合视之，当用相须相使良者，勿用相恶相反者。\n若有毒宜制，可用相畏相杀者，不尔，勿合用也。",
+    "content": "腐婢　味辛平。\n主治痎疟寒热，邪气，泄利，阴不起，病酒头痛。\n\n上药一百二十种为君，主养命以应天，无毒，多服久服不伤人，欲轻身益气不老延年者，本《上经》。\n\n中药一百二十种为臣，主养性以应人，无毒，有毒，斟酌其宜，欲遏病补虚羸者，本《中经》。\n\n下药一百二十五种为佐使，主治病以应地，多毒，不可久服，欲除寒热邪气、破积聚、愈疾者，本《下经》。\n\n药有君臣佐使，以相宣摄合和者，宜用一君二臣五佐，又可一君三臣九佐使也。\n\n药有阴阳配合，子母兄弟，根茎花实草石骨肉。\n有单行者，有相须者，有相使者，有相畏者，有相恶者，有相反者，有相杀者。\n凡此七情和合视之，当用相须相使良者，勿用相恶相反者。\n若有毒宜制，可用相畏相杀者，不尔，勿合用也。\n药有酸咸甘苦辛五味，又有寒热温凉四气及有毒无毒，阴干暴干，采治时日，生熟，上地所出，真伪陈新，并各有法。\n\n药性有宜丸者，宜散者，宜水煮者，宜酒浸者，宜膏煎者，亦有一物兼宜者，亦有不可入汤酒者，并随药性，不得违越。\n\n凡欲治病，先察其源，先候病机。\n五脏未虚，六腑未竭，血脉未乱，精神未散，服药必活。\n若病已成，可得半愈。\n病势已过，命将难全。",
     "metadata": {
       "book": "神农本草经",
       "category": "米谷部下品",
       "drug_name": "腐婢",
+      "cleaning_version": 1,
+      "raw_body_sha256": "f67a7bc6a1ebf16cefb1d092a0430a86b6436d6e29b84a3c5f97919b80d1253b",
+      "removed_source_ranges": [
+        [
+          30,
+          34
+        ],
+        [
+          34,
+          37
+        ],
+        [
+          37,
+          43
+        ],
+        [
+          43,
+          47
+        ],
+        [
+          47,
+          53
+        ],
+        [
+          53,
+          62
+        ],
+        [
+          62,
+          77
+        ],
+        [
+          77,
+          104
+        ],
+        [
+          104,
+          110
+        ],
+        [
+          110,
+          121
+        ],
+        [
+          121,
+          146
+        ],
+        [
+          146,
+          158
+        ],
+        [
+          158,
+          163
+        ],
+        [
+          163,
+          164
+        ],
+        [
+          164,
+          165
+        ],
+        [
+          165,
+          172
+        ],
+        [
+          172,
+          183
+        ],
+        [
+          183,
+          194
+        ],
+        [
+          194,
+          205
+        ],
+        [
+          205,
+          213
+        ],
+        [
+          213,
+          217
+        ],
+        [
+          217,
+          220
+        ],
+        [
+          220,
+          224
+        ],
+        [
+          224,
+          229
+        ],
+        [
+          229,
+          233
+        ],
+        [
+          827,
+          830
+        ],
+        [
+          993,
+          996
+        ]
+      ],
       "split_from": "SNBCJ_0368"
     }
   },
   {
     "id": "SNBCJ_0368_2",
-    "content": "药有酸咸甘苦辛五味，又有寒热温凉四气及有毒无毒，阴干暴干，采治时日，生熟，上地所出，真伪陈新，并各有法。\n\n药性有宜丸者，宜散者，宜水煮者，宜酒浸者，宜膏煎者，亦有一物兼宜者，亦有不可入汤酒者，并随药性，不得违越。\n\n凡欲治病，先察其源，先候病机。\n五脏未虚，六腑未竭，血脉未乱，精神未散，服药必活。\n若病已成，可得半愈。\n病势已过，命将难全。\n\n若用毒药疗病，先起如黍粟，病去及止。\n不去，倍之；不去，十之。\n取去为度。\n治寒以热药，治热以寒药。\n饮食不消，以吐下药。\n鬼注蛊毒，以毒药。\n痈肿疮瘤，以疮药。\n风湿，以风湿药。\n各随其所宜。\n\n病在胸鬲以上者，先食后服药。\n病在心腹以下者，先服药而后食。\n病在四肢血脉者，宜空腹而在旦。\n病在骨髓者，宜饱满而在夜。\n\n10\n夫大病之主，有中风、伤寒、温疟、中恶、霍乱、大腹、水肿、肠澼下利、大小便不通、贲肫、上气、咳逆、呕吐、黄疸、消渴、留饮、澼食、坚积症瘕、惊邪、癫痫、鬼注、喉痺、齿痛、耳聋、目盲、金创、踒折、痈肿、恶疮、痔、瘘、瘿瘘、男子五劳七伤、虚乏羸瘦，女子带下、崩中、血闭，虫蛇蛊毒所伤，此皆大略，宗兆。",
+    "content": "\n若用毒药疗病，先起如黍粟，病去及止。\n不去，倍之；不去，十之。\n取去为度。\n治寒以热药，治热以寒药。\n饮食不消，以吐下药。\n鬼注蛊毒，以毒药。\n痈肿疮瘤，以疮药。\n风湿，以风湿药。\n各随其所宜。\n\n病在胸鬲以上者，先食后服药。\n病在心腹以下者，先服药而后食。\n病在四肢血脉者，宜空腹而在旦。\n病在骨髓者，宜饱满而在夜。\n\n夫大病之主，有中风、伤寒、温疟、中恶、霍乱、大腹、水肿、肠澼下利、大小便不通、贲肫、上气、咳逆、呕吐、黄疸、消渴、留饮、澼食、坚积症瘕、惊邪、癫痫、鬼注、喉痺、齿痛、耳聋、目盲、金创、踒折、痈肿、恶疮、痔、瘘、瘿瘘、男子五劳七伤、虚乏羸瘦，女子带下、崩中、血闭，虫蛇蛊毒所伤，此皆大略，宗兆。\n其间变动枝节，各宜依端绪以取之。",
     "metadata": {
       "book": "神农本草经",
       "category": "米谷部下品",
       "drug_name": "腐婢",
+      "cleaning_version": 1,
+      "raw_body_sha256": "f67a7bc6a1ebf16cefb1d092a0430a86b6436d6e29b84a3c5f97919b80d1253b",
+      "removed_source_ranges": [
+        [
+          30,
+          34
+        ],
+        [
+          34,
+          37
+        ],
+        [
+          37,
+          43
+        ],
+        [
+          43,
+          47
+        ],
+        [
+          47,
+          53
+        ],
+        [
+          53,
+          62
+        ],
+        [
+          62,
+          77
+        ],
+        [
+          77,
+          104
+        ],
+        [
+          104,
+          110
+        ],
+        [
+          110,
+          121
+        ],
+        [
+          121,
+          146
+        ],
+        [
+          146,
+          158
+        ],
+        [
+          158,
+          163
+        ],
+        [
+          163,
+          164
+        ],
+        [
+          164,
+          165
+        ],
+        [
+          165,
+          172
+        ],
+        [
+          172,
+          183
+        ],
+        [
+          183,
+          194
+        ],
+        [
+          194,
+          205
+        ],
+        [
+          205,
+          213
+        ],
+        [
+          213,
+          217
+        ],
+        [
+          217,
+          220
+        ],
+        [
+          220,
+          224
+        ],
+        [
+          224,
+          229
+        ],
+        [
+          229,
+          233
+        ],
+        [
+          827,
+          830
+        ],
+        [
+          993,
+          996
+        ]
+      ],
       "split_from": "SNBCJ_0368"
-    }
-  },
-  {
-    "id": "SNBCJ_0368_3",
-    "content": "其间变动枝节，各宜依端绪以取之。\n\n中卷》。",
-    "metadata": {
-      "book": "神农本草经",
-      "category": "米谷部下品",
-      "drug_name": "腐婢",
-      "split_from": "SNBCJ_0368"
-    }
-  },
-  {
-    "id": "SNBCJ_0735_1",
-    "content": "腐婢　味辛平。\n主治痎疟寒热，邪气，泄利，阴不起，病酒头痛。\n\nURN\n喜欢\n我们的网站\n请支持\n我们的发展\n网站的设计与内容\n(c)2006-2025\n如果您想引用本网站上的内容，请同时加上至本站的链接：\n。\n请注意：\n软体\n下载本网站的大量网页，，不另行通知。\n\n若有任何意见或建议，请\n### 中卷\n----------\n中国哲学书电子化计划\n中国哲学书电子化计划\n《神农本草经》\n] [\n修改\n] [\n查看历史\n上卷》\n上药一百二十种为君，主养命以应天，无毒，多服久服不伤人，欲轻身益气不老延年者，本《上经》。\n\n中药一百二十种为臣，主养性以应人，无毒，有毒，斟酌其宜，欲遏病补虚羸者，本《中经》。\n\n下药一百二十五种为佐使，主治病以应地，多毒，不可久服，欲除寒热邪气、破积聚、愈疾者，本《下经》。\n\n药有君臣佐使，以相宣摄合和者，宜用一君二臣五佐，又可一君三臣九佐使也。\n\n药有阴阳配合，子母兄弟，根茎花实草石骨肉。\n有单行者，有相须者，有相使者，有相畏者，有相恶者，有相反者，有相杀者。\n凡此七情和合视之，当用相须相使良者，勿用相恶相反者。\n若有毒宜制，可用相畏相杀者，不尔，勿合用也。",
-    "metadata": {
-      "book": "神农本草经",
-      "category": "米谷部下品",
-      "drug_name": "腐婢",
-      "split_from": "SNBCJ_0735"
-    }
-  },
-  {
-    "id": "SNBCJ_1102_1",
-    "content": "腐婢　味辛平。\n主治痎疟寒热，邪气，泄利，阴不起，病酒头痛。\n\nURN\n喜欢\n我们的网站\n请支持\n我们的发展\n网站的设计与内容\n(c)2006-2025\n如果您想引用本网站上的内容，请同时加上至本站的链接：\n。\n请注意：\n软体\n下载本网站的大量网页，，不另行通知。\n\n若有任何意见或建议，请\n### 下卷\n----------\n中国哲学书电子化计划\n中国哲学书电子化计划\n《神农本草经》\n] [\n修改\n] [\n查看历史\n上卷》\n上药一百二十种为君，主养命以应天，无毒，多服久服不伤人，欲轻身益气不老延年者，本《上经》。\n\n中药一百二十种为臣，主养性以应人，无毒，有毒，斟酌其宜，欲遏病补虚羸者，本《中经》。\n\n下药一百二十五种为佐使，主治病以应地，多毒，不可久服，欲除寒热邪气、破积聚、愈疾者，本《下经》。\n\n药有君臣佐使，以相宣摄合和者，宜用一君二臣五佐，又可一君三臣九佐使也。\n\n药有阴阳配合，子母兄弟，根茎花实草石骨肉。\n有单行者，有相须者，有相使者，有相畏者，有相恶者，有相反者，有相杀者。\n凡此七情和合视之，当用相须相使良者，勿用相恶相反者。\n若有毒宜制，可用相畏相杀者，不尔，勿合用也。",
-    "metadata": {
-      "book": "神农本草经",
-      "category": "米谷部下品",
-      "drug_name": "腐婢",
-      "split_from": "SNBCJ_1102"
     }
   },
   {
     "id": "SNBCJ_1469",
-    "content": "腐婢　味辛平。主治痎疟寒热，邪气，泄利，阴不起，病酒头痛。\nURN\n喜欢\n我们的网站\n请支持\n我们的发展\n网站的设计与内容\n(c)2006-2025\n如果您想引用本网站上的内容，请同时加上至本站的链接：\n。请注意：\n软体\n下载本网站的大量网页，，不另行通知。\n若有任何意见或建议，请",
+    "content": "腐婢　味辛平。主治痎疟寒热，邪气，泄利，阴不起，病酒头痛。",
     "metadata": {
       "book": "神农本草经",
       "category": "米谷部下品",
-      "drug_name": "腐婢"
+      "drug_name": "腐婢",
+      "cleaning_version": 1,
+      "raw_body_sha256": "f1b71741f0963cd6912f638dd0e7b31dccfe951fabc3d4f1f214ae73aa316bc3",
+      "removed_source_ranges": [
+        [
+          30,
+          34
+        ],
+        [
+          34,
+          37
+        ],
+        [
+          37,
+          43
+        ],
+        [
+          43,
+          47
+        ],
+        [
+          47,
+          53
+        ],
+        [
+          53,
+          62
+        ],
+        [
+          62,
+          77
+        ],
+        [
+          77,
+          104
+        ],
+        [
+          104,
+          110
+        ],
+        [
+          110,
+          121
+        ],
+        [
+          121,
+          146
+        ],
+        [
+          146,
+          158
+        ],
+        [
+          158,
+          162
+        ]
+      ]
     }
   }
 ]

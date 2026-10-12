@@ -23,11 +23,40 @@ NEGATIVE = r"没有|并无|否认|不伴|未见|从未|未曾|不再|无|不"
 TIME = re.compile(r"以前|曾经|既往|去年|昨晚|昨天|过去|\d+小时前|现在|目前|今天|最近|这次")
 DEGREE = re.compile(r"不明显|不严重|不太严重|不太明显|不是很严重|不是很明显|不怎么|不经常|不频繁|很少|偶尔|偶有|轻微|明显|严重|剧烈|频繁|持续性|间歇性")
 TREND = re.compile(r"(?:没有|未|没)(?:明显)?(?:加重|好转|减轻)|(?:有所|逐渐)?(?:加重|好转|减轻)")
+TIMING = r"夜间|夜里|晚上|白天|晨起|早上|睡前|饭后|饭前"
 
 
 def duration_text(text: str) -> str:
     match = re.search(r"(?:\d+|[一二两三四五六七八九十半]+)(?:[到至~～-](?:\d+|[一二两三四五六七八九十]+))?(?:个)?(?:小时|天|周|个月|月|年)", text)
     return match[0] if match else ""
+
+
+def bind_details(facts: list[dict], text: str, *, subject: str, message_id: str, thread_id: str,
+                 kind="message", start=0) -> list[dict]:
+    """Bind a bare qualifier only to one current, explicitly present complaint."""
+    clause = text.strip("。！! ")
+    duration = r"(?:\d+|[一二两三四五六七八九十半]+)(?:个)?(?:小时|天|周|个月|月|年)"
+    if not re.fullmatch(rf"(?:(?:{TIMING})(?:更|比较)?(?:{DEGREE.pattern}|{TREND.pattern})?|"
+                        rf"(?:持续|已经|已有)?{duration}|(?:{DEGREE.pattern}|{TREND.pattern}))", clause):
+        return []
+    active = effective(facts, subject)
+    active = [f for f in active if f["time_scope"] == "current" and f["assertion"] == "present"]
+    if len(active) != 1 or subject == "unknown":
+        return []
+    fact = copy.deepcopy(active[0])
+    fact.update(id=str(uuid4()), correction=False)
+    fact["source"] = {"kind": kind, "message_id": message_id, "thread_id": thread_id,
+                      "quote": clause, "start": start, "end": start + len(text), "collected_at": now()}
+    ref = {"fact_id": fact["id"], "message_id": message_id, "collected_at": fact["source"]["collected_at"]}
+    changes = {"duration_text": duration_text(clause),
+               "timing_text": "、".join(dict.fromkeys(re.findall(TIMING, clause))),
+               "degree_text": (match[0] if (match := DEGREE.search(clause)) else ""),
+               "trend_text": (match[0] if (match := TREND.search(clause)) else "")}
+    for key, value in changes.items():
+        if value:
+            fact[key] = value
+            fact.setdefault("evidence_refs", {})[key] = ref
+    return [fact]
 
 
 def unmapped_mentions(clause: str, known: list):
@@ -79,6 +108,11 @@ def extract(text: str, *, subject="self", message_id="", thread_id="", kind="mes
                 fact["source"].update(quote=clause.strip(), start=start_offset, end=end)
                 observations.append(fact)
             continue
+        if not mentions and observations:
+            # Only the immediately preceding single complaint can own this clause.
+            recent = [f for f in observations if f["source"]["quote"] == observations[-1]["source"]["quote"]]
+            observations += bind_details(recent, clause, subject=inherited, message_id=message_id,
+                                         thread_id=thread_id, kind=kind, start=start_offset)
         assertion_scope, time_scope = "present", "current"
         previous_end = 0
         for i, match in enumerate(mentions):
@@ -135,6 +169,7 @@ def extract(text: str, *, subject="self", message_id="", thread_id="", kind="mes
                 "unmapped": match[0] not in ALIASES,
                 "assertion": value, "time_scope": time_scope,
                 "degree_text": degree[0] if degree else "", "trend_text": trend[0] if trend else "",
+                "timing_text": "、".join(dict.fromkeys(re.findall(r"夜间|夜里|晚上|白天|晨起|早上|睡前|饭后|饭前", clause))),
                 "duration_text": duration_text(suffix) or (duration_text(prefix) if i == 0 else ""),
                 "correction": bool(re.search(r"更正|纠正|说错|实际|现在|目前|不再", prefix + suffix)),
                 "source": {"kind": kind, "message_id": message_id, "thread_id": thread_id,
@@ -160,7 +195,7 @@ def merge(old: list[dict], new: list[dict]) -> list[dict]:
 
 
 def view(facts: list[dict], subject: str) -> tuple[list[str], list[str], dict | None]:
-    active = [f for f in facts if not f.get("superseded_by")]
+    active = [f for f in facts if not f.get("superseded_by") and not f.get("archived_episode")]
     if subject == "unknown" and active:
         return [], [], {"kind": "subject", "symptom": "", "question": "本次主要为谁咨询？请说明你本人或具体代问对象。"}
     selected = [f for f in active if f["subject"] == subject]
@@ -215,11 +250,35 @@ def bind_answer(facts: list[dict], pending: dict | None, text: str, *, subject: 
                         "question": pending["question"]}}]
 
 
+def effective(facts: list[dict], subject: str) -> list[dict]:
+    """Compact repeated observations, keeping evidence for every carried field."""
+    groups = {}
+    for fact in facts:
+        if fact["subject"] != subject or fact.get("superseded_by") or fact.get("archived_episode"):
+            continue
+        key = (fact["symptom"], fact["assertion"], fact["time_scope"])
+        previous = groups.get(key)
+        value = copy.deepcopy(fact)
+        source_ref = {"fact_id": fact["id"], "message_id": fact.get("source", {}).get("message_id", ""),
+                      "collected_at": fact.get("source", {}).get("collected_at", "")}
+        refs = {"statement": source_ref}
+        for field in ("duration_text", "degree_text", "trend_text", "timing_text"):
+            if value.get(field):
+                refs[field] = fact.get("evidence_refs", {}).get(field) or source_ref
+            elif previous and previous.get(field):
+                value[field] = previous[field]
+                refs[field] = previous["evidence_refs"].get(field, source_ref)
+        value["evidence_refs"] = refs
+        groups[key] = value
+    return list(groups.values())
+
+
 def describe(facts: list[dict], subject: str) -> str:
+    facts = effective(facts, subject)
     labels = {"present": "肯定", "absent": "否认", "uncertain": "待确认", "unspecified": "仅描述变化"}
-    return "；".join(
+    return "；".join(dict.fromkeys(
         f"{f['symptom']}（{f['time_scope']}、{labels[f['assertion']]}"
-        + ("、" + "、".join(part for part in (f.get("degree_text"), f.get("trend_text"), f.get("duration_text")) if part)
-           if any(f.get(k) for k in ("degree_text", "trend_text", "duration_text")) else "") + "）"
-        for f in facts if f["subject"] == subject and not f.get("superseded_by")
-    )
+        + ("、" + "、".join(part for part in (f.get("degree_text"), f.get("trend_text"), f.get("duration_text"), f.get("timing_text")) if part)
+           if any(f.get(k) for k in ("degree_text", "trend_text", "duration_text", "timing_text")) else "") + "）"
+        for f in facts if f["subject"] == subject and not f.get("superseded_by") and not f.get("archived_episode")
+    ))

@@ -12,7 +12,8 @@ from .safety import mentioned_herbs, normalize, KNOWN, ALIASES
 
 URGENT = ("胸痛", "呼吸困难", "昏厥", "大出血", "意识不清", "自杀",
           "咯血", "咳血", "惊厥", "脑梗", "嘴歪", "半身不遂", "硬得像板")
-FAMILY = r"母亲|妈妈|父亲|爸爸|朋友|妻子|老婆|丈夫|老公|孩子|宝宝|儿子|女儿|同事"
+FAMILY = r"母亲|妈妈|父亲|爸爸|朋友|妻子|老婆|丈夫|老公|大宝|二宝|老大|老二|孩子|宝宝|儿子|女儿|同事|奶奶|爷爷|外婆|外公|姐姐|哥哥|妹妹|弟弟|家人|妈|爸|别人"
+FAMILY_ALIASES = {"妈妈": "母亲", "妈": "母亲", "爸爸": "父亲", "爸": "父亲", "老婆": "妻子", "老公": "丈夫", "宝宝": "孩子", "别人": "未明确"}
 CONSTITUTIONS = r"气虚|阳虚|阴虚|湿热|痰湿|血瘀|气郁|特禀|平和"
 DISEASES = r"高血压|糖尿病|肾病|肝病|哮喘|心脏病"
 NEGATIVE = r"没有|并无|否认|不伴|未见|未曾|从未|不过敏|无过敏|不再|未怀孕|未哺乳|不是|不在|未在|(?<!并)无|不"
@@ -21,11 +22,13 @@ NEGATIVE = r"没有|并无|否认|不伴|未见|未曾|从未|不过敏|无过�
 def subject_of(text: str, inherited: str = "unknown") -> str:
     match = re.search(rf"(?:我的?|帮|替|给|为)?({FAMILY})", text)
     if match:
-        entity = {"妈妈": "母亲", "爸爸": "父亲", "老婆": "妻子", "老公": "丈夫", "宝宝": "孩子"}.get(match[1], match[1])
+        entity = FAMILY_ALIASES.get(match[1], match[1])
         return "other:" + entity
-    if re.search(r"我(?!的?(?:" + FAMILY + r"))|本人|我自己", text):
+    if re.search(r"(?:替|帮|为|给)(?:她|他)(?:们)?", text):
+        return inherited if inherited.startswith("other:") else "other:未明确"
+    if re.search(r"我(?!的?(?:" + FAMILY + r"))|本人|我自己", text) and not re.search(r"不是(?:我(?:本人|自己)?|本人)", text):
         return "self"
-    if re.search(r"她|他", text):
+    if re.search(r"她|(?<!其)他", text):
         return inherited if inherited.startswith("other:") else "other:未明确"
     return inherited
 
@@ -141,7 +144,7 @@ def extract_facts(text: str, *, subject="unknown", source_id="", kind="message",
 
 
 def empty_state() -> dict:
-    return {"version": 0, "subject": "self", "subject_confirmed": False, "facts": [],
+    return {"version": 0, "subject": "unknown", "subject_confirmed": False, "subject_epoch": 0, "subject_evidence": None, "facts": [],
             "pending": None, "answers": {}, "status": "resolved", "episode": "", "clinical": {}, "safety_by_subject": {}}
 
 
@@ -177,7 +180,7 @@ def merge_facts(old: list[dict], new: list[dict]) -> list[dict]:
 
 
 QUESTIONS = {
-    "subject": "本次主要为谁咨询，这条风险资料属于谁？请说明你本人或具体代问对象。",
+    "subject": "这次是你本人，还是替别人咨询？如果涉及多人，请明确本次主要咨询对象。",
     "allergy_details": "请说明具体过敏原和发生过的反应；不知道时请直接说明不知道。",
     "pregnancy_status": "这条孕哺资料目前仍然适用吗？请说明是怀孕、哺乳还是备孕，以及当前或结束的时间。",
     "medication_details": "请提供目前使用的全部药品名称和用药情况；不知道时请直接说明。",
@@ -199,10 +202,11 @@ def bind_answer(state: dict, text: str, source: dict) -> list[dict]:
         if who == "unknown":
             return []
         state["subject"] = who
-        state["subject_confirmed"] = True
+        state["subject_confirmed"] = who != "other:未明确"
         for fact in state["facts"]:
-            if fact["subject"] in {"unknown", "other:未明确"}:
+            if fact["subject"] == "unknown" or (fact["subject"] == "other:未明确" and who.startswith("other:")):
                 fact["subject"] = who
+                fact["ownership_confirmed_by"] = source["id"]
         state["pending"] = None
         return []
     if short and key not in {"pregnancy_status"}:
@@ -275,26 +279,56 @@ def make_context(saved: dict, text: str, attachment: str, *, message_id="", thre
     state = copy.deepcopy(saved or empty_state())
     for key, value in empty_state().items():
         state.setdefault(key, copy.deepcopy(value))
-    subjects = {subject_of(clause) for clause in re.split(r"[，,。；;]|但是|但", text)}
-    subjects.discard("unknown")
-    explicit = subject_of(text) if len(subjects) <= 1 else "unknown"
-    target = re.search(rf"(?:替|帮|为|给)((?:我的?)?(?:{FAMILY})|我自己|本人|我).{{0,6}}(?:咨询|问|看)", text)
-    if target:
-        explicit = subject_of(target[1])
-    if len(subjects) > 1 and not target and not state["subject_confirmed"] and not state.get("pending"):
+    # Old checkpoints defaulted to self without evidence. Do not promote that
+    # default into an identity confirmation.
+    if not state["subject_confirmed"]:
         state["subject"] = "unknown"
-    if explicit != "unknown" and explicit != state["subject"] and (target or not state.get("pending")):
+    if re.fullmatch(r"不是(?:我(?:本人|自己)?|本人)[。！! ]*", text.strip()):
+        state.update(subject="unknown", subject_confirmed=False, pending={"key": "subject", "subject": "unknown"})
+    subjects = set()
+    inherited = state["subject"] if state["subject_confirmed"] else "unknown"
+    for clause in re.split(r"[，,。；;]|但是|但", text):
+        who = subject_of(clause, inherited)
+        if who != "unknown":
+            subjects.add(who)
+            inherited = who
+    subjects.update("other:" + FAMILY_ALIASES.get(m[0], m[0])
+                    for m in re.finditer(FAMILY, text))
+    if re.search(r"我(?!的?(?:" + FAMILY + r"))|本人", text):
+        subjects.add("self")
+    if re.search(r"她|(?<!其)他", text):
+        named = {who for who in subjects if who.startswith("other:") and who != "other:未明确"}
+        pronoun_subject = next(iter(named)) if len(named) == 1 else (state["subject"] if state["subject_confirmed"] and state["subject"].startswith("other:") else "other:未明确")
+        subjects.add(pronoun_subject)
+    if len(subjects) == 1:
+        explicit = next(iter(subjects))
+    else:
+        explicit = "unknown"
+    target = re.search(rf"(?:替|帮|为|给)((?:我的?)?(?:{FAMILY})|我自己|本人|我|她|他).{{0,6}}(?:咨询|问|看)", text)
+    if target:
+        explicit = subject_of(target[1], state["subject"] if state["subject_confirmed"] else "unknown")
+    if len(subjects) > 1 and not target:
+        state["safety_by_subject"][state["subject"]] = {
+            key: copy.deepcopy(state.get(key)) for key in ("pending", "answers", "status", "episode")}
+        state["subject"] = "unknown"
+        state["subject_confirmed"] = False
+        state["pending"] = {"key": "subject", "subject": "unknown"}
+    resolving = bool(state.get("pending") and state["pending"]["key"] == "subject" and len(subjects) <= 1)
+    if resolving:
+        source = {"kind": "message", "id": message_id, "thread_id": thread_id, "quote": text, "collected_at": now()}
+        bind_answer(state, text, source)
+    if explicit != "unknown" and explicit != state["subject"] and (target or not state.get("pending") or re.search(r"换成|改问|现在问", text)):
         state["safety_by_subject"][state["subject"]] = {
             key: copy.deepcopy(state.get(key)) for key in ("pending", "answers", "status", "episode")}
         state["subject"] = explicit
-        state["subject_confirmed"] = True
+        state["subject_confirmed"] = explicit != "other:未明确"
         personal = state["safety_by_subject"].get(explicit, {"pending": None, "answers": {}, "status": "resolved", "episode": ""})
         state.update(copy.deepcopy(personal))
-    elif explicit == state["subject"]:
-        state["subject_confirmed"] = True
+    elif explicit != "unknown" and explicit == state["subject"]:
+        state["subject_confirmed"] = explicit != "other:未明确"
     source = {"kind": "message", "id": message_id, "thread_id": thread_id, "quote": text, "collected_at": now()}
     answering = state.get("pending", {}).get("key") if state.get("pending") else None
-    bound = bind_answer(state, text, source)
+    bound = bind_answer(state, text, source) if len(subjects) <= 1 or target else []
     inherited = state["subject"] if state["subject_confirmed"] else "unknown"
     current = extract_facts(text, subject=inherited, source_id=message_id, thread_id=thread_id)
     current += extract_facts(attachment, source_id=message_id, kind="attachment", thread_id=thread_id)
@@ -312,7 +346,11 @@ def make_context(saved: dict, text: str, attachment: str, *, message_id="", thre
 
 
 def applicable_facts(state: dict) -> list[dict]:
-    return [fact for fact in state["facts"] if state["subject"] == "unknown" or fact["subject"] in {state["subject"], "unknown"}]
+    return [fact for fact in state["facts"]
+            if fact["subject"] in {state["subject"], "unknown"}
+            and fact.get("source", {}).get("kind") != "summary"
+            and (fact.get("source", {}).get("kind") not in {"manual_profile", "confirmed_profile"}
+                 or state.get("subject_confirmed") and state["subject"] == "self")]
 
 
 def gate_context(state: dict) -> dict:
@@ -332,6 +370,8 @@ def gate_context(state: dict) -> dict:
         return {"decision": "block", "risk_categories": ["deterministic"], "reason": "命中当前肯定风险，停止治疗路径",
                 "required_questions": [], "question_keys": [], "restricted": True}
     risk_facts = [f for f in active if f["category"] in {"urgent", "pregnancy_lactation", "age", "medication", "allergy"}]
+    if state.get("identity_required") and (not state.get("subject_confirmed") or state["subject"] in {"unknown", "other:未明确"}):
+        keys.append("subject")
     if risk_facts and (state["subject"] in {"unknown", "other:未明确"} or any(f["subject"] == "unknown" for f in risk_facts)):
         keys.append("subject")
     if any(f["category"] == "urgent" for f in active):
@@ -383,7 +423,7 @@ def response_for(state: dict, decision: dict) -> str:
         return "你提供的信息中出现可能需要及时处理的情况。若症状正在发生，请尽快联系当地急救服务或就近医疗机构，不要等待在线问答。"
     if keys:
         key = keys[0]
-        if not state.get("pending") or state["pending"]["key"] != key:
+        if not state.get("pending") or state["pending"]["key"] != key or not state["pending"].get("id"):
             state["pending"] = {"id": str(uuid4()), "key": key, "subject": state["subject"]}
         state["status"] = "needs_info"
         return "需要先确认安全资料，本轮不生成方剂或治疗建议。" + QUESTIONS[key]
@@ -403,5 +443,5 @@ def candidate_key(fact: dict) -> str:
 def profile_candidates(facts: list[dict]) -> list[dict]:
     return [copy.deepcopy(f) for f in facts
             if f["category"] in {"allergy", "constitution", "history", "medication", "pregnancy_lactation"}
-            and f["subject"] in {"self", "unknown"} and f["assertion"] != "uncertain"
+            and f["subject"] == "self" and f["assertion"] != "uncertain"
             and f["entity"] not in {"过敏原不明"} and f["source"]["kind"] == "message"]

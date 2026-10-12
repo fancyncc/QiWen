@@ -47,7 +47,7 @@ def test_preflight_fails_closed(monkeypatch, failure):
     with TestClient(app) as client:
         token, _ = register(client, "fail_" + uuid4().hex[:8])
         data = client.post("/api/chat", headers=auth(token),
-                           json={"message": "最近失眠三天，白天疲劳"}).json()
+                           json={"message": "我最近失眠三天，白天疲劳"}).json()
         assert data["intent_type"] == "safety_rejected"
         assert data["trace"]["preflight"]["risk_categories"] == ["preflight_unavailable"]
         assert not any(event["stage"] in {"bianzheng", "formula"} for event in data["trace"]["events"])
@@ -84,7 +84,7 @@ def test_cancel_ownership_model_cleanup_no_memory_or_success(monkeypatch, blocke
         run_id = str(uuid4())
         future = executor.submit(client.post, "/api/chat", headers=headers,
                                  json={"run_id": run_id, "thread_id": thread,
-                                       "message": "最近失眠三天，白天疲劳，不用查古籍"})
+                                       "message": "我最近失眠三天，白天疲劳，不用查古籍"})
         assert entered.wait(5)
         assert client.post(f"/api/runs/{run_id}/cancel", headers=auth(other)).status_code == 404
         assert client.get(f"/api/runs/{run_id}", headers=auth(other)).status_code == 404
@@ -115,7 +115,7 @@ def test_completed_result_is_authoritative_and_cancel_is_noop():
     with TestClient(app) as client:
         token, _ = register(client, "final_" + uuid4().hex[:8])
         headers = auth(token)
-        with client.stream("POST", "/api/chat?stream=true", headers=headers, json={"message": "最近失眠"}) as response:
+        with client.stream("POST", "/api/chat?stream=true", headers=headers, json={"message": "我最近失眠"}) as response:
             events = [json.loads(line[6:]) for line in response.iter_lines() if line.startswith("data: ")]
         final = events[-1]
         assert final["done"] and final["message"]["content"] == final["response"]
@@ -142,7 +142,7 @@ def test_disconnect_cancels_model_and_leaves_stopped_history(monkeypatch, asgi_v
         monkeypatch.setattr(workflow, "MODEL_MODE", "openai_compatible")
         incoming = asyncio.Queue()
         incoming.put_nowait({"type": "http.request", "body": json.dumps({
-            "run_id": run_id, "thread_id": thread_id, "message": "最近失眠三天，白天疲劳",
+            "run_id": run_id, "thread_id": thread_id, "message": "我最近失眠三天，白天疲劳",
         }).encode(), "more_body": False})
         sent = []
         async def receive():
@@ -192,7 +192,7 @@ def test_model_cannot_relax_rule_and_bad_plan_never_appears(monkeypatch):
         pregnancy = client.post("/api/chat", headers=auth(token), json={"message": "怀孕期间失眠三天"}).json()
         assert pregnancy["trace"]["preflight"]["decision"] == "clarify"
         assert not any(event["stage"] == "formula" for event in pregnancy["trace"]["events"])
-        failed = client.post("/api/chat", headers=auth(token), json={"message": "最近失眠三天，白天疲劳"})
+        failed = client.post("/api/chat", headers=auth(token), json={"message": "我最近失眠三天，白天疲劳"})
         assert failed.status_code == 503
         thread = client.get("/api/threads", headers=auth(token)).json()[0]["id"]
         saved = client.get(f"/api/threads/{thread}/messages", headers=auth(token)).json()[-1]
@@ -201,7 +201,7 @@ def test_model_cannot_relax_rule_and_bad_plan_never_appears(monkeypatch):
         assert saved["trace"]["model_calls"][-1]["status"] == "failed"
 
 
-def test_cancel_before_summary_commit_preserves_previous_memory(monkeypatch):
+def test_cancel_before_summary_commit_preserves_previous_episode(monkeypatch):
     from app import runs
     entered = threading.Event()
     async def wait_before_write(state):
@@ -212,11 +212,11 @@ def test_cancel_before_summary_commit_preserves_previous_memory(monkeypatch):
         token, _ = register(client, "memory_" + uuid4().hex[:8])
         headers = auth(token)
         prior = client.post("/api/chat", headers=headers,
-                            json={"message": "最近失眠三天，白天疲劳，不用查古籍"}).json()
+                            json={"message": "我最近失眠三天，白天疲劳，不用查古籍"}).json()
         thread = prior["thread_id"]
-        summary = one("SELECT summary FROM profile_memories WHERE thread_id=?", (thread,))["summary"]
+        summary = one("SELECT summary,version FROM consultation_episodes WHERE thread_id=? ORDER BY updated_at DESC LIMIT 1", (thread,))
         symptom_state = one("SELECT state,version FROM thread_safety_state WHERE thread_id=?", (thread,))
-        monkeypatch.setattr(workflow, "profile_write", wait_before_write)
+        monkeypatch.setattr(workflow, "episode_write", wait_before_write)
         run_id = str(uuid4())
         future = executor.submit(client.post, "/api/chat", headers=headers,
                                  json={"run_id": run_id, "thread_id": thread,
@@ -224,7 +224,8 @@ def test_cancel_before_summary_commit_preserves_previous_memory(monkeypatch):
         assert entered.wait(5)
         client.post(f"/api/runs/{run_id}/cancel", headers=headers).raise_for_status()
         assert future.result(timeout=5).json()["cancelled"]
-        assert one("SELECT summary FROM profile_memories WHERE thread_id=?", (thread,))["summary"] == summary
+        assert one("SELECT summary,version FROM consultation_episodes WHERE thread_id=? ORDER BY updated_at DESC LIMIT 1", (thread,)) == summary
+        assert not one("SELECT * FROM profile_memories WHERE thread_id=?", (thread,))
         assert one("SELECT state,version FROM thread_safety_state WHERE thread_id=?", (thread,)) == symptom_state
         assert run_id not in runs.active
 
@@ -284,7 +285,7 @@ def test_successful_provider_pipeline_persists_role_node_usage(monkeypatch):
     with TestClient(app) as client:
         token, _ = register(client, "usage_" + uuid4().hex[:8])
         headers = auth(token)
-        result = client.post("/api/chat", headers=headers, json={"message": "最近失眠三天，白天疲劳", "mode": "multi"})
+        result = client.post("/api/chat", headers=headers, json={"message": "我最近失眠三天，白天疲劳", "mode": "multi"})
         assert result.status_code == 200, result.text
         data = result.json()
         calls = data["trace"]["model_calls"]

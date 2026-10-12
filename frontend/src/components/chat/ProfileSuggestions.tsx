@@ -18,6 +18,11 @@ type Row = ProfileSuggestion & { action: SuggestionDecision["action"]; entity: s
 export function ProfileSuggestions({ threadId, streaming, refreshKey }: {
   threadId: string; streaming: boolean; refreshKey: number;
 }) {
+  if (!threadId || streaming) return null;
+  return <SuggestionDialog key={JSON.stringify([threadId, refreshKey])} threadId={threadId} />;
+}
+
+function SuggestionDialog({ threadId }: { threadId: string }) {
   const qc = useQueryClient();
   const [rows, setRows] = useState<Row[]>([]);
   const [revision, setRevision] = useState(0);
@@ -25,8 +30,6 @@ export function ProfileSuggestions({ threadId, streaming, refreshKey }: {
   const [reload, setReload] = useState(0);
   useEffect(() => {
     let stale = false;
-    setRows([]);
-    if (!threadId || streaming) return;
     api.getProfileSuggestions(threadId).then((data) => {
       if (stale) return;
       setRevision(data.revision);
@@ -35,7 +38,7 @@ export function ProfileSuggestions({ threadId, streaming, refreshKey }: {
       if (!stale) toast.error(error.message || "画像建议读取失败");
     });
     return () => { stale = true; };
-  }, [threadId, streaming, refreshKey, reload]);
+  }, [threadId, reload]);
 
   function change(id: string, patch: Partial<Row>) {
     setRows((old) => old.map((row) => row.id === id ? { ...row, ...patch } : row));
@@ -55,12 +58,15 @@ export function ProfileSuggestions({ threadId, streaming, refreshKey }: {
       if (!skipAll) toast.success("已处理画像建议");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "保存失败");
-      if (typeof error === "object" && error && "status" in error && error.status === 409) setReload((old) => old + 1);
+      if (typeof error === "object" && error && "status" in error && error.status === 409) {
+        setRows([]);
+        setReload((old) => old + 1);
+      }
     } finally { setBusy(false); }
   }
   const invalid = rows.some((row) => row.action === "accept" && (!row.entity.trim() || (row.conflict && !row.replace)));
   return (
-    <Dialog open={rows.length > 0 && !streaming} onOpenChange={(open) => { if (!open && !busy) void submit(true); }}>
+    <Dialog open={rows.length > 0} onOpenChange={(open) => { if (!open && !busy) void submit(true); }}>
       <DialogContent className="sm:max-w-xl" showCloseButton={!busy}>
         <DialogHeader>
           <DialogTitle>是否加入你的长期画像？</DialogTitle>

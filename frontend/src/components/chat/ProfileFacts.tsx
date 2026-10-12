@@ -15,7 +15,7 @@ export function ProfileFacts() {
   const username = useAuthStore((state) => state.username) ?? "";
   const qc = useQueryClient();
   const { data, isLoading, error } = useQuery({
-    queryKey: ["profile", username], queryFn: () => api.getProfile(username), enabled: open,
+    queryKey: ["profile", username], queryFn: () => api.getProfile(), enabled: open,
   });
   async function revoke(id: string) {
     if (busy || data?.revision === undefined) return;

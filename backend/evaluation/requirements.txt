@@ -1,0 +1,2 @@
+# Optional browser driver for evaluation; not installed in the application image.
+playwright>=1.50,<2

@@ -43,31 +43,43 @@ export function useChat(threadId: string, initialMessages: MessageItem[] = []) {
   const [messages, setMessages] = useState<MessageItem[]>(initialMessages);
   const [streaming, setStreaming] = useState(false);
   const [currentThreadId, setCurrentThreadId] = useState(threadId);
+  const [viewThreadId, setViewThreadId] = useState(threadId);
   const abortRef = useRef<AbortController | null>(null);
   /** 轮次序号：每次 send 递增。用于丢弃迟到的上一轮 resync（防止覆盖新一轮的乐观消息）。 */
   const turnSeqRef = useRef(0);
   const qc = useQueryClient();
+  const cancelActive = useCallback(() => {
+    ++turnSeqRef.current;
+    abortRef.current?.abort();
+    abortRef.current = null;
+  }, []);
+
+  // Reset the visible view during a prop change, before children see messages
+  // belonging to another thread. Effect cleanup invalidates the old request.
+  if (viewThreadId !== threadId) {
+    setViewThreadId(threadId);
+    setCurrentThreadId(threadId);
+    setMessages([]);
+    setStreaming(false);
+  }
 
   // 切换会话时加载历史
   useEffect(() => {
-    setCurrentThreadId(threadId);
-    if (!threadId) {
-      setMessages([]);
-      return;
-    }
     let cancelled = false;
-    api
+    const sequence = turnSeqRef.current;
+    if (threadId) api
       .getMessages(threadId)
-      .then((msgs) => !cancelled && setMessages(msgs))
-      .catch(() => !cancelled && setMessages([]));
+      .then((msgs) => !cancelled && sequence === turnSeqRef.current && setMessages(msgs))
+      .catch(() => !cancelled && sequence === turnSeqRef.current && setMessages([]));
     return () => {
       cancelled = true;
+      cancelActive();
     };
-  }, [threadId]);
+  }, [threadId, cancelActive]);
 
   const send = useCallback(
     async (text: string, files: string[] = []) => {
-      if (!text.trim() || streaming) return;
+      if (!text.trim() || abortRef.current) return;
       const myTurn = ++turnSeqRef.current;
       const userMsg: MessageItem = { role: "user", content: text };
       setMessages((m) => [...m, userMsg, { role: "assistant", content: "" }]);
@@ -75,6 +87,7 @@ export function useChat(threadId: string, initialMessages: MessageItem[] = []) {
 
       const controller = new AbortController();
       abortRef.current = controller;
+      const isCurrent = () => turnSeqRef.current === myTurn && !controller.signal.aborted;
 
       try {
         await streamChat(
@@ -82,8 +95,10 @@ export function useChat(threadId: string, initialMessages: MessageItem[] = []) {
           {
             signal: controller.signal,
             onEvent: (ev) => {
+              if (!isCurrent()) return;
               if (ev.type === "token") {
                 setMessages((m) => {
+                  if (!isCurrent() || !m.length) return m;
                   const copy = [...m];
                   const last = copy[copy.length - 1];
                   let newContent = last.content + ev.content;
@@ -105,6 +120,7 @@ export function useChat(threadId: string, initialMessages: MessageItem[] = []) {
               } else if (ev.type === "stage") {
                 // 阶段事件实时写入最后一条助手消息（per-message 轨迹）
                 setMessages((m) => {
+                  if (!isCurrent()) return m;
                   const copy = [...m];
                   for (let i = copy.length - 1; i >= 0; i--) {
                     if (copy[i].role === "assistant") {
@@ -121,6 +137,7 @@ export function useChat(threadId: string, initialMessages: MessageItem[] = []) {
                 const incomingNotes: ConsultationNote[] | undefined = ev.notes;
                 const elapsedMs = ev.elapsed_ms;
                 setMessages((m) => {
+                  if (!isCurrent()) return m;
                   const copy = [...m];
                   for (let i = copy.length - 1; i >= 0; i--) {
                     if (copy[i].role === "assistant") {
@@ -137,22 +154,18 @@ export function useChat(threadId: string, initialMessages: MessageItem[] = []) {
                 // 新会话创建/画像更新后刷新列表
                 qc.invalidateQueries({ queryKey: ["threads"] });
                 qc.invalidateQueries({ queryKey: ["profile"] });
-                // 会话命名是后台异步，延迟刷新确保新标题可见
-                setTimeout(() => qc.invalidateQueries({ queryKey: ["threads"] }), 6000);
-                setTimeout(() => qc.invalidateQueries({ queryKey: ["threads"] }), 12000);
-                setTimeout(() => qc.invalidateQueries({ queryKey: ["profile"] }), 8000);
                 // 同步后端权威状态：确保所有消息（含 inquiry 过渡语等非流式消息）按正确顺序显示
                 // 同步时保留 per-message extras：notes / stages / elapsedMs（先按内容匹配，
                 // 匹配不上时兜底挂到最后一条助手消息——流式气泡可能被截断/重写导致内容不一致）
                 // 守卫：若在 getMessages 返回前用户已开启新一轮（send），此结果已过期，直接丢弃，
                 // 否则会把新一轮的乐观消息（用户消息+流式气泡）整体覆盖掉。
                 if (tid) {
-                  const seq = turnSeqRef.current;
                   api
                     .getMessages(tid)
                     .then((msgs) => {
-                      if (turnSeqRef.current !== seq) return; // 已开新轮，丢弃过期 resync
+                      if (!isCurrent()) return;
                       setMessages((prev) => {
+                        if (!isCurrent()) return prev;
                         const hasExtras = (m: MessageItem) =>
                           Boolean(
                             m.notes?.length || m.stages?.length || typeof m.elapsedMs === "number"
@@ -197,21 +210,29 @@ export function useChat(threadId: string, initialMessages: MessageItem[] = []) {
                 toast.error(ev.message);
               }
             },
-            onError: (err) => toast.error(err.message),
+            onError: (err) => { if (isCurrent()) toast.error(err.message); },
           }
         );
+      } catch (error) {
+        if (isCurrent() && (error as Error).name !== "AbortError") {
+          toast.error(error instanceof Error ? error.message : "请求失败，请稍后重试");
+        }
       } finally {
-        setStreaming(false);
-        abortRef.current = null;
+        if (isCurrent() && abortRef.current === controller) {
+          setStreaming(false);
+          abortRef.current = null;
+        }
       }
     },
-    [streaming, currentThreadId, qc]
+    [currentThreadId, qc]
   );
 
   const stop = useCallback(() => {
-    abortRef.current?.abort();
+    cancelActive();
     setStreaming(false);
-  }, []);
+    setMessages((old) => old.map((message, index) => index === old.length - 1 && message.role === "assistant" && !message.content
+      ? { ...message, content: "已停止，本轮没有生成最终答复。" } : message));
+  }, [cancelActive]);
 
   return { messages, streaming, send, stop, currentThreadId };
 }

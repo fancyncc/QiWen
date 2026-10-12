@@ -1,30 +1,30 @@
-{"id": "ROUTE-001", "input": "你好", "expected": "chat"}
-{"id": "ROUTE-002", "input": "请介绍一下这个系统", "expected": "chat"}
-{"id": "ROUTE-003", "input": "什么是阴阳五行？", "expected": "chat"}
-{"id": "ROUTE-004", "input": "《伤寒论》是谁写的？", "expected": "chat"}
-{"id": "ROUTE-005", "input": "中医里的气血是什么意思？", "expected": "chat"}
-{"id": "ROUTE-006", "input": "桂枝汤出自哪本书？", "expected": "chat"}
-{"id": "ROUTE-007", "input": "十八反是什么？", "expected": "chat"}
-{"id": "ROUTE-008", "input": "请解释一下脉诊的基本概念", "expected": "chat"}
-{"id": "ROUTE-009", "input": "中药炮制有什么作用？", "expected": "chat"}
-{"id": "ROUTE-010", "input": "为什么中医强调辨证论治？", "expected": "chat"}
-{"id": "ROUTE-011", "input": "最近失眠", "expected": "consult"}
-{"id": "ROUTE-012", "input": "我有点头痛", "expected": "consult"}
-{"id": "ROUTE-013", "input": "这两天咳嗽", "expected": "consult"}
-{"id": "ROUTE-014", "input": "最近胃不舒服", "expected": "consult"}
-{"id": "ROUTE-015", "input": "腰有点酸", "expected": "consult"}
-{"id": "ROUTE-016", "input": "总觉得很疲劳", "expected": "consult"}
-{"id": "ROUTE-017", "input": "最近口苦", "expected": "consult"}
-{"id": "ROUTE-018", "input": "晚上容易出汗", "expected": "consult"}
-{"id": "ROUTE-019", "input": "失眠已经三周，入睡困难，白天疲劳，没有口苦。", "expected": "diagnose"}
-{"id": "ROUTE-020", "input": "头痛五天，太阳穴胀痛，情绪紧张时加重。", "expected": "diagnose"}
-{"id": "ROUTE-021", "input": "咳嗽一周，有白痰，受凉后明显，没有发热。", "expected": "diagnose"}
-{"id": "ROUTE-022", "input": "胃痛两个月，喜温喜按，饭后腹胀。", "expected": "diagnose"}
-{"id": "ROUTE-023", "input": "腰酸半年并且夜尿增多，最近畏寒乏力。", "expected": "diagnose"}
-{"id": "ROUTE-024", "input": "腹泻三天，每天四次，伴腹部隐痛和食欲差。", "expected": "diagnose"}
-{"id": "ROUTE-025", "input": "咽痛两天，发热口渴，咳嗽痰黄。", "expected": "diagnose"}
-{"id": "ROUTE-026", "input": "胸闷一个月，常叹气，压力大时加重。", "expected": "diagnose"}
-{"id": "ROUTE-027", "input": "头晕耳鸣三个月，腰膝酸软，晚上盗汗。", "expected": "diagnose"}
-{"id": "ROUTE-028", "input": "皮肤瘙痒一个月，夜间明显，抓后脱屑。", "expected": "diagnose"}
-{"id": "ROUTE-029", "input": "月经量少三个月，面色淡，常有心悸头晕。", "expected": "diagnose"}
-{"id": "ROUTE-030", "input": "口苦口黏一周，小便偏黄，大便黏滞不爽。", "expected": "diagnose"}
+{"id": "ROUTE-001", "input": "你好", "expected": "chat", "expected_next_action": "knowledge_answer", "label_reason": "知识交流不使用患者画像。", "family": "router-ROUTE-001", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "ROUTE-002", "input": "请介绍一下这个系统", "expected": "chat", "expected_next_action": "knowledge_answer", "label_reason": "知识交流不使用患者画像。", "family": "router-ROUTE-002", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "ROUTE-003", "input": "什么是阴阳五行？", "expected": "chat", "expected_next_action": "knowledge_answer", "label_reason": "知识交流不使用患者画像。", "family": "router-ROUTE-003", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "ROUTE-004", "input": "《伤寒论》是谁写的？", "expected": "chat", "expected_next_action": "knowledge_answer", "label_reason": "知识交流不使用患者画像。", "family": "router-ROUTE-004", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "ROUTE-005", "input": "中医里的气血是什么意思？", "expected": "chat", "expected_next_action": "knowledge_answer", "label_reason": "知识交流不使用患者画像。", "family": "router-ROUTE-005", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "ROUTE-006", "input": "桂枝汤出自哪本书？", "expected": "chat", "expected_next_action": "knowledge_answer", "label_reason": "知识交流不使用患者画像。", "family": "router-ROUTE-006", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "ROUTE-007", "input": "十八反是什么？", "expected": "chat", "expected_next_action": "knowledge_answer", "label_reason": "知识交流不使用患者画像。", "family": "router-ROUTE-007", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "ROUTE-008", "input": "请解释一下脉诊的基本概念", "expected": "chat", "expected_next_action": "knowledge_answer", "label_reason": "知识交流不使用患者画像。", "family": "router-ROUTE-008", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "ROUTE-009", "input": "中药炮制有什么作用？", "expected": "chat", "expected_next_action": "knowledge_answer", "label_reason": "知识交流不使用患者画像。", "family": "router-ROUTE-009", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "ROUTE-010", "input": "为什么中医强调辨证论治？", "expected": "chat", "expected_next_action": "knowledge_answer", "label_reason": "知识交流不使用患者画像。", "family": "router-ROUTE-010", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "ROUTE-011", "input": "最近失眠", "expected": "safety_advisory", "expected_next_action": "confirm_subject", "required_questions": ["这次是你本人"], "label_reason": "原输入未明确本人或代问对象，必须先确认对象。", "family": "router-ROUTE-011", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "ROUTE-012", "input": "我有点头痛", "expected": "consult", "expected_next_action": "ask_clinical_details", "label_reason": "明确本人前提，保留原资料充分性预期。", "family": "router-ROUTE-012", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "ROUTE-013", "input": "这两天咳嗽", "expected": "safety_advisory", "expected_next_action": "confirm_subject", "required_questions": ["这次是你本人"], "label_reason": "原输入未明确本人或代问对象，必须先确认对象。", "family": "router-ROUTE-013", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "ROUTE-014", "input": "我最近胃不舒服", "expected": "consult", "expected_next_action": "ask_clinical_details", "label_reason": "明确本人前提，保留原资料充分性预期。", "family": "router-ROUTE-014", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "ROUTE-015", "input": "我腰有点酸", "expected": "consult", "expected_next_action": "ask_clinical_details", "label_reason": "明确本人前提，保留原资料充分性预期。", "family": "router-ROUTE-015", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "ROUTE-016", "input": "我总觉得很疲劳", "expected": "consult", "expected_next_action": "ask_clinical_details", "label_reason": "明确本人前提，保留原资料充分性预期。", "family": "router-ROUTE-016", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "ROUTE-017", "input": "我最近口苦", "expected": "consult", "expected_next_action": "ask_clinical_details", "label_reason": "明确本人前提，保留原资料充分性预期。", "family": "router-ROUTE-017", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "ROUTE-018", "input": "我晚上容易出汗", "expected": "consult", "expected_next_action": "ask_clinical_details", "label_reason": "明确本人前提，保留原资料充分性预期。", "family": "router-ROUTE-018", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "ROUTE-019", "input": "我失眠已经三周，入睡困难，白天疲劳，没有口苦。", "expected": "diagnose", "expected_next_action": "explain_with_uncertainty", "label_reason": "明确本人前提，保留原资料充分性预期。", "family": "router-ROUTE-019", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "ROUTE-020", "input": "我头痛五天，太阳穴胀痛，情绪紧张时加重。", "expected": "diagnose", "expected_next_action": "explain_with_uncertainty", "label_reason": "明确本人前提，保留原资料充分性预期。", "family": "router-ROUTE-020", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "ROUTE-021", "input": "我咳嗽一周，有白痰，受凉后明显，没有发热。", "expected": "diagnose", "expected_next_action": "explain_with_uncertainty", "label_reason": "明确本人前提，保留原资料充分性预期。", "family": "router-ROUTE-021", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "ROUTE-022", "input": "我胃痛两个月，喜温喜按，饭后腹胀。", "expected": "diagnose", "expected_next_action": "explain_with_uncertainty", "label_reason": "明确本人前提，保留原资料充分性预期。", "family": "router-ROUTE-022", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "ROUTE-023", "input": "我腰酸半年并且夜尿增多，最近畏寒乏力。", "expected": "diagnose", "expected_next_action": "explain_with_uncertainty", "label_reason": "明确本人前提，保留原资料充分性预期。", "family": "router-ROUTE-023", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "ROUTE-024", "input": "我腹泻三天，每天四次，伴腹部隐痛和食欲差。", "expected": "diagnose", "expected_next_action": "explain_with_uncertainty", "label_reason": "明确本人前提，保留原资料充分性预期。", "family": "router-ROUTE-024", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "ROUTE-025", "input": "我咽痛两天，发热口渴，咳嗽痰黄。", "expected": "diagnose", "expected_next_action": "explain_with_uncertainty", "label_reason": "明确本人前提，保留原资料充分性预期。", "family": "router-ROUTE-025", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "ROUTE-026", "input": "我胸闷一个月，常叹气，压力大时加重。", "expected": "diagnose", "expected_next_action": "explain_with_uncertainty", "label_reason": "明确本人前提，保留原资料充分性预期。", "family": "router-ROUTE-026", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "ROUTE-027", "input": "我头晕耳鸣三个月，腰膝酸软，晚上盗汗。", "expected": "diagnose", "expected_next_action": "explain_with_uncertainty", "label_reason": "明确本人前提，保留原资料充分性预期。", "family": "router-ROUTE-027", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "ROUTE-028", "input": "我皮肤瘙痒一个月，夜间明显，抓后脱屑。", "expected": "diagnose", "expected_next_action": "explain_with_uncertainty", "label_reason": "明确本人前提，保留原资料充分性预期。", "family": "router-ROUTE-028", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "ROUTE-029", "input": "我月经量少三个月，面色淡，常有心悸头晕。", "expected": "diagnose", "expected_next_action": "explain_with_uncertainty", "label_reason": "明确本人前提，保留原资料充分性预期。", "family": "router-ROUTE-029", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "ROUTE-030", "input": "我口苦口黏一周，小便偏黄，大便黏滞不爽。", "expected": "diagnose", "expected_next_action": "explain_with_uncertainty", "label_reason": "明确本人前提，保留原资料充分性预期。", "family": "router-ROUTE-030", "split": "development", "label_status": "engineering_contract", "version": 2}

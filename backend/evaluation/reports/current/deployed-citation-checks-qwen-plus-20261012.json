@@ -1,0 +1,89 @@
+{
+  "deployment_report": "deployment-20261012T102913267411Z.json",
+  "count": 12,
+  "passed": 12,
+  "generation_gate": {
+    "status": "passed",
+    "executed": 12,
+    "count": 12,
+    "scope": "actual_successful_model_calls_not_semantic_quality"
+  },
+  "model_judge": {
+    "status": "not_enabled"
+  },
+  "scope": "current_deployed_source_id_title_chapter_original_quote_and_actual_display; semantic_support_pending",
+  "details": [
+    {
+      "id": "RAG-003",
+      "mode": "fixed",
+      "passed": true,
+      "displayed_quotes": 1
+    },
+    {
+      "id": "RAG-003",
+      "mode": "multi",
+      "passed": true,
+      "displayed_quotes": 1
+    },
+    {
+      "id": "RAG-006",
+      "mode": "fixed",
+      "passed": true,
+      "displayed_quotes": 4
+    },
+    {
+      "id": "RAG-006",
+      "mode": "multi",
+      "passed": true,
+      "displayed_quotes": 4
+    },
+    {
+      "id": "RAG-022",
+      "mode": "fixed",
+      "passed": true,
+      "displayed_quotes": 4
+    },
+    {
+      "id": "RAG-022",
+      "mode": "multi",
+      "passed": true,
+      "displayed_quotes": 4
+    },
+    {
+      "id": "RAG-035",
+      "mode": "fixed",
+      "passed": true,
+      "displayed_quotes": 1
+    },
+    {
+      "id": "RAG-035",
+      "mode": "multi",
+      "passed": true,
+      "displayed_quotes": 1
+    },
+    {
+      "id": "RAG-022-MAI",
+      "mode": "fixed",
+      "passed": true,
+      "displayed_quotes": 4
+    },
+    {
+      "id": "RAG-022-MAI",
+      "mode": "multi",
+      "passed": true,
+      "displayed_quotes": 4
+    },
+    {
+      "id": "RAG-035-NORMALIZED",
+      "mode": "fixed",
+      "passed": true,
+      "displayed_quotes": 1
+    },
+    {
+      "id": "RAG-035-NORMALIZED",
+      "mode": "multi",
+      "passed": true,
+      "displayed_quotes": 1
+    }
+  ]
+}

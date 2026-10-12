@@ -81,7 +81,7 @@ def test_body_card_data_and_edit_invalidate_review(monkeypatch):
     with TestClient(app) as client:
         token, _ = register(client, "dose_" + uuid4().hex[:8])
         headers = auth(token)
-        first = client.post("/api/chat", headers=headers, json={"message": "最近失眠三天，白天疲劳"}).json()
+        first = client.post("/api/chat", headers=headers, json={"message": "我最近失眠三天，白天疲劳"}).json()
         message = first["message"]
         assert render_plan(message["prescription"]) in message["content"]
         assert message["prescription_review"]["plan_hash"] == fingerprint(message["prescription"])

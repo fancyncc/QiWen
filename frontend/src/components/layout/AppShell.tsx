@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, ApiError } from "@/lib/api";
@@ -35,13 +35,13 @@ import {
 import type { ProfileUpdate } from "@/lib/types";
 
 /** 应用外壳：路由守卫 + 侧边栏（会话/画像）+ 主区域。 */
+const subscribeHydration = () => () => {};
+
 export function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const { token, username, logout } = useAuthStore();
-  const [hydrated, setHydrated] = useState(false);
-
-  useEffect(() => setHydrated(true), []);
+  const hydrated = useSyncExternalStore(subscribeHydration, () => true, () => false);
   useEffect(() => {
     if (hydrated && !token) router.replace("/login");
   }, [hydrated, token, router]);
@@ -83,12 +83,12 @@ function SidebarContent({
   const router = useRouter();
   const qc = useQueryClient();
   const { data: threads } = useQuery({
-    queryKey: ["threads"],
+    queryKey: ["threads", username],
     queryFn: api.listThreads,
   });
   const { data: profile } = useQuery({
     queryKey: ["profile", username],
-    queryFn: () => api.getProfile(username),
+    queryFn: () => api.getProfile(),
     enabled: !!username,
   });
 

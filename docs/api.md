@@ -1,5 +1,13 @@
 # 岐问接口与页面适配
 
+## 画像与旧摘要兼容
+
+跨会话只参考本人手填或明确确认的画像。画像读取不返回自动问诊摘要。`GET /api/memories` 与 `GET /api/threads/{id}/context` 已移除，聊天页不再提供独立记忆面板。
+
+保留 `DELETE /threads/{id}/memory`、`DELETE /profiles/{user_id}/memories/{thread_id}` 处理旧摘要，204 表示删除旧摘要及级联缓存，不删除聊天。`PATCH /threads/{id}/memory` 兼容保留 enabled/revision，旧 revision 返回 409；开启设置也不会生成跨会话摘要。以上路径省略 `/api`，要求登录及账号归属校验。
+
+删除聊天级联删除运行、问诊状态、病程摘要、知识话题及检查点。撤销长期资料不会自动否认同会话中已经自述的风险。已有摘要数据不自动清空，但不再提供给任何工作流。
+
 依据当前 `backend/app/main.py` 和前端适配代码编写。以下表格路径均省略 `/api` 前缀。健康、注册、登录与公开知识出处无需登录；其余接口需在客户端配置登录凭据，并按用户归属校验。不要在文档或日志中输出请求头、访问令牌或 API 密钥。
 
 | 接口 | 请求与返回 |
@@ -63,4 +71,4 @@ trace.inquiry 保存普通症状 facts 与待确认 pending，包括原文位置
 
 登录错误的 401 在表单中提示，不立刻重载。其他受保护请求 401 清登录态并跳登录页。422 字段错误转为可读文字；删除返回 204 时不读取 JSON。
 
-最终答复与历史消息的 `trace.memory_retrieval` 保存实际记忆检索模式、退化原因与选中摘要来源。`rerank` 子项记录 requested_mode、status、fallback_reason、input_count、output_count；status 可为 success、no_candidates、disabled、skipped_unconfigured、fallback，后四项不能当作成功模型重排。协议见 [rag.md](rag.md)，配置见 [deployment.md](deployment.md)。
+新运行不再生成 `trace.memory_retrieval`；历史消息中的旧轨迹只用于查看已完成运行。`trace.context_usage` 记录当前会话事实、适用画像与公开证据的实际 injected/dropped IDs。历史轨迹不会成为新会话输入。

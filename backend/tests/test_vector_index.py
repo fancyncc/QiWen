@@ -5,7 +5,8 @@ import pytest
 from app import retrieval
 
 
-def test_vector_index_resume_only_embeds_missing_segments(monkeypatch):
+@pytest.mark.parametrize("batch_size", [1, 32])
+def test_vector_index_resume_only_embeds_missing_segments(monkeypatch, batch_size):
     stored: dict[str, list[float]] = {}
     embedded: list[list[str]] = []
     metadata = {}
@@ -33,10 +34,10 @@ def test_vector_index_resume_only_embeds_missing_segments(monkeypatch):
         {"id": "a", "title": "伤寒论", "chapter": "1", "body": "桂枝汤"},
         {"id": "b", "title": "金匮要略", "chapter": "2", "body": "酸枣仁汤"},
     ]
-    assert retrieval.index_vectors(rows) == 2
+    assert retrieval.index_vectors(rows, batch_size=batch_size) == 2
     rows[0]["metadata"] = '{"split_from":"SHL_001"}'
-    assert retrieval.index_vectors(rows) == 0
-    assert embedded == [["桂枝汤", "酸枣仁汤"]]
+    assert retrieval.index_vectors(rows, batch_size=batch_size) == 0
+    assert embedded == ([["桂枝汤"], ["酸枣仁汤"]] if batch_size == 1 else [["桂枝汤", "酸枣仁汤"]])
     assert set(stored) == {"a", "b"}
     assert metadata["a"]["chunk_metadata"] == rows[0]["metadata"]
 

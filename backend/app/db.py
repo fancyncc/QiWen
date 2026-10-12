@@ -117,11 +117,39 @@ def init_db() -> None:
         );
         CREATE INDEX IF NOT EXISTS profile_memories_user_idx
           ON profile_memories(user_id, updated_at DESC);
+        CREATE TABLE IF NOT EXISTS memory_subject_scope (
+          thread_id TEXT PRIMARY KEY REFERENCES profile_memories(thread_id) ON DELETE CASCADE,
+          user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          subject TEXT NOT NULL, summary_hash TEXT NOT NULL
+        );
         CREATE TABLE IF NOT EXISTS memory_embeddings (
           thread_id TEXT NOT NULL REFERENCES profile_memories(thread_id) ON DELETE CASCADE,
           user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
           model_key TEXT NOT NULL, content_hash TEXT NOT NULL, embedding TEXT NOT NULL,
           PRIMARY KEY(thread_id,model_key)
+        );
+        CREATE TABLE IF NOT EXISTS memory_controls (
+          thread_id TEXT PRIMARY KEY REFERENCES threads(id) ON DELETE CASCADE,
+          user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          enabled INTEGER NOT NULL DEFAULT 1, revision INTEGER NOT NULL DEFAULT 0,
+          updated_at TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS memory_terms (
+          thread_id TEXT NOT NULL REFERENCES profile_memories(thread_id) ON DELETE CASCADE,
+          term TEXT NOT NULL, PRIMARY KEY(thread_id,term)
+        );
+        CREATE INDEX IF NOT EXISTS memory_terms_lookup ON memory_terms(term,thread_id);
+        CREATE TABLE IF NOT EXISTS consultation_episodes (
+          id TEXT PRIMARY KEY, thread_id TEXT NOT NULL REFERENCES threads(id) ON DELETE CASCADE,
+          user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          subject TEXT NOT NULL, version INTEGER NOT NULL, summary TEXT NOT NULL,
+          state TEXT NOT NULL, last_run_id TEXT NOT NULL, started_at TEXT, updated_at TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS episodes_thread ON consultation_episodes(thread_id,updated_at DESC);
+        CREATE TABLE IF NOT EXISTS knowledge_topics (
+          thread_id TEXT PRIMARY KEY REFERENCES threads(id) ON DELETE CASCADE,
+          user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          state TEXT NOT NULL, updated_at TEXT NOT NULL
         );
         CREATE TABLE IF NOT EXISTS thread_safety_state (
           thread_id TEXT PRIMARY KEY REFERENCES threads(id) ON DELETE CASCADE,
@@ -154,6 +182,8 @@ def init_db() -> None:
             db.execute("ALTER TABLE chat_runs ADD COLUMN source_message_id TEXT")
         if "source_files" not in {row[1] for row in db.execute("PRAGMA table_info(chat_runs)")}:
             db.execute("ALTER TABLE chat_runs ADD COLUMN source_files TEXT NOT NULL DEFAULT '[]'")
+        if "memory_revision" not in {row[1] for row in db.execute("PRAGMA table_info(chat_runs)")}:
+            db.execute("ALTER TABLE chat_runs ADD COLUMN memory_revision INTEGER NOT NULL DEFAULT 0")
         if "trace" not in {row[1] for row in db.execute("PRAGMA table_info(messages)")}:
             db.execute("ALTER TABLE messages ADD COLUMN trace TEXT")
         if "plan" not in {row[1] for row in db.execute("PRAGMA table_info(messages)")}:
@@ -191,6 +221,8 @@ def init_db() -> None:
         seed_structured_dosage(db)
         from .corpus_seed import seed_bundled_corpus
         seed_bundled_corpus(db)
+        # Legacy memory tables are preserved for explicit deletion only; no index backfill.
+
 
 
 def one(sql: str, params: tuple = ()):

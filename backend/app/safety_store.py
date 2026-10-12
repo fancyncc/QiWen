@@ -8,7 +8,7 @@ from uuid import uuid4
 
 from fastapi import HTTPException
 from .db import connection, now
-from .safety_context import empty_state, extract_facts, merge_facts, candidate_key
+from .safety_context import empty_state, extract_facts, merge_facts, candidate_key, subject_of
 
 FIELD = {"allergy": "allergies", "constitution": "constitution", "history": "history"}
 
@@ -26,7 +26,7 @@ def effective_profile(db, user_id):
     row = db.execute("SELECT * FROM profiles WHERE user_id=?", (user_id,)).fetchone()
     profile = dict(row) if row else {"constitution": "", "allergies": "", "history": "", "safety_revision": 0}
     profile["_safety_revision"] = profile.get("safety_revision", 0)
-    facts = active_facts(db, user_id)
+    facts = [f for f in active_facts(db, user_id) if f.get("subject") == "self" and f.get("confirmation") == "confirmed"]
     for category, field in FIELD.items():
         positives = [f["entity"] for f in facts if f["category"] == category and f["assertion"] == "present"]
         if category == "constitution" and positives:
@@ -39,16 +39,43 @@ def effective_profile(db, user_id):
     return profile
 
 
-def load(user_id, thread_id):
+def load_state(user_id, thread_id):
     with connection() as db:
         row = db.execute("SELECT * FROM thread_safety_state WHERE thread_id=? AND user_id=?", (thread_id, user_id)).fetchone()
         state = json.loads(row["state"]) if row else empty_state()
         state["version"] = row["version"] if row else 0
+        if not state.get("subject_confirmed"):
+            if state.get("subject") == "self":
+                for fact in state.get("facts", []) + state.get("symptom_facts", []):
+                    if fact.get("subject") == "self":
+                        inferred = subject_of(fact.get("source", {}).get("quote", ""))
+                        if inferred != "self":
+                            fact["subject"] = inferred
+                clinical = state.setdefault("clinical", {})
+                if "self" in clinical:
+                    clinical.setdefault("unknown", clinical.pop("self"))
+            state["subject"] = "unknown"
+        state["facts"] = [f for f in state.get("facts", [])
+                          if f.get("source", {}).get("kind") not in {"manual_profile", "confirmed_profile", "summary"}
+                          and f.get("source", {}).get("thread_id") in {None, "", thread_id}]
+        state["symptom_facts"] = [f for f in state.get("symptom_facts", [])
+                                  if f.get("source", {}).get("kind") != "summary"
+                                  and f.get("source", {}).get("thread_id") in {None, "", thread_id}]
+        return state
+
+
+def load(user_id, thread_id, state=None):
+    state = copy.deepcopy(state if state is not None else load_state(user_id, thread_id))
+    state["facts"] = [f for f in state.get("facts", []) if f.get("source", {}).get("kind") != "summary"]
+    if state.get("subject") != "self" or not state.get("subject_confirmed"):
+        return state, {}
+    with connection() as db:
         profile = effective_profile(db, user_id)
-        facts = active_facts(db, user_id)
+        facts = [f for f in active_facts(db, user_id) if f.get("subject") == "self"]
         # Time-sensitive facts from another consultation must be revalidated.
         for fact in facts:
-            if fact["category"] in {"pregnancy_lactation", "medication"} and fact["source"].get("thread_id") != thread_id:
+            if fact["category"] in {"pregnancy_lactation", "medication"} and (fact["source"].get("thread_id") != thread_id or
+                    state.get("episode_confirmation") or state.get("recheck_temporal")):
                 fact["temporal_scope"] = "past"
         if state["subject"] == "self":
             raw = db.execute("SELECT * FROM profiles WHERE user_id=?", (user_id,)).fetchone()
@@ -105,6 +132,8 @@ def add_suggestions(db, user_id, thread_id, run_id, candidates):
     profile = effective_profile(db, user_id)
     existing = active_facts(db, user_id)
     for fact in candidates:
+        if fact.get("subject") != "self" or fact.get("source", {}).get("kind") != "message":
+            continue
         key = candidate_key(fact)
         same = [f for f in existing if all(f.get(k) == fact.get(k) for k in ("category", "entity", "assertion"))]
         field = FIELD.get(fact["category"])
@@ -112,6 +141,13 @@ def add_suggestions(db, user_id, thread_id, run_id, candidates):
         if same and (not meaningful_detail or any(candidate_key(f) == key for f in same)):
             continue
         if field and fact["assertion"] == "present" and fact["entity"] in profile.get(field, "") and not meaningful_detail:
+            continue
+        legacy = db.execute("SELECT id,fact,status FROM profile_suggestions WHERE user_id=? AND dedup_key=?", (user_id, key)).fetchone()
+        if legacy and legacy["status"] == "pending" and json.loads(legacy["fact"]).get("subject") != "self":
+            # A previously ambiguous proposal becomes actionable only after
+            # this workflow has obtained explicit patient ownership evidence.
+            db.execute("UPDATE profile_suggestions SET thread_id=?,run_id=?,fact=?,updated_at=? WHERE id=?",
+                       (thread_id, run_id, dumps(fact), now(), legacy["id"]))
             continue
         db.execute("""INSERT INTO profile_suggestions
             (id,user_id,thread_id,run_id,dedup_key,fact,status,created_at,updated_at) VALUES(?,?,?,?,?,?,'pending',?,?)
@@ -129,6 +165,8 @@ def list_suggestions(user_id, thread_id):
         items = []
         for row in db.execute("SELECT * FROM profile_suggestions WHERE user_id=? AND thread_id=? AND status='pending' ORDER BY created_at,id", (user_id, thread_id)):
             fact = json.loads(row["fact"])
+            if fact.get("subject") != "self":
+                continue
             is_conflict, previous = conflict(db, user_id, fact)
             items.append({"id": row["id"], "fact": fact, "conflict": is_conflict, "previous": previous})
         return {"revision": revision, "items": items}
@@ -164,6 +202,8 @@ def resolve(user_id, revision, decisions):
                 continue
             fact = json.loads(row["fact"])
             if item.action == "accept":
+                if fact.get("subject") != "self":
+                    raise HTTPException(422, "该资料未确认属于本人，不能写入本人画像")
                 if not item.confirm_self:
                     raise HTTPException(422, "保存前必须确认资料属于本人")
                 if item.entity is not None:
@@ -230,6 +270,9 @@ def resolve(user_id, revision, decisions):
             db.execute("UPDATE profile_suggestions SET status=?,updated_at=? WHERE id=?", (item.action, now(), item.id))
             audit(db, user_id, item.id, item.action, next_revision)
         db.execute("UPDATE profiles SET safety_revision=?,updated_at=? WHERE user_id=?", (next_revision, now(), user_id))
+        from .memory import invalidate_user
+        if any(item.action in {"accept", "other"} for item, _ in rows):
+            invalidate_user(db, user_id)
         return {"revision": next_revision, "status": "saved"}
 
 
@@ -247,4 +290,6 @@ def revoke(user_id, fact_id, revision):
         db.execute("UPDATE patient_safety_facts SET status='revoked',updated_at=? WHERE id=?", (now(), fact_id))
         db.execute("UPDATE profiles SET safety_revision=safety_revision+1,updated_at=? WHERE user_id=?", (now(), user_id))
         audit(db, user_id, fact_id, "revoked", current + 1)
+        from .memory import invalidate_user
+        invalidate_user(db, user_id)
         return {"revision": current + 1}

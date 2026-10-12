@@ -59,22 +59,22 @@ def test_followup_sse_multi_and_history():
         token, user_id = register(client, "flow_" + uuid4().hex[:6])
         headers = auth(token)
         thread = client.post("/api/threads", headers=headers, json={"mode": "fixed"}).json()["id"]
-        first = client.post("/api/chat", headers=headers, json={"message": "最近失眠", "thread_id": thread}).json()
+        first = client.post("/api/chat", headers=headers, json={"message": "我最近失眠", "thread_id": thread}).json()
         assert first.get("intent_type") == "consult", first
-        assert client.get("/api/threads", headers=headers).json()[0]["title"] == "最近失眠"
+        assert client.get("/api/threads", headers=headers).json()[0]["title"] == "我最近失眠"
         second = client.post("/api/chat", headers=headers, json={"message": "三天，白天有些疲劳", "thread_id": thread}).json()
         assert second["intent_type"] == "diagnose"
         assert "失眠" in second["response"]
         assert len(client.get(f"/api/threads/{thread}/messages", headers=headers).json()) == 4
         assert "甘草" in second["response"]
         client.patch(f"/api/profiles/{user_id}", headers=headers, json={"allergies": "甘草"})
-        blocked = client.post("/api/chat", headers=headers, json={"message": "最近失眠三天，伴有疲劳", "thread_id": thread}).json()
+        blocked = client.post("/api/chat", headers=headers, json={"message": "我最近失眠三天，伴有疲劳", "thread_id": thread}).json()
         assert "药材清单已隐藏" in blocked["response"]
         assert "酸枣仁、茯苓" not in blocked["response"]
 
         multi = client.post("/api/threads", headers=headers, json={"mode": "multi"}).json()["id"]
         with client.stream("POST", "/api/chat?stream=true", headers=headers,
-                           json={"message": "最近咳嗽三天，伴有疲劳", "thread_id": multi}) as response:
+                           json={"message": "我最近咳嗽三天，伴有疲劳", "thread_id": multi}) as response:
             events = [json.loads(line[6:]) for line in response.iter_lines() if line.startswith("data: ")]
         assert response.status_code == 200
         assert any(item.get("stage") == "herb" for item in events)
@@ -99,7 +99,7 @@ def test_followup_sse_multi_and_history():
 
         client.patch(f"/api/profiles/{user_id}", headers=headers, json={"allergies": ""})
         example = client.post("/api/chat", headers=headers,
-                              json={"message": "最近总是睡不好，白天容易疲劳"}).json()
+                              json={"message": "我最近总是睡不好，白天容易疲劳"}).json()
         assert "失眠" in example["symptoms"]
         assert "酸枣仁汤" in example["response"]
 
@@ -110,7 +110,7 @@ def test_multi_expert_cards_are_persisted_after_safety_review():
         headers = auth(token)
         thread = client.post("/api/threads", headers=headers, json={"mode": "multi"}).json()["id"]
         result = client.post("/api/chat", headers=headers,
-                             json={"message": "最近失眠三天，白天疲劳", "thread_id": thread}).json()
+                             json={"message": "我最近失眠三天，白天疲劳", "thread_id": thread}).json()
         assert "## 会诊综合" in result["response"]
         assert [note["expert"] for note in result["notes"]] == ["辨证", "方剂", "本草"]
         assert result["notes"][0]["status"] == "资料有限"
@@ -121,7 +121,7 @@ def test_multi_expert_cards_are_persisted_after_safety_review():
 
         client.patch(f"/api/profiles/{user_id}", headers=headers, json={"allergies": "甘草"})
         blocked = client.post("/api/chat", headers=headers,
-                              json={"message": "最近失眠三天，白天疲劳", "thread_id": thread}).json()
+                              json={"message": "我最近失眠三天，白天疲劳", "thread_id": thread}).json()
         assert "药材清单已隐藏" in blocked["response"]
         assert "酸枣仁汤" not in blocked["notes"][1]["content"]
         assert "甘草" in blocked["notes"][2]["warning"]
@@ -144,7 +144,7 @@ def test_contextual_followup_preserves_denials_without_searching_them(monkeypatc
         headers = auth(token)
         thread = client.post("/api/threads", headers=headers, json={"mode": "multi"}).json()["id"]
         first = client.post("/api/chat", headers=headers,
-                            json={"message": "肚子胀、怕冷、大便稀", "thread_id": thread}).json()
+                            json={"message": "我肚子胀、怕冷、大便稀", "thread_id": thread}).json()
         assert first["intent_type"] == "consult"
         assert "腹痛" in first["response"] and "舌苔" in first["response"]
         assert "formula" not in [event["stage"] for event in
@@ -181,8 +181,8 @@ def test_upload_validation_and_retrieval(tmp_path, monkeypatch):
                                   files={"file": ("symptoms.docx", symptom_stream.getvalue())}).json()["id"]
         attached = client.post("/api/chat", headers=headers,
                                json={"message": "请看附件", "files": [symptom_file]}).json()
-        assert attached["intent_type"] == "consult"
-        assert attached["trace"]["inquiry"]["pending"]["kind"] == "subject"
+        assert attached["intent_type"] == "safety_advisory"
+        assert attached["trace"]["safety"]["pending"]["key"] == "subject"
         attached_trace = client.get(f'/api/threads/{attached["thread_id"]}/messages', headers=headers).json()[-1]["trace"]["events"]
         assert any(event["stage"] == "document_parse" and event["status"] == "done" for event in attached_trace)
         confirmed = client.post("/api/chat", headers=headers,
@@ -226,7 +226,7 @@ def test_contraindication_rules():
 def test_benchmark_safety_long_tails_and_short_complaints():
     blocked = ["川乌能配半夏吗？", "夹竹桃叶煮水当偏方喝可以吗？",
                "刚才大量咯血，现在很虚弱怎么办？", "腹部硬得像板并剧痛，能否先喝中药？"]
-    consult = ["这两天咳嗽", "最近胃不舒服", "腰有点酸", "晚上容易出汗"]
+    consult = ["我这两天咳嗽", "我最近胃不舒服", "我腰有点酸", "我晚上容易出汗"]
     with TestClient(app) as client:
         for index, message in enumerate(blocked):
             token, _ = register(client, f"longtail_{index}_{uuid4().hex[:5]}")
@@ -239,7 +239,7 @@ def test_benchmark_safety_long_tails_and_short_complaints():
             assert data["intent_type"] == "consult"
         token, _ = register(client, "detailed_" + uuid4().hex[:5])
         detailed = client.post("/api/chat", headers=auth(token),
-                               json={"message": "胸闷一个月，常叹气，压力大时加重。"}).json()
+                               json={"message": "我胸闷一个月，常叹气，压力大时加重。"}).json()
         assert detailed["intent_type"] == "diagnose"
 
 
@@ -250,7 +250,7 @@ def test_followup_herb_addition_checks_prior_formula_and_isolates_threads():
         token, _ = register(client, "herb_" + uuid4().hex[:6])
         headers = auth(token)
         original = client.post("/api/chat", headers=headers,
-                               json={"message": "最近失眠三天，白天疲劳"}).json()
+                               json={"message": "我最近失眠三天，白天疲劳"}).json()
         thread = original["thread_id"]
         assert "甘草" in original["response"]
         warning = client.post("/api/chat", headers=headers,
@@ -272,8 +272,8 @@ def test_followup_herb_addition_checks_prior_formula_and_isolates_threads():
             db.execute("UPDATE messages SET plan=NULL WHERE thread_id=? AND role='assistant'", (thread,))
         legacy = client.post("/api/chat", headers=headers,
                              json={"message": "海藻能和这个方子一起用吗？", "thread_id": thread}).json()
-        assert legacy["intent_type"] == "safety_rejected"
-        assert "十八反·甘草" in legacy["response"]
+        assert legacy["intent_type"] == "safety_advisory"
+        assert "完整药材清单" in legacy["response"]  # A legacy visible example has no patient-bound structured candidate.
 
         direct = client.post("/api/chat", headers=headers,
                              json={"message": "甘草和海藻可以一起用吗？"}).json()
@@ -299,7 +299,7 @@ def test_bundled_data_can_be_rebuilt_from_preserved_sources():
     from scripts.rebuild_classics import CHUNK_DIR, KNOWLEDGE_FILE, RAW_DIR, rebuild_knowledge
 
     generated = chunk_all_books(str(RAW_DIR))
-    assert sum(map(len, generated.values())) == 1537
+    assert sum(map(len, generated.values())) == 1515
     for book, chunks in generated.items():
         saved = json.loads((CHUNK_DIR / f"{book}.json").read_text(encoding="utf-8"))
         assert saved == [
@@ -311,17 +311,15 @@ def test_bundled_data_can_be_rebuilt_from_preserved_sources():
     assert [len(saved_knowledge[key]) for key in ("herbs", "formulas", "contraindications")] == [33, 22, 14]
 
 
-def test_full_branching_flow_persists_trace_and_user_memory(monkeypatch):
+def test_full_branching_flow_persists_trace_and_session_summary(monkeypatch):
     from app import workflow
 
     calls = []
     async def staged_retrieval(plan):
         calls.append(plan["keyword_query"])
-        if len(calls) == 1:
-            return [], {"warning": ""}
+        assert plan["expansions"] and "不寐" in plan["keyword_query"]
         return [{"title": "测试古籍", "chapter": "测试章", "body": "失眠疲劳的测试片段。"}], {"warning": ""}
     monkeypatch.setattr(workflow, "retrieve_classics", staged_retrieval)
-    monkeypatch.setattr(workflow, "CONTEXT_CHAR_LIMIT", 1)
     with TestClient(app) as client:
         token, user_id = register(client, "branch_" + uuid4().hex[:6])
         other, _ = register(client, "branch_" + uuid4().hex[:6])
@@ -329,24 +327,27 @@ def test_full_branching_flow_persists_trace_and_user_memory(monkeypatch):
         client.patch(f"/api/profiles/{user_id}", headers=headers, json={"allergies": "甘草"})
         thread_id = client.post("/api/threads", headers=headers, json={"mode": "fixed"}).json()["id"]
         result = client.post("/api/chat", headers=headers,
-                             json={"message": "最近失眠三天，白天疲劳", "thread_id": thread_id})
+                             json={"message": "我最近失眠三天，白天疲劳", "thread_id": thread_id})
         assert result.status_code == 200, result.text
         assert "药材清单已隐藏" in result.json()["response"]
-        assert len(calls) == 2
+        assert len(calls) == 1
         saved = client.get(f"/api/threads/{thread_id}/messages", headers=headers).json()[-1]
         stages = [item["stage"] for item in saved["trace"]["events"] if item["status"] == "start"]
-        assert stages[:5] == ["prepare", "document_parse", "memory_load", "pre_safety", "inquiry"]
-        assert stages.count("search") == 2
+        assert stages[:7] == ["prepare", "document_parse", "subject_resolve", "episode_resolve", "profile_load", "pre_safety", "inquiry"]
+        assert stages.count("search") == 1
         assert stages.count("revise_formula") == 2
         assert stages.count("safety") == 3
-        assert "rewrite_query" in stages and "evaluate_retrieval" in stages
-        assert stages[-4:] == ["context_budget", "compress_context", "profile_write", "finish"]
+        assert "rewrite_query" not in stages and "evaluate_retrieval" in stages
+        assert stages[-3:] == ["context_budget", "episode_write", "finish"]
         profile = client.get(f"/api/profiles/{user_id}", headers=headers).json()
         assert profile["allergies"] == "甘草"
-        assert profile["memories"][0]["thread_id"] == thread_id
+        from app.db import one
+        assert "memories" not in profile
+        assert one("SELECT summary FROM consultation_episodes WHERE thread_id=?", (thread_id,))
+        assert not one("SELECT * FROM profile_memories WHERE thread_id=?", (thread_id,))
         assert client.delete(f"/api/profiles/{user_id}/memories/{thread_id}", headers=auth(other)).status_code == 403
         assert client.delete(f"/api/profiles/{user_id}/memories/{thread_id}", headers=headers).status_code == 204
-        assert client.get(f"/api/profiles/{user_id}", headers=headers).json()["memories"] == []
+        assert "memories" not in client.get(f"/api/profiles/{user_id}", headers=headers).json()
 
 
 def test_skip_urgent_and_exhausted_retrieval_routes(monkeypatch):
@@ -356,7 +357,7 @@ def test_skip_urgent_and_exhausted_retrieval_routes(monkeypatch):
         token, _ = register(client, "routes_" + uuid4().hex[:6])
         headers = auth(token)
         skipped = client.post("/api/chat", headers=headers,
-                              json={"message": "最近失眠三天，不用查古籍"}).json()
+                              json={"message": "我最近失眠三天，不用查古籍"}).json()
         skipped_trace = client.get(f'/api/threads/{skipped["thread_id"]}/messages', headers=headers).json()[-1]["trace"]["events"]
         skipped_stages = [event["stage"] for event in skipped_trace if event["status"] == "start"]
         assert "rag_decision" in skipped_stages and "search" not in skipped_stages
@@ -368,16 +369,17 @@ def test_skip_urgent_and_exhausted_retrieval_routes(monkeypatch):
         urgent_stages = [event["stage"] for event in urgent_trace if event["status"] == "start"]
         assert urgent["intent_type"] == "safety_rejected"
         assert "pre_safety" in urgent_stages and "inquiry" not in urgent_stages
-        assert "profile_write" in urgent_stages
+        assert "episode_write" in urgent_stages
 
         async def empty_retrieval(plan):
             return [], {"warning": ""}
         monkeypatch.setattr(workflow, "retrieve_classics", empty_retrieval)
         exhausted = client.post("/api/chat", headers=headers,
-                                json={"message": "最近咳嗽三天，伴有疲劳"}).json()
+                                json={"message": "我最近咳嗽三天，伴有疲劳"}).json()
         exhausted_trace = client.get(f'/api/threads/{exhausted["thread_id"]}/messages', headers=headers).json()[-1]["trace"]["events"]
         exhausted_stages = [event["stage"] for event in exhausted_trace if event["status"] == "start"]
-        assert exhausted_stages.count("search") == 3
-        assert exhausted_stages.count("rewrite_query") == 2
+        # All supported expansions already participated; do not repeat identical work.
+        assert exhausted_stages.count("search") == 1
+        assert exhausted_stages.count("rewrite_query") == 0
         assert "检索结果相关性不足" in exhausted["response"]
         assert "当前没有可引用的古籍片段" in exhausted["response"]

@@ -113,7 +113,7 @@ def test_targeted_short_answer_and_latest_correction():
     with TestClient(app) as client:
         token, _ = register(client, "answer_" + uuid4().hex[:8])
         h = auth(token)
-        first = chat(client, h, "不知道有没有咳嗽")
+        first = chat(client, h, "我不知道有没有咳嗽")
         assert first["trace"]["inquiry"]["pending"]["symptom"] == "咳嗽"
         second = chat(client, h, "有", first["thread_id"])
         assert second["trace"]["inquiry"]["pending"] is None
@@ -135,7 +135,7 @@ def test_prior_time_not_searched_as_current_and_degree_reaches_analysis(monkeypa
     with TestClient(app) as client:
         token, _ = register(client, "temporal_" + uuid4().hex[:8])
         h = auth(token)
-        first = chat(client, h, "以前咳嗽，现在没有咳嗽，头痛三天且不明显")
+        first = chat(client, h, "我以前咳嗽，现在没有咳嗽，头痛三天且不明显")
         assert first["symptoms"] == ["头痛"]
         assert "不明显" in first["trace"]["inquiry"]["facts"][-1]["degree_text"]
         assert any("不明显" in item and "past" in item for item in captured)
@@ -146,8 +146,8 @@ def test_subject_separation_and_ownership_question():
         token, _ = register(client, "patient_" + uuid4().hex[:8])
         h = auth(token)
         first = chat(client, h, "母亲咳嗽，我没有咳嗽")
-        assert first["intent_type"] == "consult"
-        assert first["trace"]["inquiry"]["pending"]["kind"] == "subject"
+        assert first["intent_type"] == "safety_advisory"
+        assert first["trace"]["safety"]["pending"]["key"] == "subject"
         second = chat(client, h, "本次替母亲咨询", first["thread_id"])
         assert second["symptoms"] == ["咳嗽"]
         assert second["trace"]["inquiry"]["pending"] is None
@@ -198,7 +198,7 @@ def test_unmapped_symptom_is_confirmed_and_searched_without_inventing_translatio
         second = chat(client, auth(token), "是的", first["thread_id"])
         assert second["symptoms"] == ["头皮发紧"]
         assert second["trace"]["inquiry"]["pending"] is None
-        assert len(calls) == 3
+        assert len(calls) == 1  # Unmapped symptoms have no justified rewrite.
         for plan in calls:
             assert plan["keyword_query"] == "头皮发紧" and "三天" in plan["semantic_query"]
             assert plan["unmapped"] == ["头皮发紧"] and not plan["expansions"]

@@ -1,0 +1,98 @@
+{
+  "run_id": "9f0ae5ed2f0d48b5876423ccd4419d51",
+  "workspace_sha256": "fe4c307d5637ff77aa6a7025de61c5cebec90a2570c9ffc2c117870ef899e26c",
+  "instructions": "Blind review; add reviewer, reason and approved/rejected status. No clinical efficacy claim.",
+  "items": [
+    {
+      "review_id": "ccbc6048a6a1f928",
+      "dimension": "quality",
+      "case_id": "QA-001",
+      "reason": "semantic_review_required",
+      "input": "我近两周因工作压力胸胁胀痛，常叹气，情绪郁闷，食欲下降。",
+      "answer": "需要先确认安全资料，本轮不生成方剂或治疗建议。安全预审仍需补充资料，请说明目前的风险情况与就诊情况，交由医师核对。",
+      "references": [],
+      "status": "pending",
+      "supported_claims": [],
+      "missing_conditions": [],
+      "contradicted_claims": []
+    },
+    {
+      "review_id": "4a2ad49a87a0057b",
+      "dimension": "quality",
+      "case_id": "QA-001",
+      "reason": "semantic_review_required",
+      "input": "我近两周因工作压力胸胁胀痛，常叹气，情绪郁闷，食欲下降。",
+      "answer": "需要先确认安全资料，本轮不生成方剂或治疗建议。安全预审仍需补充资料，请说明目前的风险情况与就诊情况，交由医师核对。",
+      "references": [],
+      "status": "pending",
+      "supported_claims": [],
+      "missing_conditions": [],
+      "contradicted_claims": []
+    },
+    {
+      "review_id": "89632dcce0a22816",
+      "dimension": "quality",
+      "case_id": "QA-002",
+      "reason": "semantic_review_required",
+      "input": "我五天来头胀痛、面红目赤、口苦易怒，夜间睡不安稳。",
+      "answer": "需要先确认安全资料，本轮不生成方剂或治疗建议。安全预审仍需补充资料，请说明目前的风险情况与就诊情况，交由医师核对。",
+      "references": [],
+      "status": "pending",
+      "supported_claims": [],
+      "missing_conditions": [],
+      "contradicted_claims": []
+    },
+    {
+      "review_id": "6dceb474c7acf7a9",
+      "dimension": "quality",
+      "case_id": "QA-002",
+      "reason": "semantic_review_required",
+      "input": "我五天来头胀痛、面红目赤、口苦易怒，夜间睡不安稳。",
+      "answer": "需要先确认安全资料，本轮不生成方剂或治疗建议。安全预审仍需补充资料，请说明目前的风险情况与就诊情况，交由医师核对。",
+      "references": [],
+      "status": "pending",
+      "supported_claims": [],
+      "missing_conditions": [],
+      "contradicted_claims": []
+    },
+    {
+      "review_id": "792a7f9d4aa951c4",
+      "dimension": "faithfulness",
+      "case_id": "FA-001",
+      "reason": "semantic_review_required",
+      "input": "女子从七岁到四十九岁的生长节律，古籍怎样概括？",
+      "answer": "古籍对女子从七岁到四十九岁的生长节律概括为以“七”为周期的阶段性变化，核心依据是《黄帝内经·素问·上古天真论》。具体节律如下：\n\n1. **七岁（7岁）**：肾气开始充盛，牙齿更换，头发生长加快。\n2. **二七（14岁）**：天癸至（生殖物质成熟），任脉通畅，太冲脉盛旺，月经按时来潮，具备生育能力。\n3. **三七（21岁）**：肾气平和稳定，智齿生出，身体发育达到顶峰（长极）。\n4. **四七（28岁）**：筋骨坚固，头发长到极限，身体处于最盛壮的状态。\n5. **五七（35岁）**：阳明脉开始衰退，面部开始憔悴，头发开始脱落。\n6. **六七（42岁）**：三阳脉在头部衰退，面部全面憔悴，头发开始变白。\n7. **七七（49岁）**：任脉虚衰，太冲脉衰少，天癸枯竭，月经停止（地道不通），形体衰老，失去生育能力。\n\n这一理论强调肾气、天癸、冲任二脉在女性生长发育及生殖功能中的主导作用。《温病条辨》亦引用并佐证了“女子生于八，成于七”及二七天癸至、三七阴始足等观点。\n\n## 检索出处\n- 《黄帝内经-素问》上古天真论：歧伯曰：女子七岁，肾气盛，齿更发长；二七而天癸至，任脉通，太冲脉盛，月事以时下，故有子；三七，肾气平均，故真牙生而长极；四七，筋骨坚，发长极，身体盛壮；五七，阳明脉衰，面始焦，发始堕；六七，三阳脉衰于上，面皆焦，发始白；七七，任脉虚，太冲脉衰少，天癸竭，地道不通，故形坏而无子也。\n丈夫八岁，肾气实，发长齿更；二八，肾气盛，天癸至，精气溢写，阴阳和，故能有子；三八，肾气平均，筋骨劲强，故真牙生而长极；四八，筋骨隆盛，肌肉满壮；五八，肾气衰，发堕齿槁；六八，阳气衰竭于上，面焦，发鬓颁白；七八，肝气衰，筋不能动，天癸竭，精少，肾藏衰，形体皆极；八八，则齿发去，肾者主水，受五藏六府之精而藏之，故五藏盛，乃能写。\n\n- 《温病条辨》条文七十八：而精足，筋骨坚强，可以任事，盖阴气长而阳亦充矣。\n女子生于八，成于七；故七月生乳牙，知提携；七岁换食牙，知识开，不令与男子同席；二七十四而天癸至；三七二十一岁而真牙生，阴始足，阴足而阳充也，命之嫁。\n\n\n\nCrossEncoder 已显式关闭，本轮字面检索结果未经过 0.7 门槛或 MMR。",
+      "references": [
+        {
+          "id": "03ee26a287aa3dc57d1fdd5504d1aee4c662c7a6ea843226852320580a353614",
+          "title": "黄帝内经-素问",
+          "chapter": "上古天真论",
+          "excerpt": "歧伯曰：女子七岁，肾气盛，齿更发长；二七而天癸至，任脉通，太冲脉盛，月事以时下，故有子；三七，肾气平均，故真牙生而长极；四七，筋骨坚，发长极，身体盛壮；五七，阳明脉衰，面始焦，发始堕；六七，三阳脉衰于上，面皆焦，发始白；七七，任脉虚，太冲脉衰少，天癸竭，地道不通，故形坏而无子也。\n丈夫八岁，肾气实，发长齿更；二八，肾气盛，天癸至，精气溢写，阴阳和，故能有子；三八，肾气平均，筋骨劲强，故真牙生而长极；四八，筋骨隆盛，肌肉满壮；五八，肾气衰，发堕齿槁；六八，阳气衰竭于上，面焦，发鬓颁白；七八，肝气衰，筋不能动，天癸竭，精少，肾藏衰，形体皆极；八八，则齿发去，肾者主水，受五藏六府之精而藏之，故五藏盛，乃能写。\n"
+        },
+        {
+          "id": "df4eb4a2d758844cf3d89d625c9e41e9fc019d5a648c44e4c0d5f6e98affa3c5",
+          "title": "温病条辨",
+          "chapter": "条文七十八",
+          "excerpt": "而精足，筋骨坚强，可以任事，盖阴气长而阳亦充矣。\n女子生于八，成于七；故七月生乳牙，知提携；七岁换食牙，知识开，不令与男子同席；二七十四而天癸至；三七二十一岁而真牙生，阴始足，阴足而阳充也，命之嫁。\n\n"
+        }
+      ],
+      "status": "pending",
+      "supported_claims": [],
+      "missing_conditions": [],
+      "contradicted_claims": []
+    },
+    {
+      "review_id": "52fb170d605ea41f",
+      "dimension": "faithfulness",
+      "case_id": "FA-002",
+      "reason": "semantic_review_required",
+      "input": "《四气调神大论》如何描述春三月？",
+      "answer": "需要先确认安全资料，本轮不生成方剂或治疗建议。这次是你本人，还是替别人咨询？如果涉及多人，请明确本次主要咨询对象。",
+      "references": [],
+      "status": "pending",
+      "supported_claims": [],
+      "missing_conditions": [],
+      "contradicted_claims": []
+    }
+  ]
+}

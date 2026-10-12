@@ -1,30 +1,30 @@
-{"id": "PERF-001", "input": "你好", "scenario": "chat"}
-{"id": "PERF-002", "input": "介绍一下岐问", "scenario": "chat"}
-{"id": "PERF-003", "input": "什么是气血？", "scenario": "chat"}
-{"id": "PERF-004", "input": "什么是阴阳？", "scenario": "chat"}
-{"id": "PERF-005", "input": "五行指什么？", "scenario": "chat"}
-{"id": "PERF-006", "input": "什么叫辨证论治？", "scenario": "chat"}
-{"id": "PERF-007", "input": "十八反是什么意思？", "scenario": "chat"}
-{"id": "PERF-008", "input": "脉诊是什么？", "scenario": "chat"}
-{"id": "PERF-009", "input": "中药炮制是什么？", "scenario": "chat"}
-{"id": "PERF-010", "input": "《黄帝内经》是什么书？", "scenario": "chat"}
-{"id": "PERF-011", "input": "《伤寒论》主要讲什么？", "scenario": "chat"}
-{"id": "PERF-012", "input": "什么是方剂？", "scenario": "chat"}
-{"id": "PERF-013", "input": "中医如何理解养生？", "scenario": "chat"}
-{"id": "PERF-014", "input": "请说明寒热概念", "scenario": "chat"}
-{"id": "PERF-015", "input": "古籍检索有什么作用？", "scenario": "chat"}
-{"id": "PERF-016", "input": "失眠已经三周，入睡困难，白天疲劳，没有口苦。", "scenario": "diagnose"}
-{"id": "PERF-017", "input": "头痛五天，太阳穴胀痛，情绪紧张时加重。", "scenario": "diagnose"}
-{"id": "PERF-018", "input": "咳嗽一周，有白痰，受凉后明显，没有发热。", "scenario": "diagnose"}
-{"id": "PERF-019", "input": "胃痛两个月，喜温喜按，饭后腹胀。", "scenario": "diagnose"}
-{"id": "PERF-020", "input": "腰酸半年并且夜尿增多，最近畏寒乏力。", "scenario": "diagnose"}
-{"id": "PERF-021", "input": "腹泻三天，每天四次，伴腹部隐痛和食欲差。", "scenario": "diagnose"}
-{"id": "PERF-022", "input": "咽痛两天，发热口渴，咳嗽痰黄。", "scenario": "diagnose"}
-{"id": "PERF-023", "input": "胸闷一个月，常叹气，压力大时加重。", "scenario": "diagnose"}
-{"id": "PERF-024", "input": "头晕耳鸣三个月，腰膝酸软，晚上盗汗。", "scenario": "diagnose"}
-{"id": "PERF-025", "input": "皮肤瘙痒一个月，夜间明显，抓后脱屑。", "scenario": "diagnose"}
-{"id": "PERF-026", "input": "月经量少三个月，面色淡，常有心悸头晕。", "scenario": "diagnose"}
-{"id": "PERF-027", "input": "口苦口黏一周，小便偏黄，大便黏滞不爽。", "scenario": "diagnose"}
-{"id": "PERF-028", "input": "近一个月心烦失眠、腰膝酸软、夜间盗汗并且口干。", "scenario": "diagnose"}
-{"id": "PERF-029", "input": "受凉后恶寒发热三天，无汗，全身酸痛并咳嗽清痰。", "scenario": "diagnose"}
-{"id": "PERF-030", "input": "食少腹胀和便溏已经半年，最近神疲乏力更加明显。", "scenario": "diagnose"}
+{"id": "PERF-001", "input": "你好", "scenario": "chat", "family": "performance-PERF-001", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "PERF-002", "input": "介绍一下岐问", "scenario": "chat", "family": "performance-PERF-002", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "PERF-003", "input": "什么是气血？", "scenario": "chat", "family": "performance-PERF-003", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "PERF-004", "input": "什么是阴阳？", "scenario": "chat", "family": "performance-PERF-004", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "PERF-005", "input": "五行指什么？", "scenario": "chat", "family": "performance-PERF-005", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "PERF-006", "input": "什么叫辨证论治？", "scenario": "chat", "family": "performance-PERF-006", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "PERF-007", "input": "十八反是什么意思？", "scenario": "chat", "family": "performance-PERF-007", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "PERF-008", "input": "脉诊是什么？", "scenario": "chat", "family": "performance-PERF-008", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "PERF-009", "input": "中药炮制是什么？", "scenario": "chat", "family": "performance-PERF-009", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "PERF-010", "input": "《黄帝内经》是什么书？", "scenario": "chat", "family": "performance-PERF-010", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "PERF-011", "input": "《伤寒论》主要讲什么？", "scenario": "chat", "family": "performance-PERF-011", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "PERF-012", "input": "什么是方剂？", "scenario": "chat", "family": "performance-PERF-012", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "PERF-013", "input": "中医如何理解养生？", "scenario": "chat", "family": "performance-PERF-013", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "PERF-014", "input": "请说明寒热概念", "scenario": "chat", "family": "performance-PERF-014", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "PERF-015", "input": "古籍检索有什么作用？", "scenario": "chat", "family": "performance-PERF-015", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "PERF-016", "input": "我失眠已经三周，入睡困难，白天疲劳，没有口苦。", "scenario": "diagnose", "expected_next_action": "explain_with_uncertainty", "family": "performance-PERF-016", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "PERF-017", "input": "我头痛五天，太阳穴胀痛，情绪紧张时加重。", "scenario": "diagnose", "expected_next_action": "explain_with_uncertainty", "family": "performance-PERF-017", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "PERF-018", "input": "我咳嗽一周，有白痰，受凉后明显，没有发热。", "scenario": "diagnose", "expected_next_action": "explain_with_uncertainty", "family": "performance-PERF-018", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "PERF-019", "input": "我胃痛两个月，喜温喜按，饭后腹胀。", "scenario": "diagnose", "expected_next_action": "explain_with_uncertainty", "family": "performance-PERF-019", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "PERF-020", "input": "我腰酸半年并且夜尿增多，最近畏寒乏力。", "scenario": "diagnose", "expected_next_action": "explain_with_uncertainty", "family": "performance-PERF-020", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "PERF-021", "input": "我腹泻三天，每天四次，伴腹部隐痛和食欲差。", "scenario": "diagnose", "expected_next_action": "explain_with_uncertainty", "family": "performance-PERF-021", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "PERF-022", "input": "我咽痛两天，发热口渴，咳嗽痰黄。", "scenario": "diagnose", "expected_next_action": "explain_with_uncertainty", "family": "performance-PERF-022", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "PERF-023", "input": "我胸闷一个月，常叹气，压力大时加重。", "scenario": "diagnose", "expected_next_action": "explain_with_uncertainty", "family": "performance-PERF-023", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "PERF-024", "input": "我头晕耳鸣三个月，腰膝酸软，晚上盗汗。", "scenario": "diagnose", "expected_next_action": "explain_with_uncertainty", "family": "performance-PERF-024", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "PERF-025", "input": "我皮肤瘙痒一个月，夜间明显，抓后脱屑。", "scenario": "diagnose", "expected_next_action": "explain_with_uncertainty", "family": "performance-PERF-025", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "PERF-026", "input": "我月经量少三个月，面色淡，常有心悸头晕。", "scenario": "diagnose", "expected_next_action": "explain_with_uncertainty", "family": "performance-PERF-026", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "PERF-027", "input": "我口苦口黏一周，小便偏黄，大便黏滞不爽。", "scenario": "diagnose", "expected_next_action": "explain_with_uncertainty", "family": "performance-PERF-027", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "PERF-028", "input": "我近一个月心烦失眠、腰膝酸软、夜间盗汗并且口干。", "scenario": "diagnose", "expected_next_action": "explain_with_uncertainty", "family": "performance-PERF-028", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "PERF-029", "input": "我受凉后恶寒发热三天，无汗，全身酸痛并咳嗽清痰。", "scenario": "diagnose", "expected_next_action": "explain_with_uncertainty", "family": "performance-PERF-029", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "PERF-030", "input": "我食少腹胀和便溏已经半年，最近神疲乏力更加明显。", "scenario": "diagnose", "expected_next_action": "explain_with_uncertainty", "family": "performance-PERF-030", "split": "development", "label_status": "engineering_contract", "version": 2}

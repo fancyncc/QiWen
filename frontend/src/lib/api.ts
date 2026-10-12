@@ -26,13 +26,13 @@ export class ApiError extends Error {
 }
 
 /** 从 auth store 取 Bearer 头（非交互场景用 getState，避免 hook 限制）。 */
-function authHeaders(): Record<string, string> {
-  const token = useAuthStore.getState().token;
+function authHeaders(token = useAuthStore.getState().token): Record<string, string> {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
 /** 401 时清登录态并跳登录页。 */
-function handleUnauthorized() {
+function handleUnauthorized(requestToken: string | null) {
+  if (requestToken !== useAuthStore.getState().token) return;
   useAuthStore.getState().logout();
   if (typeof window !== "undefined") {
     window.location.href = "/login";
@@ -40,17 +40,18 @@ function handleUnauthorized() {
 }
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const requestToken = useAuthStore.getState().token;
   const res = await fetch(`${API_BASE}${path}`, {
     ...options,
     headers: {
       "Content-Type": "application/json",
-      ...authHeaders(),
+      ...authHeaders(requestToken),
       ...options.headers,
     },
   });
 
   if (res.status === 401 && path !== "/login" && path !== "/register") {
-    handleUnauthorized();
+    handleUnauthorized(requestToken);
     throw new ApiError(401, "未登录或登录已过期");
   }
   if (!res.ok) {
@@ -99,7 +100,7 @@ export const api = {
     (await request<BackendMessage[]>(`/threads/${id}/messages`)).map(mapMessage),
 
   // 画像
-  getProfile: async (_username: string): Promise<UserProfile> => {
+  getProfile: async (): Promise<UserProfile> => {
     const user = await request<{ id: string }>("/me");
     return mapProfile(await request<BackendProfile>(`/profiles/${user.id}`));
   },
@@ -124,15 +125,16 @@ export const api = {
 
   // 文件上传（multipart，不带 Content-Type 让浏览器自动设置 boundary）
   upload: async (file: File): Promise<UploadResponse> => {
+    const requestToken = useAuthStore.getState().token;
     const fd = new FormData();
     fd.append("file", file);
     const res = await fetch(`${API_BASE}/upload`, {
       method: "POST",
-      headers: authHeaders(),
+      headers: authHeaders(requestToken),
       body: fd,
     });
     if (res.status === 401) {
-      handleUnauthorized();
+      handleUnauthorized(requestToken);
       throw new ApiError(401, "未登录");
     }
     if (!res.ok) {

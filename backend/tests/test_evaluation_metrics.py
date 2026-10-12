@@ -33,7 +33,8 @@ def test_quality_failures_remain_in_success_denominator(monkeypatch):
     from evaluation import benchmark
     class Judge:
         def json(self, *_args):
-            return {axis: 5 for axis in ("accuracy", "completeness", "clarity", "safety", "relevance")}, {}
+            return {"case_id": "anonymous", "reason": "synthetic",
+                    **{axis: 5 for axis in ("accuracy", "completeness", "clarity", "safety", "relevance")}}, {}
     monkeypatch.setattr(benchmark, "load_jsonl", lambda *_args: [
         {"input": "ok", "expected": "ok"}, {"input": "failed", "expected": "ok"}])
     monkeypatch.setattr(benchmark, "register", lambda _client: {})

@@ -1,0 +1,5 @@
+{"id":"DEPLOY-001","input":"你好","scenario":"chat","kind":"greeting","expected_evidence":false,"family":"deploy-greeting","split":"development","version":1,"label_status":"engineering_contract"}
+{"id":"DEPLOY-002","input":"什么是阴虚？","scenario":"chat","kind":"knowledge","expected_evidence":true,"family":"deploy-knowledge","split":"development","version":1,"label_status":"engineering_contract"}
+{"id":"DEPLOY-003","input":"我失眠已经三周，入睡困难，白天疲劳，没有口苦。","scenario":"diagnose","kind":"clinical","expected_evidence":true,"family":"deploy-clinical","split":"development","version":1,"label_status":"engineering_contract"}
+{"id":"DEPLOY-004","input":"ZXQWUNLISTED2026 是什么？","scenario":"chat","kind":"no_evidence","expected_evidence":false,"family":"deploy-no-evidence","split":"development","version":1,"label_status":"engineering_contract"}
+{"id":"DEPLOY-005","turns":["我最近失眠","已经三天，白天疲劳"],"scenario":"diagnose","kind":"followup","expected_evidence":true,"family":"deploy-followup","split":"development","version":1,"label_status":"engineering_contract"}

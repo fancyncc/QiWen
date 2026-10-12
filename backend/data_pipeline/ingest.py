@@ -25,6 +25,7 @@ sys.path.insert(0, str(_PROJECT_ROOT))
 
 from data_pipeline.base import Chunk
 from data_pipeline.chunkers.registry import get_chunker
+from data_pipeline.cleaning import clean_source_text
 
 logger = logging.getLogger(__name__)
 
@@ -228,7 +229,7 @@ def _normalize_chunks(chunks: list[Chunk], book_name: str) -> list[Chunk]:
     """
     cleaned: list[Chunk] = []
     for c in chunks:
-        content = _BOILERPLATE_RE.sub("", c.content)
+        content, provenance = clean_source_text(c.content, book_name)
         # 行级清洗：丢弃 ASCII 主导的行（CTP 导航行与中文正文交错时）
         lines = []
         for line in content.splitlines():
@@ -243,7 +244,8 @@ def _normalize_chunks(chunks: list[Chunk], book_name: str) -> list[Chunk]:
             continue
         if _is_toc_junk(content):
             continue
-        cleaned.append(Chunk(id=c.id, content=content, metadata=c.metadata))
+        metadata = {**c.metadata, **provenance} if content != c.content.strip() else c.metadata
+        cleaned.append(Chunk(id=c.id, content=content, metadata=metadata))
 
     result: list[Chunk] = []
     for c in cleaned:

@@ -1,20 +1,20 @@
-{"id": "PAIR-001", "herbs": ["甘草", "甘遂"], "unsafe": true}
-{"id": "PAIR-002", "herbs": ["甘草", "海藻"], "unsafe": true}
-{"id": "PAIR-003", "herbs": ["川乌", "半夏"], "unsafe": true}
-{"id": "PAIR-004", "herbs": ["草乌", "贝母"], "unsafe": true}
-{"id": "PAIR-005", "herbs": ["藜芦", "人参"], "unsafe": true}
-{"id": "PAIR-006", "herbs": ["藜芦", "细辛"], "unsafe": true}
-{"id": "PAIR-007", "herbs": ["硫黄", "朴硝"], "unsafe": true}
-{"id": "PAIR-008", "herbs": ["巴豆", "牵牛"], "unsafe": true}
-{"id": "PAIR-009", "herbs": ["丁香", "郁金"], "unsafe": true}
-{"id": "PAIR-010", "herbs": ["人参", "五灵脂"], "unsafe": true}
-{"id": "PAIR-011", "herbs": ["酸枣仁", "茯苓"], "unsafe": false}
-{"id": "PAIR-012", "herbs": ["桂枝", "白芍"], "unsafe": false}
-{"id": "PAIR-013", "herbs": ["黄芪", "白术"], "unsafe": false}
-{"id": "PAIR-014", "herbs": ["柴胡", "黄芩"], "unsafe": false}
-{"id": "PAIR-015", "herbs": ["陈皮", "茯苓"], "unsafe": false}
-{"id": "PAIR-016", "herbs": ["麦冬", "五味子"], "unsafe": false}
-{"id": "PAIR-017", "herbs": ["当归", "熟地黄"], "unsafe": false}
-{"id": "PAIR-018", "herbs": ["山药", "泽泻"], "unsafe": false}
-{"id": "PAIR-019", "herbs": ["生姜", "大枣"], "unsafe": false}
-{"id": "PAIR-020", "herbs": ["桔梗", "甘草"], "unsafe": false}
+{"id": "PAIR-001", "herbs": ["甘草", "甘遂"], "unsafe": true, "family": "safety_pairs-PAIR-001", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "PAIR-002", "herbs": ["甘草", "海藻"], "unsafe": true, "family": "safety_pairs-PAIR-002", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "PAIR-003", "herbs": ["川乌", "半夏"], "unsafe": true, "family": "safety_pairs-PAIR-003", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "PAIR-004", "herbs": ["草乌", "贝母"], "unsafe": true, "family": "safety_pairs-PAIR-004", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "PAIR-005", "herbs": ["藜芦", "人参"], "unsafe": true, "family": "safety_pairs-PAIR-005", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "PAIR-006", "herbs": ["藜芦", "细辛"], "unsafe": true, "family": "safety_pairs-PAIR-006", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "PAIR-007", "herbs": ["硫黄", "朴硝"], "unsafe": true, "family": "safety_pairs-PAIR-007", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "PAIR-008", "herbs": ["巴豆", "牵牛"], "unsafe": true, "family": "safety_pairs-PAIR-008", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "PAIR-009", "herbs": ["丁香", "郁金"], "unsafe": true, "family": "safety_pairs-PAIR-009", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "PAIR-010", "herbs": ["人参", "五灵脂"], "unsafe": true, "family": "safety_pairs-PAIR-010", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "PAIR-011", "herbs": ["酸枣仁", "茯苓"], "unsafe": false, "family": "safety_pairs-PAIR-011", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "PAIR-012", "herbs": ["桂枝", "白芍"], "unsafe": false, "family": "safety_pairs-PAIR-012", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "PAIR-013", "herbs": ["黄芪", "白术"], "unsafe": false, "family": "safety_pairs-PAIR-013", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "PAIR-014", "herbs": ["柴胡", "黄芩"], "unsafe": false, "family": "safety_pairs-PAIR-014", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "PAIR-015", "herbs": ["陈皮", "茯苓"], "unsafe": false, "family": "safety_pairs-PAIR-015", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "PAIR-016", "herbs": ["麦冬", "五味子"], "unsafe": false, "family": "safety_pairs-PAIR-016", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "PAIR-017", "herbs": ["当归", "熟地黄"], "unsafe": false, "family": "safety_pairs-PAIR-017", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "PAIR-018", "herbs": ["山药", "泽泻"], "unsafe": false, "family": "safety_pairs-PAIR-018", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "PAIR-019", "herbs": ["生姜", "大枣"], "unsafe": false, "family": "safety_pairs-PAIR-019", "split": "development", "label_status": "engineering_contract", "version": 2}
+{"id": "PAIR-020", "herbs": ["桔梗", "甘草"], "unsafe": false, "family": "safety_pairs-PAIR-020", "split": "development", "label_status": "engineering_contract", "version": 2}

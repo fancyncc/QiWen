@@ -20,7 +20,7 @@ def test_candidate_rejection_replacement_and_final_history():
         headers = auth(token)
         client.patch(f"/api/profiles/{user_id}", headers=headers, json={"allergies": "甘草"})
         with client.stream("POST", "/api/chat?stream=true", headers=headers,
-                           json={"message": "最近失眠三天，白天疲劳", "mode": "multi"}) as response:
+                           json={"message": "我最近失眠三天，白天疲劳", "mode": "multi"}) as response:
             events = [json.loads(line[6:]) for line in response.iter_lines() if line.startswith("data: ")]
         assert all(set(("run_id", "candidate_id", "sequence", "type", "payload")) <= event.keys() for event in events)
         assert [event["sequence"] for event in events] == list(range(1, len(events) + 1))
@@ -67,7 +67,7 @@ def test_real_sse_deltas_precede_completion_and_cancel_blocks_late_events(monkey
         headers = auth(token)
         run_id = str(uuid4())
         future = executor.submit(client.post, "/api/chat", headers=headers,
-                                 json={"run_id": run_id, "message": "最近失眠三天，白天疲劳，不用查古籍"})
+                                 json={"run_id": run_id, "message": "我最近失眠三天，白天疲劳，不用查古籍"})
         assert entered.wait(5)
         before = client.get(f"/api/runs/{run_id}/events", headers=headers).json()
         delta = next(event for event in before if event["type"] == "candidate.delta")
@@ -89,7 +89,7 @@ def test_final_event_failure_rolls_back_answer_and_memory():
         with connection() as db:
             db.execute("CREATE TRIGGER fail_final_event BEFORE INSERT ON run_events WHEN NEW.type='answer.final' BEGIN SELECT RAISE(ABORT, 'test failure'); END")
         try:
-            result = client.post("/api/chat", headers=headers, json={"thread_id": thread_id, "message": "最近失眠三天，白天疲劳"})
+            result = client.post("/api/chat", headers=headers, json={"thread_id": thread_id, "message": "我最近失眠三天，白天疲劳"})
             assert result.status_code == 503
             history = client.get(f"/api/threads/{thread_id}/messages", headers=headers).json()
             assert len(history) == 2 and history[-1]["intent_type"] == "failed"
