@@ -3,7 +3,9 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import math
+import sys
 import threading
+from types import SimpleNamespace
 
 import pytest
 
@@ -251,13 +253,13 @@ def test_worker_timeout_signals_remaining_batches_to_stop():
 
 
 def test_namespace_changes_with_embedding_model(monkeypatch, tmp_path):
-    import chromadb
     names = []
     class Client:
         def get_or_create_collection(self, name, metadata):
             names.append(name)
             assert metadata == {"hnsw:space": "cosine"}
-    monkeypatch.setattr(chromadb, "PersistentClient", lambda **kwargs: Client())
+    # Namespace isolation does not require the optional vector database package.
+    monkeypatch.setitem(sys.modules, "chromadb", SimpleNamespace(PersistentClient=lambda **kwargs: Client()))
     monkeypatch.setattr(retrieval, "DATA_DIR", tmp_path)
     monkeypatch.setenv("QIWEN_EMBEDDING_MODEL", "first")
     retrieval._collection()
