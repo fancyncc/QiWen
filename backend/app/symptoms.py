@@ -27,7 +27,7 @@ TIMING = r"夜间|夜里|晚上|白天|晨起|早上|睡前|饭后|饭前"
 
 
 def duration_text(text: str) -> str:
-    match = re.search(r"(?:\d+|[一二两三四五六七八九十半]+)(?:[到至~～-](?:\d+|[一二两三四五六七八九十]+))?(?:个)?(?:小时|天|周|个月|月|年)", text)
+    match = re.search(r"(?:\d+|[一二两三四五六七八九十半]+)(?:[到至~～-](?:\d+|[一二两三四五六七八九十]+))?(?:个)?(?:小时|天|周|星期|礼拜|个月|月|年)", text)
     return match[0] if match else ""
 
 
@@ -35,9 +35,9 @@ def bind_details(facts: list[dict], text: str, *, subject: str, message_id: str,
                  kind="message", start=0) -> list[dict]:
     """Bind a bare qualifier only to one current, explicitly present complaint."""
     clause = text.strip("。！! ")
-    duration = r"(?:\d+|[一二两三四五六七八九十半]+)(?:个)?(?:小时|天|周|个月|月|年)"
+    duration = r"(?:\d+|[一二两三四五六七八九十半]+)(?:个)?(?:小时|天|周|星期|礼拜|个月|月|年)"
     if not re.fullmatch(rf"(?:(?:{TIMING})(?:更|比较)?(?:{DEGREE.pattern}|{TREND.pattern})?|"
-                        rf"(?:持续|已经|已有)?{duration}|(?:{DEGREE.pattern}|{TREND.pattern}))", clause):
+                        rf"(?:持续|已经|已有|有)?(?:了)?(?:有)?{duration}|(?:{DEGREE.pattern}|{TREND.pattern}))", clause):
         return []
     active = effective(facts, subject)
     active = [f for f in active if f["time_scope"] == "current" and f["assertion"] == "present"]

@@ -15,6 +15,9 @@ UPLOAD_DIR.mkdir(exist_ok=True)
 DB_PATH = DATA_DIR / "qiwen.sqlite3"
 CHECKPOINT_PATH = DATA_DIR / "checkpoints.sqlite3"
 MODEL_MODE = os.getenv("QIWEN_MODEL_MODE", "mock")
+TOOL_PROTOCOL = os.getenv("QIWEN_TOOL_PROTOCOL", "auto").strip().lower()
+if TOOL_PROTOCOL not in {"auto", "native", "json"}:
+    raise RuntimeError("QIWEN_TOOL_PROTOCOL 必须是 auto、native 或 json")
 RAG_MODE = os.getenv("QIWEN_RAG_MODE", "hybrid")
 API_BASE = os.getenv("QIWEN_MODEL_BASE_URL", "")
 API_KEY = os.getenv("QIWEN_MODEL_API_KEY", "")

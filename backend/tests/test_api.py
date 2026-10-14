@@ -6,6 +6,8 @@ import os
 import tempfile
 from uuid import uuid4
 
+import pytest
+
 os.environ["QIWEN_DATA_DIR"] = tempfile.mkdtemp(prefix="qiwen-test-")
 
 from docx import Document
@@ -26,6 +28,77 @@ def register(client: TestClient, name: str) -> tuple[str, str]:
 
 def auth(token: str) -> dict:
     return {"Authorization": f"Bearer {token}"}
+
+
+@pytest.mark.parametrize("initial_title", ["新对话", "新会话", "我的问诊记录"])
+def test_first_message_names_default_threads_and_preserves_custom_titles(initial_title):
+    with TestClient(app) as client:
+        token, _ = register(client, "title_" + uuid4().hex[:8])
+        headers = auth(token)
+        thread = client.post("/api/threads", headers=headers, json={"mode": "multi"}).json()
+        assert thread["title"] == "新对话"
+        path = f'/api/threads/{thread["id"]}'
+        assert client.put(path, headers=headers, json={"title": initial_title}).status_code == 200
+        first_message = "我最近总是失眠多梦"
+        for text in (first_message, "本人"):
+            result = client.post("/api/chat", headers=headers, json={"thread_id": thread["id"], "message": text})
+            assert result.status_code == 200
+            saved = next(t for t in client.get("/api/threads", headers=headers).json() if t["id"] == thread["id"])
+            assert saved["title"] == (initial_title if initial_title == "我的问诊记录" else first_message)
+
+
+def test_startup_repairs_existing_default_titles_from_first_user_message():
+    from app.db import connection, init_db
+
+    with TestClient(app) as client:
+        token, _ = register(client, "title_repair_" + uuid4().hex[:8])
+        headers = auth(token)
+        cases = [("新对话", True), ("新会话", True), ("我的记录", True), ("新对话", False)]
+        threads = []
+        first_message = "最近总是失眠多梦，白天也容易疲劳，希望了解如何改善睡眠和精神状态"
+        for title, has_messages in cases:
+            thread = client.post("/api/threads", headers=headers, json={}).json()
+            client.put(f'/api/threads/{thread["id"]}', headers=headers, json={"title": title})
+            with connection() as db:
+                stamp = db.execute("SELECT updated_at FROM threads WHERE id=?", (thread["id"],)).fetchone()[0]
+                if has_messages:
+                    for role, content, date in [("assistant", "请描述症状", "2026-01-01"),
+                                                ("user", first_message, "2026-01-02"),
+                                                ("user", "本人", "2026-01-03")]:
+                        db.execute("INSERT INTO messages(id,thread_id,role,content,created_at) VALUES(?,?,?,?,?)",
+                                   (str(uuid4()), thread["id"], role, content, date))
+            expected = first_message[:28] if has_messages and title in {"新对话", "新会话"} else title
+            threads.append((thread["id"], expected, stamp))
+        for _ in range(2):
+            init_db()
+            saved = {t["id"]: t for t in client.get("/api/threads", headers=headers).json()}
+            for tid, expected, stamp in threads:
+                assert saved[tid]["title"] == expected
+                assert saved[tid]["updated_at"] == stamp
+
+
+def test_thread_mode_switch_is_owned_persisted_and_guarded_during_runs():
+    from app.db import connection, now
+    with TestClient(app) as client:
+        token, uid = register(client, "mode_" + uuid4().hex[:8])
+        other, _ = register(client, "mode_other_" + uuid4().hex[:8])
+        h = auth(token)
+        tid = client.post("/api/threads", headers=h, json={"mode": "fixed"}).json()["id"]
+        path = f"/api/threads/{tid}"
+        assert client.put(path, headers=auth(other), json={"mode": "multi"}).status_code == 404
+        assert client.put(path, headers=h, json={}).status_code == 422
+        assert client.put(path, headers=h, json={"mode": "invalid"}).status_code == 422
+        updated = client.put(path, headers=h, json={"mode": "multi"})
+        assert updated.status_code == 200 and updated.json()["mode"] == "multi"
+        result = client.post("/api/chat", headers=h, json={
+            "thread_id": tid, "message": "我肚子胀、怕冷、大便稀，持续三天，饭后加重"}).json()
+        assert result["trace"]["mode"] == "multi"
+        assert [note["expert"] for note in result["notes"]] == ["辨证", "方剂", "本草"]
+        with connection() as db:
+            db.execute("INSERT INTO chat_runs(id,thread_id,user_id,status,created_at,updated_at) VALUES(?,?,?,'running',?,?)",
+                       (str(uuid4()), tid, uid, now(), now()))
+        assert client.put(path, headers=h, json={"mode": "fixed"}).status_code == 409
+        assert next(t for t in client.get("/api/threads", headers=h).json() if t["id"] == tid)["mode"] == "multi"
 
 
 def test_accounts_threads_profiles_and_file_isolation():

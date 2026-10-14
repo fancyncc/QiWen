@@ -42,6 +42,27 @@ function pendingStream() {
 }
 
 describe("useChat request isolation", () => {
+  it("连接失败的说明保留在答复气泡中，并结束等待", async () => {
+    const stream = pendingStream();
+    const { result } = renderHook(() => useChat(""));
+    let sending!: Promise<void>;
+    await act(async () => { sending = result.current.send("腹胀"); });
+    act(() => stream.options.onError?.(new Error("连接已中断，请重试")));
+    await act(async () => { stream.finish(); await sending; });
+    expect(result.current.streaming).toBe(false);
+    expect(result.current.messages.at(-1)?.content).toBe("连接已中断，请重试");
+  });
+
+  it("新会话默认发送多 Agent 模式，也支持明确选择固定流程", async () => {
+    const { result, rerender } = renderHook(({ mode }: { mode?: "fixed" | "multi" }) => useChat("", [], mode), {
+      initialProps: { mode: undefined } as { mode?: "fixed" | "multi" },
+    });
+    await act(async () => { await result.current.send("我头痛三天"); });
+    expect(vi.mocked(streamChat).mock.calls.at(-1)?.[0].mode).toBe("multi");
+    rerender({ mode: "fixed" });
+    await act(async () => { await result.current.send("我头痛三天"); });
+    expect(vi.mocked(streamChat).mock.calls.at(-1)?.[0].mode).toBe("fixed");
+  });
   it("late events and finally from a stopped turn cannot mutate or cancel the next turn", async () => {
     const first = pendingStream();
     const second = pendingStream();

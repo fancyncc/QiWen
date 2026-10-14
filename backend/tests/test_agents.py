@@ -125,6 +125,150 @@ def test_agent_graph_rejects_invalid_final_without_completed_event(monkeypatch):
     assert "agent.completed" not in events
 
 
+def test_agent_graph_repairs_invalid_json_once_within_round_limit(monkeypatch):
+    monkeypatch.setattr(model, "MODEL_MODE", "openai_compatible")
+    calls = []
+
+    async def chat(messages, schemas, *, role):
+        calls.append(messages)
+        return {"content": '{"status":"completed",\n"total":3,}'}
+
+    async def structured(system, user, **kwargs):
+        calls.append(json.loads(user)["conversation"])
+        assert "字符串内换行必须转义" in calls[-1][-1]["content"]
+        assert kwargs["stream_output"] is False
+        assert kwargs["schema"] is Result
+        return {"status": "completed", "total": 3}
+
+    monkeypatch.setattr(model, "achat_tools", chat)
+    monkeypatch.setattr(model, "acomplete_json", structured)
+    run = asyncio.run(run_agent_graph(
+        name="测试", role="bianzheng", task="格式恢复", state={}, tools=[], output_schema=Result,
+        mock_planner=lambda *_: pytest.fail("unexpected mock"), max_steps=2,
+    ))
+    assert run.output["total"] == 3
+    assert len(calls) == 2
+    assert len(run.trace) == 1 and run.trace[0]["step"] == 2
+
+
+def test_structured_tool_protocol_preserves_tools_and_observations(monkeypatch):
+    monkeypatch.setattr(model, "MODEL_MODE", "openai_compatible")
+    calls, tools = [], []
+    async def unavailable(*args, **kwargs):
+        raise RuntimeError("native tools unavailable")
+    async def structured(system, user, **kwargs):
+        messages = json.loads(user)["conversation"]
+        calls.append(messages)
+        if len(calls) == 1:
+            return {"tool": "add", "arguments": {"value": 2}, "final": None}
+        assert json.loads(messages[-1]["content"])["result"]["total"] == 3
+        assert kwargs["schema"] is Result
+        assert "最后一次决策" in system
+        return {"status": "completed", "total": 3}
+    monkeypatch.setattr(model, "achat_tools", unavailable)
+    monkeypatch.setattr(model, "acomplete_json", structured)
+    context = model.InvocationContext()
+    token = model.invocation.set(context)
+    try:
+        run = asyncio.run(run_agent_graph(
+            name="测试", role="bianzheng", task="JSON 工具兼容", state={},
+            tools=[ToolSpec("add", "加一", AddArgs, lambda _, args: (tools.append(args.value) or {"total": args.value + 1}))],
+            output_schema=Result, mock_planner=lambda *_: pytest.fail("unexpected mock"), max_steps=2,
+        ))
+        assert context.tool_protocol == "json"
+    finally:
+        model.invocation.reset(token)
+    assert tools == [2] and run.output["total"] == 3
+    assert run.trace[-1]["protocol"] == "json"
+
+
+def test_json_conversation_budget_drops_old_pairs_but_preserves_patient_and_latest(monkeypatch):
+    from app.context_budget import budget_conversation
+    from app.context import ContextBudgetError
+    monkeypatch.setenv("QIWEN_MODEL_CONTEXT_LIMIT", "5000")
+    monkeypatch.setenv("QIWEN_MODEL_OUTPUT_RESERVE", "128")
+    messages = [{"role": "system", "content": "system"}, {"role": "user", "content": "critical patient facts"}]
+    for index in range(3):
+        messages.extend([{"role": "assistant", "tool_calls": [{"id": str(index), "function": {"name": "lookup"}}]},
+                         {"role": "tool", "tool_call_id": str(index), "content": '"evidence"' * 150}])
+    payload, dropped = budget_conversation("instructions", messages, "bianzheng", remaining=2)
+    kept = json.loads(payload)["conversation"]
+    assert kept[0]["content"] == "critical patient facts"
+    assert kept[-1]["tool_call_id"] == "2" and dropped
+    assert all(m.get("tool_call_id") not in dropped for m in kept)
+    with pytest.raises(ContextBudgetError):
+        budget_conversation("instructions", [{"role": "user", "content": "critical" * 1000}], "bianzheng", remaining=1)
+
+
+def test_structured_protocol_executes_batched_tools_within_one_round(monkeypatch):
+    monkeypatch.setattr(model, "MODEL_MODE", "openai_compatible")
+    context = model.InvocationContext(tool_protocol="json")
+    seen = []
+    async def structured(system, user, **kwargs):
+        if kwargs["schema"] is Result:
+            messages = json.loads(user)["conversation"]
+            assert [json.loads(m["content"])["result"]["total"] for m in messages if m["role"] == "tool"] == [3, 4]
+            return {"status": "completed", "total": 7}
+        return {"tool": None, "final": None, "tool_calls": [
+            {"name": "add", "arguments": {"value": 2}}, {"name": "add", "arguments": {"value": 3}}]}
+    monkeypatch.setattr(model, "acomplete_json", structured)
+    token = model.invocation.set(context)
+    try:
+        run = asyncio.run(run_agent_graph(
+            name="测试", role="bianzheng", task="批量工具", state={},
+            tools=[ToolSpec("add", "加一", AddArgs, lambda _, args: (seen.append(args.value) or {"total": args.value + 1}))],
+            output_schema=Result, mock_planner=lambda *_: pytest.fail("unexpected mock"), max_steps=2,
+        ))
+    finally:
+        model.invocation.reset(token)
+    assert seen == [2, 3] and run.output["total"] == 7
+
+
+def test_malformed_json_tool_decision_gets_one_bounded_retry(monkeypatch):
+    monkeypatch.setattr(model, "MODEL_MODE", "openai_compatible")
+    calls = []
+    async def structured(system, user, **kwargs):
+        calls.append(kwargs["schema"])
+        if len(calls) == 1:
+            raise model.InvalidModelOutput("invalid decision")
+        assert "上次工具决策未通过" in json.loads(user)["conversation"][-1]["content"]
+        return {"status": "completed", "total": 3}
+    monkeypatch.setattr(model, "acomplete_json", structured)
+    token = model.invocation.set(model.InvocationContext(tool_protocol="json"))
+    try:
+        run = asyncio.run(run_agent_graph(
+            name="测试", role="bianzheng", task="格式修正", state={}, tools=[], output_schema=Result,
+            mock_planner=lambda *_: pytest.fail("unexpected mock"), max_steps=3,
+        ))
+    finally:
+        model.invocation.reset(token)
+    assert run.output["total"] == 3 and len(calls) == 2
+    assert run.trace[-1]["step"] == 2
+
+
+def test_agent_graph_does_not_loop_on_repeated_invalid_results(monkeypatch):
+    monkeypatch.setattr(model, "MODEL_MODE", "mock")
+    steps = []
+    def invalid(step, observations):
+        steps.append(step)
+        return {"content": "invalid json"}
+    with pytest.raises(AgentLoopError, match="结构化结果"):
+        asyncio.run(run_agent_graph(
+            name="测试", role="bianzheng", task="限制格式修正", state={}, tools=[], output_schema=Result,
+            mock_planner=invalid, max_steps=6,
+        ))
+    assert steps == [1, 2]
+
+
+def test_agent_graph_accepts_fenced_json_without_weakening_schema(monkeypatch):
+    monkeypatch.setattr(model, "MODEL_MODE", "mock")
+    run = asyncio.run(run_agent_graph(
+        name="测试", role="bianzheng", task="兼容 JSON 围栏", state={}, tools=[], output_schema=Result,
+        mock_planner=lambda *_: {"content": '```json\n{"status":"completed","total":3}\n```'}, max_steps=1,
+    ))
+    assert run.output["total"] == 3
+
+
 def test_agent_graph_model_receives_all_tool_results_and_emits_events(monkeypatch):
     monkeypatch.setattr(model, "MODEL_MODE", "openai_compatible")
     decisions, events = [], []

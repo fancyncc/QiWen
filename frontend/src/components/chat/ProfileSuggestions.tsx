@@ -10,8 +10,7 @@ import type { ProfileSuggestion, SuggestionDecision } from "@/lib/types";
 import { toast } from "sonner";
 
 const LABELS: Record<string, string> = {
-  allergy: "过敏史", constitution: "自述体质", history: "既往史",
-  pregnancy_lactation: "孕哺状态", medication: "用药情况",
+  allergy: "过敏史", constitution: "自述体质", history: "既往诊疗记录",
 };
 type Row = ProfileSuggestion & { action: SuggestionDecision["action"]; entity: string; details: string; replace: boolean };
 
@@ -71,7 +70,7 @@ function SuggestionDialog({ threadId }: { threadId: string }) {
         <DialogHeader>
           <DialogTitle>是否加入你的长期画像？</DialogTitle>
           <DialogDescription>
-            以下资料来自本次对话。请核对是否属于你本人，可修改或逐条排除。确认只记录用户自述，不代表医学核实；不保存也不会忽略本轮已知风险。
+            长期画像保存体质、过敏史及既往诊疗记录，本次症状留在当前会话。以下资料请核对是否属于你本人，可修改或逐条排除。确认仅记录本人自述，不代表医学核实；不保存也不会忽略本轮已知风险。
           </DialogDescription>
         </DialogHeader>
         <div className="max-h-[55vh] space-y-4 overflow-y-auto pr-1">

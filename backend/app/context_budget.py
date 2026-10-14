@@ -40,3 +40,26 @@ def budget_request(messages: list[dict], tools: list[dict], role: str):
         raise ContextBudgetError()
     return packed, reserve, {"estimated_input_tokens": total, "estimation": "utf8_byte_upper_bound",
                             "context_limit": capacity, "output_reserve": reserve, "dropped_tool_call_ids": dropped}
+
+
+def budget_conversation(system: str, messages: list[dict], role: str, *, remaining: int):
+    """Budget the actual JSON envelope while retaining indivisible tool groups."""
+    packed = copy.deepcopy([message for message in messages if message.get("role") != "system"])
+    dropped = []
+    while True:
+        instruction = system + ("\n较早工具轮次因预算被整组省略。只能依据当前可见工具证据，不得引用已省略结果。" if dropped else "")
+        payload = json.dumps({"conversation": packed, "remaining_decision_rounds": remaining}, ensure_ascii=False)
+        try:
+            budget_request([{"role": "system", "content": instruction}, {"role": "user", "content": payload}], [], role)
+            return payload, dropped
+        except ContextBudgetError:
+            start = next((i for i, message in enumerate(packed) if message.get("tool_calls")), None)
+            if start is None:
+                raise
+            end = start + 1
+            while end < len(packed) and packed[end].get("role") == "tool":
+                end += 1
+            if not any(message.get("tool_calls") for message in packed[end:]):
+                raise
+            dropped.extend(call["id"] for call in packed[start]["tool_calls"])
+            del packed[start:end]

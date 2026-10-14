@@ -9,6 +9,7 @@ import type { MessageItem } from "@/lib/types";
 import type { Components } from "react-markdown";
 import { PrescriptionCard } from "./PrescriptionCard";
 import { ConsultationTrace } from "./ConsultationTrace";
+import { consultationPresentation, presentNote } from "@/lib/consultation-presentation";
 
 /** 提取完整的 herb_names JSON，返回药材列表与剥离 JSON 后的文本。 */
 function extractHerbs(s: string): { text: string; herbs: string[] } {
@@ -140,13 +141,14 @@ export function MessageBubble({
 }) {
   const isUser = message.role === "user";
   const [copied, setCopied] = useState(false);
-  const { text: cleaned, herbs } = processContent(message.content, isStreaming);
+  const displayedContent = consultationPresentation(message);
+  const { text: cleaned, herbs } = processContent(displayedContent, isStreaming);
   const isSafety = !isUser && cleaned.includes("安全警告");
   const hasTrace = Boolean(message.stages?.length || message.notes?.length);
 
   async function handleCopy() {
     try {
-      await navigator.clipboard.writeText(message.content);
+      await navigator.clipboard.writeText(displayedContent);
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     } catch {
@@ -179,7 +181,7 @@ export function MessageBubble({
         )}
         <ConsultationTrace
           stages={message.stages}
-          notes={message.notes}
+          notes={message.notes?.map(presentNote)}
           streaming={isStreaming}
           elapsedMs={message.elapsedMs}
         />

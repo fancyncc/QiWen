@@ -29,15 +29,16 @@ describe("ConsultationTrace", () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it("会诊轮流式中：垂直展示实时步骤（含并行会诊分组）", () => {
+  it("会诊轮流式中：只展示实际启动的步骤", () => {
     const { container } = render(
       <ConsultationTrace stages={SPECIALIST_STAGES} streaming={true} />
     );
     expect(screen.getByText("多专家会诊中")).toBeInTheDocument();
-    expect(screen.getByText("并行会诊")).toBeInTheDocument();
-    for (const label of ["问诊", "辨证", "方剂", "本草", "综合", "安全审查", "安全校验"]) {
+    expect(screen.getByText("依次会诊")).toBeInTheDocument();
+    for (const label of ["问诊", "辨证", "方剂"]) {
       expect(screen.getByText(label)).toBeInTheDocument();
     }
+    expect(screen.queryByText("本草")).not.toBeInTheDocument();
     // 存在 active 阶段 -> 有旋转图标
     expect(container.querySelectorAll("svg.animate-spin").length).toBeGreaterThan(0);
   });
@@ -54,6 +55,7 @@ describe("ConsultationTrace", () => {
     expect(screen.getByText(/会诊过程 · 3 步 · 8.2s · 1 位专家/)).toBeInTheDocument();
     // 笔记详情默认折叠
     expect(screen.queryByText("阴虚火旺")).not.toBeInTheDocument();
+    // An incomplete stage stays incomplete even when streaming has stopped.
     expect(container.querySelector("svg.animate-spin")).toBeNull();
   });
 
@@ -103,22 +105,28 @@ describe("ConsultationTrace", () => {
     expect(container.querySelector(".text-destructive")).not.toBeNull();
   });
 
-  it("完成态阶段重建：仅收到尾部事件时，前缀阶段全部补齐为 done", () => {
+  it("仅收到审查事件时，不虚构辨证、方剂、本草已经执行", () => {
     const partial: Stage[] = [
       { stage: "reviewer", label: "安全审查", status: "done" },
       { stage: "safety_check", label: "安全校验", status: "done" },
     ];
     render(<ConsultationTrace stages={partial} notes={NOTES} streaming={false} />);
-    // 摘要条应重建为完整 7 步而非 2 步
-    expect(screen.getByText(/会诊过程 · 7 步/)).toBeInTheDocument();
+    expect(screen.getByText(/会诊过程 · 2 步/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button"));
-    // 展开后所有阶段均为完成态（无 pending 暗点行 -> 全部行有 foreground 色）
-    const rows = screen.getAllByText(/问诊|辨证|方剂|本草|综合|安全审查|安全校验/);
-    expect(rows.length).toBeGreaterThanOrEqual(7);
+    expect(screen.getByText("安全审查")).toBeInTheDocument();
+    expect(screen.getByText("安全校验")).toBeInTheDocument();
+    expect(screen.queryByText("方剂")).not.toBeInTheDocument();
+    expect(screen.queryByText("本草")).not.toBeInTheDocument();
   });
 
   it("仅笔记无阶段（历史会话）时显示摘要条", () => {
     render(<ConsultationTrace notes={NOTES} streaming={false} />);
     expect(screen.getByText(/会诊过程/)).toBeInTheDocument();
+  });
+
+  it("安全预审结束却未进入专家时保留流程位置", () => {
+    render(<ConsultationTrace stages={[{ stage: "pre_safety", label: "前置安全审查", status: "done" }]} />);
+    expect(screen.getByText("流程进度：前置安全审查 · 未进入专家分析")).toBeInTheDocument();
+    expect(screen.queryByText("辨证")).not.toBeInTheDocument();
   });
 });

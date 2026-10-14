@@ -4,6 +4,7 @@
 
 export interface ChatRequest {
   message: string;
+  mode?: "fixed" | "multi";
   thread_id?: string;
   files?: string[];
 }
@@ -17,6 +18,7 @@ export interface ChatResponse {
 
 export interface ThreadInfo {
   thread_id: string;
+  mode?: "fixed" | "multi";
   title: string;
   created_at: string;
 }
@@ -38,7 +40,23 @@ export interface UserProfile {
   past_history: string[];
   revision?: number;
   facts?: ProfileFact[];
+  medical_records?: MedicalRecord[];
 }
+
+export interface MedicalRecord {
+  id: string;
+  record_date: string | null;
+  institution: string;
+  diagnosis: string;
+  treatment: string;
+  outcome: string;
+  created_at: string;
+  updated_at: string;
+}
+export type MedicalRecordInput = Pick<MedicalRecord, "record_date" | "institution" | "diagnosis" | "treatment" | "outcome"> & {
+  revision: number;
+  confirm_self: boolean;
+};
 
 export interface ProfileFact {
   id: string;
@@ -85,6 +103,9 @@ export interface UploadResponse {
 /** 会诊笔记条目（多智能体专家输出，对应后端 consultation_notes）。 */
 export interface ConsultationNote {
   specialist: string;
+  status?: string;
+  prescription_advice?: string;
+  result?: string;
   syndrome?: string;
   recommended_formulas?: string[];
   herb_notes?: unknown[];

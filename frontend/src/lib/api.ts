@@ -12,6 +12,7 @@ import type {
   UserProfile,
   ProfileSuggestion,
   SuggestionDecision,
+  MedicalRecordInput,
 } from "./types";
 
 const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "") + "/api";
@@ -82,9 +83,9 @@ export const api = {
 
   // 会话
   listThreads: async () => (await request<BackendThread[]>("/threads")).map(mapThread),
-  createThread: async (title: string): Promise<ThreadInfo> => {
+  createThread: async (title: string, mode: "fixed" | "multi" = "multi"): Promise<ThreadInfo> => {
     const thread = await request<BackendThread>("/threads", {
-      method: "POST", body: JSON.stringify({ mode: "fixed" }),
+      method: "POST", body: JSON.stringify({ mode }),
     });
     if (title && title !== thread.title) {
       return mapThread(await request<BackendThread>(`/threads/${thread.id}`, {
@@ -95,6 +96,10 @@ export const api = {
   },
   renameThread: (id: string, title: string) =>
     request(`/threads/${id}`, { method: "PUT", body: JSON.stringify({ title }) }),
+  setThreadMode: async (id: string, mode: "fixed" | "multi") =>
+    mapThread(await request<BackendThread>(`/threads/${id}`, {
+      method: "PUT", body: JSON.stringify({ mode }),
+    })),
   deleteThread: (id: string) => request(`/threads/${id}`, { method: "DELETE" }),
   getMessages: async (id: string): Promise<MessageItem[]> =>
     (await request<BackendMessage[]>(`/threads/${id}/messages`)).map(mapMessage),
@@ -114,6 +119,12 @@ export const api = {
 
   getProfileSuggestions: (threadId: string) =>
     request<{ revision: number; items: ProfileSuggestion[] }>("/profile-suggestions?thread_id=" + encodeURIComponent(threadId)),
+  saveMedicalRecord: async (userId: string, data: MedicalRecordInput, id?: string): Promise<UserProfile> =>
+    mapProfile(await request<BackendProfile>(`/profiles/${encodeURIComponent(userId)}/medical-records${id ? "/" + encodeURIComponent(id) : ""}`, {
+      method: id ? "PUT" : "POST", body: JSON.stringify(data),
+    })),
+  deleteMedicalRecord: async (userId: string, id: string, revision: number): Promise<UserProfile> =>
+    mapProfile(await request<BackendProfile>(`/profiles/${encodeURIComponent(userId)}/medical-records/${encodeURIComponent(id)}?revision=${revision}`, { method: "DELETE" })),
   resolveProfileSuggestions: (revision: number, decisions: SuggestionDecision[]) =>
     request("/profile-suggestions/resolve", { method: "POST", body: JSON.stringify({ revision, decisions }) }),
   revokeProfileFact: (id: string, revision: number) =>

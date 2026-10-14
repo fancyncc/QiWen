@@ -23,6 +23,10 @@ export async function streamChat(req: ChatRequest, opts: StreamOptions): Promise
   const runId = crypto.randomUUID();
   let reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
   let terminalSeen = false;
+  let closed = false;
+  let checking = false;
+  let statusTimer: ReturnType<typeof setInterval> | undefined;
+  const transport = new AbortController();
   const emit = (event: ChatStreamEvent) => { if (!opts.signal?.aborted) opts.onEvent(event); };
   if (opts.signal?.aborted) return;
   const cancelRun = () => {
@@ -32,7 +36,63 @@ export async function streamChat(req: ChatRequest, opts: StreamOptions): Promise
       keepalive: true,
     }).catch(() => {});
   };
-  opts.signal?.addEventListener("abort", cancelRun, { once: true });
+  const stopTransport = () => {
+    transport.abort();
+    void reader?.cancel().catch(() => {});
+  };
+  const abort = () => { cancelRun(); stopTransport(); };
+  opts.signal?.addEventListener("abort", abort, { once: true });
+  // Bound even a connection that never returns headers or closes its body.
+  const deadline = setTimeout(() => {
+    if (closed || terminalSeen || opts.signal?.aborted) return;
+    terminalSeen = true;
+    opts.onError?.(new Error("本轮等待已超过 5 分钟，已停止请求。请稍后重试。"));
+    cancelRun();
+    stopTransport();
+  }, 300_000);
+
+  const checkStatus = async () => {
+    if (checking || closed || terminalSeen || opts.signal?.aborted) return;
+    checking = true;
+    try {
+      const options: RequestInit = {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        signal: AbortSignal.any([transport.signal, AbortSignal.timeout(8_000)]),
+      };
+      const base = (process.env.NEXT_PUBLIC_API_URL || "") + `/api/runs/${runId}`;
+      const response = await fetch(base, options);
+      if (!response.ok) return;
+      const run = await response.json();
+      if (closed || terminalSeen || opts.signal?.aborted) return;
+      if (run.status === "completed") {
+        const eventsResponse = await fetch(`${base}/events`, options);
+        if (!eventsResponse.ok) return;
+        const events: { type: string; payload: {
+          response?: string; message?: { content?: string }; thread_id?: string;
+          notes?: Parameters<typeof mapNote>[0][]; elapsed_ms?: number;
+        } }[] = await eventsResponse.json();
+        if (closed || terminalSeen || opts.signal?.aborted) return;
+        const final = events.find((event) => event.type === "answer.final")?.payload;
+        if (!final) return;
+        terminalSeen = true;
+        emit({ type: "token", content: final.message?.content ?? final.response ?? "" });
+        emit({ type: "done", thread_id: final.thread_id ?? run.thread_id ?? "",
+          notes: final.notes?.map(mapNote), elapsed_ms: final.elapsed_ms });
+        stopTransport();
+      } else if (run.status === "cancelled" || run.status === "failed") {
+        terminalSeen = true;
+        emit({ type: "token", content: run.status === "cancelled"
+          ? "本轮已中断，未生成最终答复。请重新发送。"
+          : "本轮处理失败，未生成最终答复。请稍后重试。" });
+        emit({ type: "done", thread_id: run.thread_id ?? req.thread_id ?? "" });
+        stopTransport();
+      }
+    } catch {
+      // A transient status failure must not discard a still-working SSE stream.
+    } finally {
+      checking = false;
+    }
+  };
 
   try {
     const res = await fetch(url, {
@@ -42,7 +102,7 @@ export async function streamChat(req: ChatRequest, opts: StreamOptions): Promise
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
       body: JSON.stringify({ ...req, run_id: runId }),
-      signal: opts.signal,
+      signal: transport.signal,
     });
 
     if (res.status === 401) {
@@ -65,13 +125,15 @@ export async function streamChat(req: ChatRequest, opts: StreamOptions): Promise
     }
 
     reader = res.body.getReader();
+    // Reconcile authoritative state if a proxy leaves an old stream open after restart.
+    statusTimer = setInterval(() => { void checkStatus(); }, 15_000);
     const decoder = new TextDecoder();
     let buffer = "";
 
 
-    while (true) {
+    while (!terminalSeen && !opts.signal?.aborted) {
       const { done, value } = await reader.read();
-      if (done || opts.signal?.aborted) break;
+      if (done || terminalSeen || opts.signal?.aborted) break;
       buffer += decoder.decode(value, { stream: true });
 
       // SSE 以双换行分隔事件
@@ -134,11 +196,15 @@ export async function streamChat(req: ChatRequest, opts: StreamOptions): Promise
     if (!terminalSeen && !opts.signal?.aborted) opts.onError?.(new Error("连接已中断，尚未收到最终答复，请刷新会话查看运行状态。"));
   } catch (err) {
     // AbortError 属正常中止，不报错
-    if (!opts.signal?.aborted && (err as Error).name !== "AbortError") {
+    if (!terminalSeen && !opts.signal?.aborted && (err as Error).name !== "AbortError") {
       opts.onError?.(err as Error);
     }
   } finally {
-    opts.signal?.removeEventListener("abort", cancelRun);
+    closed = true;
+    clearTimeout(deadline);
+    clearInterval(statusTimer);
+    opts.signal?.removeEventListener("abort", abort);
+    stopTransport();
     reader?.releaseLock();
   }
 }

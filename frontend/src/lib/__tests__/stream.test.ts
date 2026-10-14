@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { streamChat } from "@/lib/stream";
 import { useAuthStore } from "@/stores/auth";
 import type { ChatStreamEvent } from "@/lib/types";
@@ -16,6 +16,61 @@ function makeSSEStream(events: object[]): ReadableStream<Uint8Array> {
 }
 
 describe("streamChat (SSE 解析)", () => {
+  afterEach(() => { vi.useRealTimers(); });
+
+  it("服务重启后旧 SSE 未关闭，也会核对已取消状态并结束等待", async () => {
+    vi.useFakeTimers();
+    const events: ChatStreamEvent[] = [];
+    const fetcher = vi.fn()
+      .mockResolvedValueOnce({ ok: true, status: 200, body: new ReadableStream() })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ status: "cancelled", thread_id: "existing" }) });
+    vi.stubGlobal("fetch", fetcher);
+    const running = streamChat({ message: "腹胀", thread_id: "existing" }, { onEvent: (event) => events.push(event) });
+    await vi.advanceTimersByTimeAsync(15_000);
+    await running;
+    expect(events).toEqual([
+      { type: "token", content: expect.stringContaining("已中断") },
+      { type: "done", thread_id: "existing" },
+    ]);
+    expect(fetcher.mock.calls[1][0]).toMatch(/\/api\/runs\/[^/]+$/);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it("最终事件丢失时从已提交事件恢复答案，不重复显示候选内容", async () => {
+    vi.useFakeTimers();
+    const events: ChatStreamEvent[] = [];
+    vi.stubGlobal("fetch", vi.fn()
+      .mockResolvedValueOnce({ ok: true, status: 200, body: new ReadableStream() })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ status: "completed", thread_id: "existing" }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => [
+        { type: "candidate.delta", payload: { text: "隐藏候选" } },
+        { type: "answer.final", payload: { thread_id: "existing", response: "已审查答案", elapsed_ms: 100 } },
+      ] }));
+    const running = streamChat({ message: "腹胀" }, { onEvent: (event) => events.push(event) });
+    await vi.advanceTimersByTimeAsync(15_000);
+    await running;
+    expect(events).toEqual([
+      { type: "token", content: "已审查答案" },
+      { type: "done", thread_id: "existing", notes: undefined, elapsed_ms: 100 },
+    ]);
+  });
+
+  it("持续无结果时五分钟结束请求、通知后端取消并报告超时", async () => {
+    vi.useFakeTimers();
+    const error = vi.fn();
+    const fetcher = vi.fn()
+      .mockResolvedValueOnce({ ok: true, status: 200, body: new ReadableStream() })
+      .mockResolvedValue({ ok: true, json: async () => ({ status: "running" }) });
+    vi.stubGlobal("fetch", fetcher);
+    const running = streamChat({ message: "腹胀" }, { onEvent: vi.fn(), onError: error });
+    await vi.advanceTimersByTimeAsync(300_000);
+    await running;
+    expect(error).toHaveBeenCalledTimes(1);
+    expect(error).toHaveBeenCalledWith(expect.objectContaining({ message: expect.stringContaining("超过 5 分钟") }));
+    expect(fetcher.mock.calls.at(-1)?.[0]).toMatch(/\/cancel$/);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
   it("network errors before response headers use onError", async () => {
     const error = vi.fn();
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));

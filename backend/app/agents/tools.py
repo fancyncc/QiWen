@@ -10,7 +10,8 @@ from ..blocking import run_blocking
 from ..classics import passage_excerpt, retrieve_classics, retrieval_cache_key
 from ..db import all_rows, one
 from ..safety import check_herbs, normalize
-from ..terms import search_plan
+from ..safety_context import uncovered_allergens
+from ..terms import search_plan, CATALOG
 from ..query_plan import knowledge_plan
 from ..retrieval_budget import timeout_seconds
 
@@ -66,14 +67,35 @@ def get_patient_profile(state: dict, _args: EmptyArgs) -> dict:
                                 and fact.get("source", {}).get("kind") != "summary"]}
 
 
-def search_formulas(_state: dict, args: SearchArgs) -> dict:
-    escaped = args.query.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
-    rows = all_rows(
-        "SELECT name,structured_herbs,indication,source FROM formulas "
-        "WHERE name LIKE ? ESCAPE '\\' OR indication LIKE ? ESCAPE '\\' ORDER BY name LIMIT 10",
-        (f"%{escaped}%", f"%{escaped}%"),
-    )
-    return {"formulas": [{"name": row["name"], "indication": row["indication"], "source": row["source"],
+def search_formulas(state: dict, args: SearchArgs) -> dict:
+    def related_terms(values):
+        terms = list(values)
+        for entry in CATALOG.values():
+            if any(alias in value for value in values for alias in entry["aliases"]):
+                terms += entry["aliases"] + [item["term"] for item in entry["expansions"]]
+        return list(dict.fromkeys(term.strip() for term in terms if len(term.strip()) >= 2))[:30]
+
+    def matches(terms):
+        if not terms:
+            return []
+        params = []
+        for term in terms:
+            escaped = term.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+            params += [f"%{escaped}%"] * 2
+        return all_rows("SELECT name,structured_herbs,indication,source FROM formulas WHERE "
+                        + " OR ".join("(name LIKE ? ESCAPE '\\' OR indication LIKE ? ESCAPE '\\')" for _ in terms)
+                        + " ORDER BY name LIMIT 10", tuple(params))
+
+    terms = related_terms([args.query, *re.split(r"[\s，,、；;：:（）()]+", args.query)])
+    rows = matches(terms)
+    fallback = False
+    if not rows and state.get("symptoms"):
+        terms = related_terms(state["symptoms"])
+        rows = matches(terms)
+        fallback = bool(rows)
+    return {"matched_terms": terms, "symptom_fallback": fallback,
+            "warning": "原查询无匹配，以下按本轮明确症状检索，仅作知识对照，不代表个人选方。" if fallback else "",
+            "formulas": [{"name": row["name"], "indication": row["indication"], "source": row["source"],
                             "herbs": json.loads(row["structured_herbs"] or "[]")} for row in rows]}
 
 
@@ -110,9 +132,11 @@ def check_user_risks(state: dict, args: HerbListArgs) -> dict:
         ("liver_kidney", r"肝功能|肾功能|肝病|肾病|肝损|肾损"),
         ("anticoagulant", r"华法林|抗凝"),
     ) if re.search(pattern, text)]
-    return {"allergy_risks": allergies, "special_risks": special,
-            "medication_interaction_status": "requires_human_review" if re.search(r"服用|用药|药物|华法林|抗凝", text) else "unknown",
-            "safe": not allergies and not special,
+    uncovered = uncovered_allergens({"subject": "unknown", "facts": [], **state.get("safety_state", {})})
+    return {"allergy_risks": allergies, "special_risks": special, "uncovered_allergens": uncovered,
+            "requires_human_review": bool(uncovered),
+            "medication_interaction_status": "requires_human_review" if uncovered or re.search(r"服用|用药|药物|华法林|抗凝", text) else "unknown",
+            "safe": not allergies and not special and not uncovered,
             "warning": "当前仅检查已确认画像和已收录规则，未知药物相互作用必须由医师或药师复核。"}
 
 

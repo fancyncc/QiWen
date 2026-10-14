@@ -69,6 +69,11 @@ def clinical_bundle(state: dict) -> ContextBundle:
         ContextItem("profile", "患者画像：空白为未知，内容为用户自述", json.dumps(state.get("profile", {}), ensure_ascii=False), True),
         ContextItem("pending", "待回答问题", state.get("pending_question", ""), True),
     ]
+    if state.get("analysis_only"):
+        items.append(ContextItem("analysis-boundary", "本轮分析范围", json.dumps({
+            "mode": "knowledge_only", "manual_review_reasons": state.get("manual_review_reasons", []),
+            "instruction": "继续症状追问、辨证假设及方剂本草文献对照。已明确的非草药过敏史保留待复核，不单独作为停止知识分析的理由。不得确认个人用药适用性，所有候选剂量留空，不提供用法。"
+        }, ensure_ascii=False), True))
     if state.get("file_text"):
         items.append(ContextItem("current-attachments", "病历相关原文摘录", model_excerpt(state["file_text"]), True))
     if state.get("pending_context") or state.get("episode_text"):

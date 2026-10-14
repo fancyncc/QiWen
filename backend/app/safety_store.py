@@ -8,7 +8,7 @@ from uuid import uuid4
 
 from fastapi import HTTPException
 from .db import connection, now
-from .safety_context import empty_state, extract_facts, merge_facts, candidate_key, subject_of
+from .safety_context import empty_state, extract_facts, merge_facts, candidate_key, subject_of, eligible_profile_fact
 
 FIELD = {"allergy": "allergies", "constitution": "constitution", "history": "history"}
 
@@ -28,7 +28,7 @@ def effective_profile(db, user_id):
     profile["_safety_revision"] = profile.get("safety_revision", 0)
     facts = [f for f in active_facts(db, user_id) if f.get("subject") == "self" and f.get("confirmation") == "confirmed"]
     for category, field in FIELD.items():
-        positives = [f["entity"] for f in facts if f["category"] == category and f["assertion"] == "present"]
+        positives = [f["entity"] for f in facts if f["category"] == category and f["assertion"] == "present" and eligible_profile_fact(f)]
         if category == "constitution" and positives:
             profile[field] = positives[-1] + "（用户自述）"
         elif positives:
@@ -36,6 +36,9 @@ def effective_profile(db, user_id):
             if base.strip() in {"无", "没有", "无过敏", "无过敏史"}:
                 base = ""
             profile[field] = "；".join(dict.fromkeys([v for v in [base, *positives] if v]))
+    profile["medical_records"] = [dict(row) for row in db.execute(
+        "SELECT id,record_date,institution,diagnosis,treatment,outcome,created_at,updated_at FROM medical_records WHERE user_id=? ORDER BY COALESCE(record_date,substr(created_at,1,10)) DESC,created_at DESC,id",
+        (user_id,))]
     return profile
 
 
@@ -132,7 +135,7 @@ def add_suggestions(db, user_id, thread_id, run_id, candidates):
     profile = effective_profile(db, user_id)
     existing = active_facts(db, user_id)
     for fact in candidates:
-        if fact.get("subject") != "self" or fact.get("source", {}).get("kind") != "message":
+        if not eligible_profile_fact(fact) or fact.get("subject") != "self" or fact.get("source", {}).get("kind") != "message":
             continue
         key = candidate_key(fact)
         same = [f for f in existing if all(f.get(k) == fact.get(k) for k in ("category", "entity", "assertion"))]
@@ -165,7 +168,7 @@ def list_suggestions(user_id, thread_id):
         items = []
         for row in db.execute("SELECT * FROM profile_suggestions WHERE user_id=? AND thread_id=? AND status='pending' ORDER BY created_at,id", (user_id, thread_id)):
             fact = json.loads(row["fact"])
-            if fact.get("subject") != "self":
+            if fact.get("subject") != "self" or not eligible_profile_fact(fact):
                 continue
             is_conflict, previous = conflict(db, user_id, fact)
             items.append({"id": row["id"], "fact": fact, "conflict": is_conflict, "previous": previous})
@@ -202,6 +205,8 @@ def resolve(user_id, revision, decisions):
                 continue
             fact = json.loads(row["fact"])
             if item.action == "accept":
+                if not eligible_profile_fact(fact):
+                    raise HTTPException(422, "当前症状或临时状态不能作为长期画像保存")
                 if fact.get("subject") != "self":
                     raise HTTPException(422, "该资料未确认属于本人，不能写入本人画像")
                 if not item.confirm_self:

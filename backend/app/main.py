@@ -8,6 +8,7 @@ import time
 import os
 from contextlib import asynccontextmanager
 from pathlib import Path
+from datetime import date
 from uuid import uuid4
 from typing import Literal
 
@@ -61,7 +62,8 @@ class ThreadCreate(BaseModel):
 
 
 class ThreadUpdate(BaseModel):
-    title: str = Field(min_length=1, max_length=80)
+    title: str | None = Field(default=None, min_length=1, max_length=80)
+    mode: Literal["fixed", "multi"] | None = None
 
 
 class ProfilePatch(BaseModel):
@@ -74,6 +76,16 @@ class ProfilePatch(BaseModel):
 class MemoryControlPatch(BaseModel):
     enabled: bool
     revision: int = Field(ge=0)
+
+
+class MedicalRecordInput(BaseModel):
+    record_date: date | None = None
+    institution: str = Field(default="", max_length=120)
+    diagnosis: str = Field(min_length=1, max_length=200)
+    treatment: str = Field(default="", max_length=1000)
+    outcome: str = Field(default="", max_length=500)
+    revision: int = Field(ge=0)
+    confirm_self: bool = False
 
 
 class SuggestionDecision(BaseModel):
@@ -209,17 +221,25 @@ def list_threads(user: dict = Depends(current_user)):
 
 @app.post("/api/threads", status_code=201)
 def create_thread(body: ThreadCreate, user: dict = Depends(current_user)):
-    return public_thread(new_thread(user["id"], "新会话", body.mode))
+    return public_thread(new_thread(user["id"], "新对话", body.mode))
 
 
 @app.put("/api/threads/{thread_id}")
 def rename_thread(thread_id: str, body: ThreadUpdate, user: dict = Depends(current_user)):
     owned_thread(thread_id, user["id"])
-    if not body.title.strip():
+    if body.title is None and body.mode is None:
+        raise HTTPException(422, "请提供会话名称或问诊模式")
+    if body.title is not None and not body.title.strip():
         raise HTTPException(422, "会话名称不能为空")
     with connection() as db:
-        db.execute("UPDATE threads SET title=?,updated_at=? WHERE id=?",
-                   (body.title.strip(), now(), thread_id))
+        db.execute("BEGIN IMMEDIATE")
+        if body.mode is not None:
+            if db.execute("SELECT 1 FROM chat_runs WHERE thread_id=? AND status IN ('running','cancelling')", (thread_id,)).fetchone():
+                raise HTTPException(409, "请等待当前回答结束后再切换问诊模式")
+            db.execute("UPDATE threads SET mode=?,updated_at=? WHERE id=?", (body.mode, now(), thread_id))
+        if body.title is not None:
+            db.execute("UPDATE threads SET title=?,updated_at=? WHERE id=?",
+                       (body.title.strip(), now(), thread_id))
     return public_thread(owned_thread(thread_id, user["id"]))
 
 
@@ -263,6 +283,51 @@ def get_profile(user_id: str, user: dict = Depends(current_user)):
         profile["facts"] = [{**json.loads(row["fact"]), "id": row["id"]} for row in db.execute(
             "SELECT id,fact FROM patient_safety_facts WHERE user_id=? AND status='active' ORDER BY created_at", (user_id,))]
     return profile
+
+
+def change_medical_record(user_id, user, record_id, body=None, *, delete=False):
+    if user_id != user["id"]:
+        raise HTTPException(403, "无权修改该画像")
+    if not delete and (not body.confirm_self or not body.diagnosis.strip()):
+        raise HTTPException(422, "请填写诊断或就诊原因，并确认记录属于本人")
+    with connection() as db:
+        db.execute("BEGIN IMMEDIATE")
+        if record_id and not db.execute("SELECT 1 FROM medical_records WHERE id=? AND user_id=?", (record_id, user_id)).fetchone():
+            raise HTTPException(404, "诊疗记录不存在")
+        current = db.execute("SELECT safety_revision FROM profiles WHERE user_id=?", (user_id,)).fetchone()[0]
+        revision = body if delete else body.revision
+        if revision != current:
+            raise HTTPException(409, "画像已变化，请刷新后重新保存")
+        if delete:
+            db.execute("DELETE FROM medical_records WHERE id=? AND user_id=?", (record_id, user_id))
+        else:
+            values = body.model_dump(mode="json", exclude={"revision", "confirm_self"})
+            values = {key: value.strip() if isinstance(value, str) else value for key, value in values.items()}
+            if record_id:
+                db.execute("UPDATE medical_records SET record_date=?,institution=?,diagnosis=?,treatment=?,outcome=?,updated_at=? WHERE id=? AND user_id=?",
+                           (*values.values(), now(), record_id, user_id))
+            else:
+                db.execute("INSERT INTO medical_records(id,user_id,record_date,institution,diagnosis,treatment,outcome,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?)",
+                           (str(uuid4()), user_id, *values.values(), now(), now()))
+        db.execute("UPDATE profiles SET safety_revision=safety_revision+1,updated_at=? WHERE user_id=?", (now(), user_id))
+        from .memory import invalidate_user
+        invalidate_user(db, user_id)
+    return get_profile(user_id, user)
+
+
+@app.post("/api/profiles/{user_id}/medical-records", status_code=201)
+def create_medical_record(user_id: str, body: MedicalRecordInput, user: dict = Depends(current_user)):
+    return change_medical_record(user_id, user, None, body)
+
+
+@app.put("/api/profiles/{user_id}/medical-records/{record_id}")
+def update_medical_record(user_id: str, record_id: str, body: MedicalRecordInput, user: dict = Depends(current_user)):
+    return change_medical_record(user_id, user, record_id, body)
+
+
+@app.delete("/api/profiles/{user_id}/medical-records/{record_id}")
+def delete_medical_record(user_id: str, record_id: str, revision: int = Query(ge=0), user: dict = Depends(current_user)):
+    return change_medical_record(user_id, user, record_id, revision, delete=True)
 
 
 @app.delete("/api/profiles/{user_id}/memories/{thread_id}", status_code=204)
@@ -430,7 +495,7 @@ def _prepare_chat(body: ChatRequest, user: dict) -> tuple[dict, dict, str]:
         except sqlite3.IntegrityError:
             raise HTTPException(409, "该会话已有运行中的问答，或 run_id 已被使用") from None
         db.execute(
-            "UPDATE threads SET title=? WHERE id=? AND title='新会话' "
+            "UPDATE threads SET title=? WHERE id=? AND title IN ('新会话','新对话') "
             "AND NOT EXISTS (SELECT 1 FROM messages WHERE thread_id=?)",
             (body.message.strip()[:28], thread["id"], thread["id"]),
         )

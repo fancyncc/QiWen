@@ -8,6 +8,15 @@ describe("恢复后端接口适配", () => {
     useAuthStore.setState({ token: "original-token" });
     vi.unstubAllGlobals();
   });
+  it("新会话默认多 Agent，切换已有会话持久化模式", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, status: 200,
+      json: async () => ({ id: "thread", title: "新对话", mode: "multi", created_at: "today" }) });
+    vi.stubGlobal("fetch", fetchMock);
+    expect((await api.createThread("新对话")).mode).toBe("multi");
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({ mode: "multi" });
+    expect((await api.setThreadMode("thread", "multi")).mode).toBe("multi");
+    expect(JSON.parse(fetchMock.mock.calls[1][1].body)).toEqual({ mode: "multi" });
+  });
   it("会话 id 转成页面 thread_id，重命名提交 title", async () => {
     const fetchMock = vi.fn().mockResolvedValue({ ok: true, status: 200,
       json: async () => [{ id: "thread", title: "旧会话", created_at: "today" }] });

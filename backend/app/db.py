@@ -47,6 +47,13 @@ def init_db() -> None:
           title TEXT NOT NULL, mode TEXT NOT NULL DEFAULT 'fixed',
           created_at TEXT NOT NULL, updated_at TEXT NOT NULL
         );
+        CREATE TABLE IF NOT EXISTS medical_records (
+          id TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          record_date TEXT, institution TEXT NOT NULL DEFAULT '', diagnosis TEXT NOT NULL,
+          treatment TEXT NOT NULL DEFAULT '', outcome TEXT NOT NULL DEFAULT '',
+          created_at TEXT NOT NULL, updated_at TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS medical_records_user_idx ON medical_records(user_id, record_date DESC);
         CREATE INDEX IF NOT EXISTS threads_user_idx ON threads(user_id, updated_at DESC);
         CREATE TABLE IF NOT EXISTS messages (
           id TEXT PRIMARY KEY, thread_id TEXT NOT NULL REFERENCES threads(id) ON DELETE CASCADE,
@@ -173,6 +180,19 @@ def init_db() -> None:
           id TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
           fact_id TEXT, operation TEXT NOT NULL, revision INTEGER NOT NULL, created_at TEXT NOT NULL
         );
+        """)
+        # Repair default titles left behind by older frontend/backend naming mismatches.
+        # Preserve custom titles, empty conversations, and sidebar ordering.
+        db.execute("""
+            UPDATE threads SET title=(
+                SELECT substr(trim(content),1,28) FROM messages
+                WHERE thread_id=threads.id AND role='user' AND trim(content)<>''
+                ORDER BY created_at,rowid LIMIT 1
+            )
+            WHERE title IN ('新会话','新对话') AND EXISTS (
+                SELECT 1 FROM messages
+                WHERE thread_id=threads.id AND role='user' AND trim(content)<>''
+            )
         """)
         if "metadata" not in {row[1] for row in db.execute("PRAGMA table_info(corpus)")}:
             db.execute("ALTER TABLE corpus ADD COLUMN metadata TEXT NOT NULL DEFAULT '{}'")

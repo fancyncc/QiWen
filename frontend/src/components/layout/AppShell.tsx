@@ -33,6 +33,7 @@ import {
   HeartPulse,
 } from "lucide-react";
 import type { ProfileUpdate } from "@/lib/types";
+import { MedicalRecords } from "./MedicalRecords";
 
 /** 应用外壳：路由守卫 + 侧边栏（会话/画像）+ 主区域。 */
 const subscribeHydration = () => () => {};
@@ -201,12 +202,12 @@ function SidebarContent({
       {/* 画像 */}
       <div className="p-3">
         <div className="mb-2 flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-          <HeartPulse className="h-3.5 w-3.5" aria-hidden /> 用户画像
+          <HeartPulse className="h-3.5 w-3.5" aria-hidden /> 长期画像
         </div>
         <dl className="space-y-1 text-sm">
           <div className="flex justify-between">
             <dt className="text-muted-foreground">体质</dt>
-            <dd>{profile?.constitution ?? "未知"}</dd>
+            <dd>{profile?.constitution || "未填写"}</dd>
           </div>
           <div className="flex items-center justify-between gap-1">
             <dt className="shrink-0 text-muted-foreground">过敏史</dt>
@@ -226,6 +227,7 @@ function SidebarContent({
             </dd>
           </div>
         </dl>
+        <MedicalRecords profile={profile} />
       </div>
       <Separator />
 

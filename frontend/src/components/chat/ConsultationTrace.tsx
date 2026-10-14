@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { Check, ChevronDown, Loader2, Stethoscope } from "lucide-react";
 import {
   Collapsible,
@@ -21,27 +21,18 @@ const STAGE_ORDER: { stage: string; label: string }[] = [
   { stage: "safety_check", label: "安全校验" },
 ];
 
-/** 并行专家阶段（多智能体 Send 扇出，同时执行）。 */
+/** 专家按辨证、方剂、本草的证据依赖顺序执行。 */
 const SPECIALIST_STAGES = new Set(["bianzheng", "fangji", "bencao"]);
 
 type CellStatus = "pending" | "active" | "done";
 
-/**
- * 完成态阶段重建：图拓扑是顺序管线（并行专家簇在中间），
- * done 到达即整轮结束，因此「最后见到的阶段」之前必然全部完成。
- * 用于抵消自定义流事件偶发丢失（_emit_stage 静默吞异常）导致的摘要缺步。
- * 已见阶段的会诊笔记（note）原样保留。
- */
+/** 只整理实际收到的阶段，不把未执行的专家阶段补成已完成。 */
 function reconcileStages(stages: Stage[]): Stage[] {
-  const idx = new Map(STAGE_ORDER.map((s, i) => [s.stage, i]));
-  const maxSeen = stages.reduce((acc, s) => Math.max(acc, idx.get(s.stage) ?? -1), -1);
-  if (maxSeen < 0) return stages;
   const seen = new Map(stages.map((s) => [s.stage, s]));
-  return STAGE_ORDER.slice(0, maxSeen + 1).map((s) => ({
-    ...s,
-    status: "done" as const,
-    note: seen.get(s.stage)?.note,
-  }));
+  return STAGE_ORDER.flatMap((stage) => {
+    const actual = seen.get(stage.stage);
+    return actual ? [actual] : [];
+  });
 }
 
 /** 由 per-message stages 数组推导每个固定阶段的显示状态。 */
@@ -126,22 +117,23 @@ function StepRow({
   );
 }
 
-/** 垂直步骤列表：问诊 → 并行专家簇（辨证/方剂/本草）→ 综合 → 安全审查 → 安全校验。 */
+/** 按流程顺序展示实际启动过的阶段。 */
 function StepList({ stages }: { stages: Stage[] }) {
-  const specialists = STAGE_ORDER.filter((s) => SPECIALIST_STAGES.has(s.stage));
-  const sequential = STAGE_ORDER.filter(
+  const actual = STAGE_ORDER.filter((stage) => stages.some((item) => item.stage === stage.stage));
+  const specialists = actual.filter((s) => SPECIALIST_STAGES.has(s.stage));
+  const sequential = actual.filter(
     (s) => !SPECIALIST_STAGES.has(s.stage) && s.stage !== "inquiry"
   );
 
   return (
     <div className="space-y-0.5">
-      <StepRow stage="inquiry" label="问诊" stages={stages} />
-      <div className="ml-1 border-l-2 border-primary/20 pl-3">
-        <p className="py-0.5 text-[11px] text-muted-foreground">并行会诊</p>
+      {actual.some((stage) => stage.stage === "inquiry") && <StepRow stage="inquiry" label="问诊" stages={stages} />}
+      {specialists.length > 0 && <div className="ml-1 border-l-2 border-primary/20 pl-3">
+        <p className="py-0.5 text-[11px] text-muted-foreground">依次会诊</p>
         {specialists.map((s) => (
           <StepRow key={s.stage} stage={s.stage} label={s.label} stages={stages} />
         ))}
-      </div>
+      </div>}
       {sequential.map((s) => (
         <StepRow key={s.stage} stage={s.stage} label={s.label} stages={stages} />
       ))}
@@ -153,7 +145,7 @@ function StepList({ stages }: { stages: Stage[] }) {
 function Field({ label, value }: { label: string; value?: string | null }) {
   if (!value) return null;
   return (
-    <div className="text-xs leading-relaxed">
+    <div className="whitespace-pre-wrap break-words text-[13px] leading-6">
       <span className="text-muted-foreground">{label}：</span>
       <span className="text-foreground">{value}</span>
     </div>
@@ -168,7 +160,7 @@ function NoteCard({ note }: { note: ConsultationNote }) {
   const specialist = note.specialist || "专家";
 
   return (
-    <div className="rounded-md border border-border/60 bg-background/60 p-2.5">
+    <div className="rounded-xl border border-border/70 bg-background/70 p-3.5">
       <div className="mb-1.5 flex items-center gap-1.5">
         <Badge
           variant={isReviewer ? "outline" : "secondary"}
@@ -186,11 +178,11 @@ function NoteCard({ note }: { note: ConsultationNote }) {
             未通过
           </Badge>
         )}
-        {typeof note.confidence === "number" && (
-          <span className="text-[11px] text-muted-foreground">
+        {typeof note.confidence === "number" ? (
+          <span className="text-xs text-muted-foreground" title="模型自评，未经临床校准，不代表诊断准确率">
             置信度 {Math.round(note.confidence * 100)}%
           </span>
-        )}
+        ) : null}
       </div>
       <Field label="证候" value={note.syndrome} />
       {note.recommended_formulas && note.recommended_formulas.length > 0 && (
@@ -201,9 +193,10 @@ function NoteCard({ note }: { note: ConsultationNote }) {
           </span>
         </div>
       )}
-      {note.safety_warnings && note.safety_warnings.length > 0 && (
-        <div className="text-xs leading-relaxed text-destructive">
-          <span>安全警告：{note.safety_warnings.join("；")}</span>
+      {((note.safety_warnings?.length ?? 0) > 0 || /本草/.test(specialist)) && (
+        <div className="my-2 rounded-lg border border-destructive/20 bg-destructive/5 p-2.5 text-[13px] leading-6 text-destructive" role="note" aria-label="本草安全警告">
+          <span className="font-medium">安全警告：</span>
+          <span>{note.safety_warnings?.length ? note.safety_warnings.map((warning) => warning.replace(/[；;。]+$/, "")).join("；") + "。" : "尚未确认个人用药适用性，请勿自行抓药或调整用药。"}</span>
         </div>
       )}
       {note.issues && note.issues.length > 0 && (
@@ -213,7 +206,8 @@ function NoteCard({ note }: { note: ConsultationNote }) {
       )}
       <Field label="加减" value={note.modifications} />
       <Field label="建议" value={note.suggestions} />
-      <Field label="推理" value={note.reasoning} />
+      <Field label="分析摘要" value={note.reasoning} />
+      {/辨证/.test(specialist) && typeof note.confidence === "number" && <p className="mt-2 text-[11px] text-muted-foreground">置信度为模型自评，不代表诊断准确率。</p>}
     </div>
   );
 }
@@ -238,20 +232,31 @@ export function ConsultationTrace({
   elapsedMs?: number;
 }) {
   const hasSpecialists = (stages ?? []).some((s) => SPECIALIST_STAGES.has(s.stage));
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(!streaming && (notes?.length ?? 0) >= 3);
   const wasStreaming = useRef(streaming);
+  const contentId = useId();
 
   // 流式结束自动折叠（用户仍可手动展开）
   useEffect(() => {
-    if (wasStreaming.current && !streaming) setOpen(false);
+    if (wasStreaming.current && !streaming) setOpen((notes?.length ?? 0) >= 3);
     wasStreaming.current = streaming;
-  }, [streaming]);
+  }, [streaming, notes?.length]);
 
   if (!stages?.length && !notes?.length) return null;
 
   // 追问/纯问诊轮：流式中单行提示，完成后由答案接管
   if (!hasSpecialists && !notes?.length) {
-    if (!streaming) return null;
+    const inquiry = stages?.some((stage) => stage.stage === "inquiry");
+    const preflight = stages?.some((stage) => stage.stage === "pre_safety");
+    if (!streaming) {
+      if (!preflight) return null;
+      const knowledge = stages?.some((stage) => stage.stage === "knowledge_search" || stage.stage === "knowledge_answer");
+      return (
+        <div className="mb-2 rounded-md bg-muted/60 px-3 py-2 text-xs text-muted-foreground" role="status">
+          流程进度：{knowledge ? "知识解答" : inquiry ? "问诊资料确认" : "前置安全审查"} · 未进入专家分析
+        </div>
+      );
+    }
     return (
       <div
         className="flex items-center gap-2 py-1 text-xs text-muted-foreground"
@@ -259,16 +264,16 @@ export function ConsultationTrace({
         aria-label="问诊中"
       >
         <Loader2 className="h-3 w-3 animate-spin" aria-hidden />
-        问诊中
+        {preflight && !inquiry ? "前置安全审查中" : "问诊中"}
       </div>
     );
   }
 
   const doneCount = reconcileStages(stages ?? []).length;
   const summaryParts = [
-    doneCount > 0 ? `会诊过程 · ${doneCount} 步` : "会诊过程",
+    (notes?.length ?? 0) >= 3 ? `会诊过程 · ${notes!.length} 位专家` : doneCount > 0 ? `会诊过程 · ${doneCount} 步` : "会诊过程",
     typeof elapsedMs === "number" ? `${(elapsedMs / 1000).toFixed(1)}s` : null,
-    notes?.length ? `${notes.length} 位专家` : null,
+    notes?.length && notes.length < 3 ? `${notes.length} 位专家` : null,
   ].filter(Boolean);
 
   // 流式中：实时展开步骤
@@ -295,7 +300,7 @@ export function ConsultationTrace({
       <CollapsibleTrigger
         className="flex w-full items-center justify-between rounded-md bg-muted/60 px-3 py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         aria-expanded={open}
-        aria-controls="consultation-trace-content"
+        aria-controls={contentId}
       >
         <span className="flex items-center gap-1.5">
           <Stethoscope className="h-3.5 w-3.5" aria-hidden />
@@ -306,9 +311,9 @@ export function ConsultationTrace({
           aria-hidden
         />
       </CollapsibleTrigger>
-      <CollapsibleContent id="consultation-trace-content">
+      <CollapsibleContent id={contentId}>
         <div className="mt-1.5 space-y-1.5 pl-1">
-          {stages?.length ? <StepList stages={reconcileStages(stages)} /> : null}
+          {stages?.length && (notes?.length ?? 0) < 3 ? <StepList stages={reconcileStages(stages)} /> : null}
           {notes?.map((n, i) => (
             <NoteCard key={i} note={n} />
           ))}

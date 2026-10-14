@@ -177,6 +177,58 @@ def test_mixed_people_and_unknown_allergen_are_not_silently_ignored():
         assert suggestions(client, h, peanut["thread_id"])["items"][0]["fact"]["entity"] == "花生"
 
 
+@pytest.mark.parametrize("mode", ["fixed", "multi"])
+def test_known_nonherbal_allergy_continues_inquiry_and_analysis_without_personal_prescription(mode):
+    from app.safety import contains_dosing
+    with TestClient(app) as client:
+        token, uid = register(client, "allergy_flow_" + uuid4().hex[:8])
+        h = auth(token)
+        client.patch(f"/api/profiles/{uid}", headers=h, json={"allergies": "青霉素"})
+        tid = client.post("/api/threads", headers=h, json={"mode": mode}).json()["id"]
+        first = chat(client, h, "肚子胀、怕冷、大便稀", tid)
+        assert first["trace"]["safety"]["pending"]["key"] == "subject"
+        second = chat(client, h, "本人", tid)
+        assert second["intent_type"] == "consult"
+        assert second["trace"]["preflight"]["analysis_allowed"]
+        assert "持续" in second["response"]
+        assert "未进入方剂和本草候选分析" not in second["response"]
+        third = chat(client, h, "三天，饭后加重，没有腹痛", tid)
+        assert third["intent_type"] == "diagnose"
+        assert third["trace"]["preflight"]["analysis_allowed"]
+        assert third["trace"]["safety"]["status"] == "restricted"
+        assert {e["stage"] for e in third["trace"]["events"]} >= {"inquiry", "bianzheng", "formula", "reviewer", "safety"}
+        assert "方剂知识对照" in third["response"] and "桂枝汤" in third["response"]
+        assert "青霉素" in third["response"] and not contains_dosing(third["response"])
+        assert third["message"]["prescription"] is None and not third["message"]["prescription_review"]["approved"]
+        assert client.get(f"/api/profiles/{uid}", headers=h).json()["allergies"] == "青霉素"
+        if mode == "multi":
+            assert "herb" in {e["stage"] for e in third["trace"]["events"]}
+            assert [n["expert"] for n in third["notes"]] == ["辨证", "方剂", "本草"]
+            assert "桂枝汤" in third["notes"][1]["content"]
+            assert "青霉素" in third["notes"][2]["warning"]
+            assert set(third["trace"]["agents"]["artifacts"]) == {"bianzheng", "formula", "herb"}
+            assert all(herb["dosage"]["min"] is None for herb in third["trace"]["agents"]["artifacts"]["formula"]["plan"]["herbs"])
+        saved = client.get(f"/api/threads/{tid}/messages", headers=h).json()[-1]
+        assert saved["content"] == third["response"] and saved["notes"] == third["notes"]
+
+
+@pytest.mark.parametrize("extra", ["我正在哺乳", "我正在服用华法林", "我有药物过敏但不知道过敏原", "我现在呼吸困难"])
+def test_nonherbal_allergy_does_not_override_other_safety_gates(extra):
+    from app.safety_context import make_context, gate_context
+    state, _ = make_context({}, "本人对青霉素过敏，" + extra, "")
+    result = gate_context(state)
+    assert result["decision"] != "allow" and not result.get("analysis_allowed")
+
+
+def test_no_current_allergic_reaction_does_not_deny_existing_allergy_history():
+    from app.safety_context import make_context, gate_context
+    state, _ = make_context({}, "本人对青霉素过敏，是既往记录", "")
+    state, _ = make_context(state, "现在无过敏反应", "")
+    assert gate_context(state)["analysis_allowed"]
+    assert not any(f.get("conflict") for f in state["facts"])
+    assert any(f["category"] == "allergy" and f["entity"] == "青霉素" and f["assertion"] == "present" for f in state["facts"])
+
+
 def test_new_constitution_and_history_are_batched_and_never_automatically_saved():
     with TestClient(app) as client:
         token, user_id = register(client, "batch_" + uuid4().hex[:8])
@@ -206,6 +258,99 @@ def test_model_evidence_validation_and_cannot_weaken_rules(monkeypatch):
         data = chat(client, h, "我最近头痛三天")
         assert data["trace"]["preflight"]["risk_categories"] == ["preflight_unavailable"]
         assert not suggestions(client, h, data["thread_id"])["items"]
+
+
+@pytest.mark.parametrize("text", ["目前未服药", "现在没有用药", "没有服用任何药物"])
+def test_explicit_no_medication_is_not_a_positive_model_observation(monkeypatch, text):
+    import asyncio
+    from app.safety_context import make_context
+    state, _ = make_context({}, "本人，" + text, "")
+    assert any(f["category"] == "medication" and f["assertion"] == "absent" for f in state["facts"])
+    async def wrong(*args, **kwargs):
+        return {"decision": "allow", "risk_categories": [], "reason": "测试", "required_questions": [],
+                "observations": [{"category": "medication", "entity": text, "subject": "self",
+                                  "assertion": "present", "temporal_scope": "current", "quote": text}]}
+    monkeypatch.setattr(preflight, "acomplete_json", wrong)
+    result = asyncio.run(preflight.assess("本人，" + text, {}, mock=False, context=state))
+    assert result["decision"] == "allow" and not result["observations"]
+
+
+@pytest.mark.parametrize("text", ["本人不是没有服药", "本人不确定是否没有用药"])
+def test_uncertain_medication_denial_does_not_clear_risk(text):
+    from app.safety_context import make_context, gate_context
+    state, _ = make_context({}, text, "")
+    assert gate_context(state)["decision"] == "clarify"
+    assert any(f["category"] == "medication" and f["assertion"] == "uncertain" for f in state["facts"])
+
+
+@pytest.mark.parametrize("variant", ["exact", "short_quote", "past", "paraphrase", "changed_assertion", "changed_subject", "new_entity"])
+def test_preflight_repeated_scoped_profile_fact_is_not_new_evidence(monkeypatch, variant):
+    import asyncio
+    from app.safety_context import make_context
+
+    state, _ = make_context({}, "本人", "")
+    fact = extract_facts("对青霉素过敏", subject="self", kind="manual_profile")[0]
+    state["facts"] = [fact]
+    state["episode"] = "肚子胀、怕冷、大便稀"
+    state["symptom_facts"] = [{"symptom": "腹胀", "subject": "self"},
+                              {"symptom": "咳嗽", "subject": "other:母亲"}]
+
+    async def repeated(_policy, payload, **kwargs):
+        supplied = json.loads(payload)["safety_context"]
+        assert supplied["episode"] == state["episode"]
+        assert [f["symptom"] for f in supplied["symptom_facts"]] == ["腹胀"]
+        observation = {key: fact[key] for key in
+                       ("category", "entity", "subject", "assertion", "temporal_scope")}
+        observation["quote"] = fact["source"]["quote"]
+        if variant == "short_quote":
+            observation["quote"] = "青霉素"
+        elif variant == "paraphrase":
+            observation["quote"] = "既往对青霉素有过敏反应"
+        elif variant == "past":
+            observation["quote"] = "青霉素过敏"
+            observation["temporal_scope"] = "past"
+        elif variant == "changed_assertion":
+            observation["assertion"] = "absent"
+        elif variant == "changed_subject":
+            observation["subject"] = "other:母亲"
+        elif variant == "new_entity":
+            observation["entity"] = "甘草"
+            observation["quote"] = "对甘草过敏"
+        return {"decision": "allow", "risk_categories": [], "reason": "测试", "required_questions": [],
+                "observations": [observation]}
+
+    monkeypatch.setattr(preflight, "acomplete_json", repeated)
+    if variant in {"changed_assertion", "changed_subject", "new_entity"}:
+        with pytest.raises(RuntimeError, match="原始证据"):
+            asyncio.run(preflight.assess("本人", {}, mock=False, context=state))
+    else:
+        result = asyncio.run(preflight.assess("本人", {}, mock=False, context=state))
+        assert result["observations"] == []
+        assert result["decision"] == "clarify"  # Existing allergy restrictions remain active.
+        assert state["facts"] == [fact]
+
+
+def test_unavailable_preflight_preserves_complaint_and_can_retry(monkeypatch):
+    async def unavailable(*args, **kwargs):
+        raise RuntimeError("provider unavailable")
+
+    with TestClient(app) as client:
+        token, _ = register(client, "retry_" + uuid4().hex[:8])
+        h = auth(token)
+        tid = client.post("/api/threads", headers=h, json={"mode": "multi"}).json()["id"]
+        first = chat(client, h, "肚子胀、怕冷、大便稀", tid)
+        assert first["trace"]["safety"]["pending"]["key"] == "subject"
+        monkeypatch.setattr(workflow, "assess", unavailable)
+        failed = chat(client, h, "本人", tid)
+        assert "安全预审暂时未能完成" in failed["response"]
+        assert "急救" not in failed["response"]
+        assert failed["trace"]["preflight"]["risk_categories"] == ["preflight_unavailable"]
+        monkeypatch.setattr(workflow, "assess", preflight.assess)
+        resumed = chat(client, h, "持续三天，饭后加重", tid)
+        assert resumed["trace"]["preflight"]["decision"] == "allow"
+        assert set(resumed["symptoms"]) >= {"腹胀", "怕冷", "大便稀"}
+        assert [note["expert"] for note in resumed["notes"]] == ["辨证", "方剂", "本草"]
+        assert set(resumed["trace"]["agents"]["artifacts"]) == {"bianzheng", "formula", "herb"}
 
 
 def test_migration_is_repeatable():

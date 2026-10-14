@@ -11,6 +11,7 @@ from .tools import (CLASSICS_TOOL, COMPATIBILITY_TOOL, DOSAGE_TOOL, FORMULA_TOOL
 from .. import model
 from ..db import one
 from ..context import clinical_context
+from ..symptoms import duration_text
 from ..prescription import CandidatePlan, migrate_plan, names
 
 
@@ -21,6 +22,9 @@ class BianzhengArtifact(BaseModel):
     evidence_ids: list[str] = Field(default_factory=list, max_length=30)
     uncertainties: list[str] = Field(default_factory=list, max_length=20)
     question: str = Field(default="", max_length=500)
+    syndrome: str = Field(default="", max_length=200)
+    confidence: float | None = Field(default=None, ge=0, le=1)
+    summary: str = Field(default="", max_length=1000)
 
 
 class FormulaArtifact(BaseModel):
@@ -30,6 +34,7 @@ class FormulaArtifact(BaseModel):
     evidence_ids: list[str] = Field(default_factory=list, max_length=40)
     uncertainties: list[str] = Field(default_factory=list, max_length=20)
     question: str = Field(default="", max_length=500)
+    comparison: str = Field(default="", max_length=2000)
 
 
 class HerbReviewArtifact(BaseModel):
@@ -51,6 +56,25 @@ def _traces(state: dict, agent: str, run: AgentRun) -> dict:
 
 def _artifacts(state: dict, agent: str, value: dict) -> dict:
     return {**state.get("agent_artifacts", {}), agent: value}
+
+
+def can_analyze_provisionally(state: dict) -> bool:
+    safe = state.get("safety_state", {})
+    return bool(safe.get("subject_confirmed") and state.get("symptoms")
+                and not state.get("symptom_pending") and state.get("preflight", {}).get("decision") in {"allow", "clarify"}
+                and not state.get("preflight", {}).get("question_keys")
+                and (duration_text(state.get("episode_text", "")) or any(
+                    f.get("duration_text") and f.get("subject") == safe.get("subject")
+                    and f.get("time_scope") == "current" and not f.get("superseded_by") and not f.get("archived_episode")
+                    for f in state.get("symptom_facts", []))))
+
+
+def provisional_updates(state: dict, artifact: dict) -> dict:
+    reason = "四诊资料尚不完整，本轮仅作初步辨证及文献知识对照，不能确定个人处方"
+    questions = artifact.get("uncertainties", []) or ([artifact["question"]] if artifact.get("question") else [])
+    return {"analysis_only": True, "preliminary_analysis": True,
+            "manual_review_reasons": list(dict.fromkeys([*state.get("manual_review_reasons", []), reason])),
+            "analysis_questions": list(dict.fromkeys([*state.get("analysis_questions", []), *questions]))[:3]}
 
 
 def _mock_diagnosis(state: dict) -> dict:
@@ -115,10 +139,13 @@ async def bianzheng_agent(state: dict) -> dict:
         return {"final": completed}
 
     task = json.dumps({
-        "goal": "形成有证据支持、明确不确定性的辨证假设；资料不足时请求用户补充。",
+        "goal": ("本轮仅整理辨证假设与不确定性，不拟定个人用药。已明确的非草药过敏保留待复核，不单独阻断辨证知识分析；必要症状资料不足仍正常追问。"
+                 if state.get("analysis_only") else "形成有证据支持、明确不确定性的辨证假设；资料不足时请求用户补充。"),
         "current_message": state.get("message", ""), "symptoms": state.get("symptoms", []),
         "denied_symptoms": state.get("denied_symptoms", []), "retrieval_query": query,
         "patient_context": clinical_context(state),
+        "completion_rule": "主诉和病程已明确时，给出初步鉴别方向：逐项列已有支持、尚缺的区分依据及不确定性，不作确诊。缺舌象、脉象或古籍未命中应放入 uncertainties，不能单独作为 need_user_input 的理由。不得把尚未询问的症状当作明确否认；不要仅列一长串追问。最多保留三个最关键的待补充项。",
+        "display_summary": "syndrome 填写初步证候方向，无法判断则明确待辨；summary 用约200字概括用户可核对的主要症状依据与不确定性，不输出内部思维链或工具日志。confidence 仅为对该初步判断的模型自评，范围0到1，不代表经过校准的诊断准确率；无法合理评估时填null，不得固定给高置信度。",
     }, ensure_ascii=False)
     run = await run_agent_graph(name="辨证 Agent", role="bianzheng", task=task, state=state,
                                 tools=[PROFILE_TOOL, CLASSICS_TOOL],
@@ -137,13 +164,15 @@ async def bianzheng_agent(state: dict) -> dict:
     context = model.invocation.get()
     if context and context.emit and artifact.get("conclusion"):
         context.emit("candidate.delta", {"channel": "body", "text": artifact["conclusion"]})
-    if artifact["status"] == "need_user_input":
+    preliminary = artifact["status"] == "need_user_input" and can_analyze_provisionally(state)
+    if artifact["status"] == "need_user_input" and not preliminary:
         question = artifact["question"] or "请补充主要不适的持续时间和伴随表现。"
         return {**retrieval_updates, "agent_stop": "need_user_input", "intent_type": "consult", "response": question,
                 "pending_question": question, "pending_context": state.get("episode_text", ""),
                 "agent_traces": _traces(state, "bianzheng", run),
                 "agent_artifacts": _artifacts(state, "bianzheng", artifact)}
     return {**retrieval_updates, "agent_stop": "", "diagnosis": artifact["conclusion"], "bianzheng_note": artifact["conclusion"],
+            **(provisional_updates(state, artifact) if preliminary else {}),
             "agent_traces": _traces(state, "bianzheng", run),
             "agent_artifacts": _artifacts(state, "bianzheng", artifact)}
 
@@ -175,7 +204,7 @@ async def formula_agent(state: dict) -> dict:
 
     def planner(step: int, _observations: list[dict]) -> dict:
         if step == 1:
-            return {"tool": "search_formulas", "arguments": {"query": formula_query}}
+            return {"tool": "search_formulas", "arguments": {"query": mock_plan["name"] if herb_names else formula_query}}
         if not revision and 2 <= step < 2 + min(2, len(herb_names)):
             return {"tool": "lookup_herb", "arguments": {"name": herb_names[step - 2]}}
         if not revision and step == 2 + min(2, len(herb_names)) and herb_names:
@@ -186,26 +215,34 @@ async def formula_agent(state: dict) -> dict:
                            "uncertainties": (["候选剂量仍需人工复核"] if herb_names else []), "question": ""}}
 
     task = json.dumps({
-        "goal": "根据辨证产物形成结构化候选方剂。先查询方剂和药材，缺少剂量证据时必须留空，不得猜测。",
+        "goal": ("仅检索可溯源的方剂文献条目作知识对照，形成结构化知识候选，剂量全部留空，不确认个人适用性。已明确的非草药过敏保留待医师复核，不阻断文献检索。无文献匹配时如实说明，不编造条目。"
+                 if state.get("analysis_only") else "根据辨证产物形成结构化候选方剂。先查询方剂和药材，缺少剂量证据时必须留空，不得猜测。"),
         "diagnosis": state.get("diagnosis", ""), "symptoms": state.get("symptoms", []),
         "profile": state.get("profile", {}), "review_feedback": state.get("safety_errors", []),
         "patient_context": clinical_context(state),
         "available_dosage_evidence": "需要时调用 get_dosage_evidence，不得从模型常识补充",
+        "completion_rule": "本轮若仅作初步知识分析，仍须实际检索方剂条目，在 comparison 说明条目记载的适应描述、与已知症状的重合和缺失依据。不得把文献候选说成个人选方。舌脉缺失不阻断文献对照；无匹配应说明证据不足，不编造方剂。",
     }, ensure_ascii=False)
     run = await run_agent_graph(name="方剂 Agent", role="formula", task=task, state=state,
                                 tools=[FORMULA_TOOL, HERB_TOOL, DOSAGE_TOOL, COMPATIBILITY_TOOL],
                                 output_schema=FormulaArtifact, mock_planner=planner, max_steps=8)
     artifact = run.output
-    if artifact["status"] == "need_user_input" or not artifact.get("plan"):
+    incomplete = artifact["status"] == "need_user_input" or not artifact.get("plan")
+    preliminary = incomplete and can_analyze_provisionally(state)
+    if incomplete and not preliminary:
         question = artifact["question"] or "候选方剂所需资料不足，请补充当前用药和过敏情况。"
         return {"agent_stop": "need_user_input", "intent_type": "consult", "response": question,
                 "pending_question": question, "pending_context": state.get("episode_text", ""),
                 "agent_traces": _traces(state, "formula", run),
                 "agent_artifacts": _artifacts(state, "formula", artifact)}
-    plan = migrate_plan(artifact["plan"])
+    plan = migrate_plan(artifact.get("plan") or {"name": "本轮未形成个人方剂候选", "herbs": []})
     for herb in plan.get("herbs", []):
         herb["verification_status"] = "unverified"
+        if state.get("analysis_only") or preliminary:
+            herb["dosage"].update(min=None, max=None)
+    artifact = {**artifact, "plan": plan}
     return {"agent_stop": "", "treatment_plan": plan, "formula_note": f'候选方剂：{plan["name"]}',
+            **(provisional_updates(state, artifact) if preliminary else {}),
             "safety_errors": [], "reviewer_approved": True,
             "safety_retry_count": state.get("safety_retry_count", 0) + (1 if revision else 0),
             "agent_traces": _traces(state, "formula", run),
@@ -219,6 +256,14 @@ def formula_route(state: dict) -> str:
 async def herb_agent(state: dict) -> dict:
     plan = state.get("treatment_plan", {})
     herb_names = names(plan)
+    if not herb_names and state.get("analysis_only"):
+        for observation in state.get("agent_traces", {}).get("formula", []):
+            if observation.get("tool") == "search_formulas" and observation.get("status") == "success":
+                entries = observation.get("result", {}).get("formulas", [])
+                if entries:
+                    herb_names = [herb["name"] for herb in entries[0].get("herbs", []) if isinstance(herb, dict) and herb.get("name")][:5]
+                    if herb_names:
+                        break
 
     def planner(step: int, observations: list[dict]) -> dict:
         if step == 1:
@@ -229,7 +274,8 @@ async def herb_agent(state: dict) -> dict:
             return {"tool": "check_user_risks", "arguments": {"herbs": herb_names}}
         dosage_index = step - 4
         if 0 <= dosage_index < len(herb_names):
-            return {"tool": "get_dosage_evidence", "arguments": {"name": herb_names[dosage_index]}}
+            return {"tool": "lookup_herb" if state.get("analysis_only") else "get_dosage_evidence",
+                    "arguments": {"name": herb_names[dosage_index]}}
         problems = []
         evidence_ids = []
         for observation in observations:
@@ -245,9 +291,12 @@ async def herb_agent(state: dict) -> dict:
                            "evidence_ids": list(dict.fromkeys(evidence_ids)), "question": ""}}
 
     task = json.dumps({
-        "goal": "独立审查候选药材与当前画像、配伍和剂量证据。未知药物相互作用必须标记人工复核。",
+        "goal": ("核对已检索条目的药材资料与已收录配伍规则，非草药过敏未覆盖项列入 problems 和 required_actions 待人工复核。区分知识条目核对与个人用药批准；本轮不提供个人用药安全承诺，不因已知非草药过敏停止药材知识核对。"
+                 if state.get("analysis_only") else "独立审查候选药材与当前画像、配伍和剂量证据。未知药物相互作用必须标记人工复核。"),
         "candidate": plan, "profile_summary": state.get("profile", {}),
         "patient_context": clinical_context(state),
+        "reference_herbs": herb_names,
+        "completion_rule": "知识分析时应实际调用 lookup_herb 查询至少两味已有文献条目的药材（若有），核对性质、功效和来源后再结束。reference_herbs 只表示文献药材，不代表个人处方。不要只输出审查通过或需复核；不得编造未查到的本草内容。",
     }, ensure_ascii=False)
     run = await run_agent_graph(name="本草 Agent", role="herb", task=task, state=state,
                                 tools=[PROFILE_TOOL, HERB_TOOL, DOSAGE_TOOL, COMPATIBILITY_TOOL, USER_RISK_TOOL],

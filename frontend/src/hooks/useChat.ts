@@ -39,7 +39,7 @@ function reduceStages(
   );
 }
 
-export function useChat(threadId: string, initialMessages: MessageItem[] = []) {
+export function useChat(threadId: string, initialMessages: MessageItem[] = [], mode: "fixed" | "multi" = "multi") {
   const [messages, setMessages] = useState<MessageItem[]>(initialMessages);
   const [streaming, setStreaming] = useState(false);
   const [currentThreadId, setCurrentThreadId] = useState(threadId);
@@ -88,10 +88,19 @@ export function useChat(threadId: string, initialMessages: MessageItem[] = []) {
       const controller = new AbortController();
       abortRef.current = controller;
       const isCurrent = () => turnSeqRef.current === myTurn && !controller.signal.aborted;
+      const reportError = (message: string) => {
+        if (!isCurrent()) return;
+        toast.error(message);
+        setMessages((previous) => {
+          if (!isCurrent()) return previous;
+          return previous.map((item, index) => index === previous.length - 1 && item.role === "assistant"
+            ? { ...item, content: message, notes: undefined, stages: undefined } : item);
+        });
+      };
 
       try {
         await streamChat(
-          { message: text, thread_id: currentThreadId || undefined, files },
+          { message: text, thread_id: currentThreadId || undefined, files, mode },
           {
             signal: controller.signal,
             onEvent: (ev) => {
@@ -207,15 +216,15 @@ export function useChat(threadId: string, initialMessages: MessageItem[] = []) {
                     .catch(() => {});
                 }
               } else if (ev.type === "error") {
-                toast.error(ev.message);
+                reportError(ev.message);
               }
             },
-            onError: (err) => { if (isCurrent()) toast.error(err.message); },
+            onError: (err) => reportError(err.message),
           }
         );
       } catch (error) {
         if (isCurrent() && (error as Error).name !== "AbortError") {
-          toast.error(error instanceof Error ? error.message : "请求失败，请稍后重试");
+          reportError(error instanceof Error ? error.message : "请求失败，请稍后重试");
         }
       } finally {
         if (isCurrent() && abortRef.current === controller) {
@@ -224,7 +233,7 @@ export function useChat(threadId: string, initialMessages: MessageItem[] = []) {
         }
       }
     },
-    [currentThreadId, qc]
+    [currentThreadId, qc, mode]
   );
 
   const stop = useCallback(() => {

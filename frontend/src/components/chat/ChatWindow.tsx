@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useAuthStore } from "@/stores/auth";
 import { useChat } from "@/hooks/useChat";
 import { MessageBubble } from "./MessageBubble";
 import { ProfileSuggestions } from "./ProfileSuggestions";
@@ -53,12 +55,42 @@ export function mergeAssistantMessages(msgs: MessageItem[]): MessageItem[] {
 }
 
 export function ChatWindow({ threadId }: { threadId: string }) {
-  const { messages, streaming, send, stop, currentThreadId } = useChat(threadId);
+  const username = useAuthStore((state) => state.username);
+  const qc = useQueryClient();
+  const { data: threads, isPending: loadingThreads } = useQuery({
+    queryKey: ["threads", username], queryFn: api.listThreads, enabled: !!username,
+  });
+  const [draftMode, setDraftMode] = useState<"fixed" | "multi">("multi");
+  const [changingMode, setChangingMode] = useState(false);
+  const activeThread = threads?.find((thread) => thread.thread_id === threadId);
+  const mode = activeThread?.mode ?? draftMode;
+  const { messages, streaming, send, stop, currentThreadId } = useChat(threadId, [], mode);
   const [input, setInput] = useState("");
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [uploading, setUploading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const modeBusy = changingMode || (!!threadId && loadingThreads);
+
+  async function changeMode(next: "fixed" | "multi") {
+    if (streaming || modeBusy) return;
+    if (!currentThreadId) {
+      setDraftMode(next);
+      return;
+    }
+    setChangingMode(true);
+    try {
+      const updated = await api.setThreadMode(currentThreadId, next);
+      qc.setQueryData<typeof threads>(["threads", username], (old) =>
+        old?.map((thread) => thread.thread_id === updated.thread_id ? updated : thread));
+      setDraftMode(next);
+      qc.invalidateQueries({ queryKey: ["threads"] });
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "切换模式失败");
+    } finally {
+      setChangingMode(false);
+    }
+  }
 
   // 新消息时自动滚到底部
   useEffect(() => {
@@ -79,7 +111,7 @@ export function ChatWindow({ threadId }: { threadId: string }) {
   }
 
   function handleSend() {
-    if (!input.trim() || streaming) return;
+    if (!input.trim() || streaming || modeBusy) return;
     send(input, files.map((f) => f.path));
     setInput("");
     setFiles([]);
@@ -97,6 +129,18 @@ export function ChatWindow({ threadId }: { threadId: string }) {
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col">
+      <div className="flex flex-wrap items-center justify-center gap-3 border-b border-border px-4 py-2 text-sm">
+        <label htmlFor="consultation-mode">问诊模式</label>
+        <select id="consultation-mode" value={mode} disabled={streaming || modeBusy}
+          onChange={(event) => changeMode(event.target.value as "fixed" | "multi")}
+          className="rounded-md border border-border bg-card px-2 py-1">
+          <option value="multi">多 Agent 会诊</option>
+          <option value="fixed">固定流程</option>
+        </select>
+        <span className="text-xs text-muted-foreground">
+          {mode === "multi" ? "辨证 → 方剂 → 本草 → 独立审查" : "辨证 → 方剂 → 独立审查"}
+        </span>
+      </div>
       <ProfileSuggestions threadId={currentThreadId} streaming={streaming} refreshKey={messages.length} />
       <div className="min-h-0 flex-1 overflow-y-auto">
         <div className="mx-auto max-w-3xl space-y-4 px-4 py-6">
@@ -193,7 +237,7 @@ export function ChatWindow({ threadId }: { threadId: string }) {
                 <Square className="h-4 w-4" />
               </Button>
             ) : (
-              <Button size="icon" onClick={handleSend} disabled={!input.trim()} aria-label="发送">
+              <Button size="icon" onClick={handleSend} disabled={!input.trim() || modeBusy} aria-label="发送">
                 <Send className="h-4 w-4" />
               </Button>
             )}

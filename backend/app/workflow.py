@@ -21,7 +21,7 @@ from .classics import passage_excerpt, retrieve_classics
 from .terms import CLASSIC_TERMS, search_plan as build_search_plan
 from .safety import check_herbs, mentioned_herbs, normalize, contains_dosing
 from . import safety_store
-from .safety_context import make_context, applicable_facts, gate_context, response_for, profile_candidates, merge_facts, extract_facts, subject_of
+from .safety_context import make_context, applicable_facts, gate_context, response_for, profile_candidates, merge_facts, extract_facts, subject_of, uncovered_allergens
 from . import symptoms as symptom_parser
 from .symptoms import SYMPTOM_ALIASES
 from .documents import model_excerpt, normalize_document
@@ -45,6 +45,10 @@ class FlowState(TypedDict, total=False):
     identity_resolved_now: bool
     user_id: str
     preflight: dict
+    analysis_only: bool
+    manual_review_reasons: list[str]
+    preliminary_analysis: bool
+    analysis_questions: list[str]
     safety_state: dict
     safety_state_version: int
     profile_suggestions: list[dict]
@@ -119,6 +123,8 @@ def prepare(state: FlowState) -> FlowState:
         "search_plan": {}, "retrieval_trace": {}, "retrieval_history": [],
         "search_required": False, "intent_type": "", "symptoms": [], "denied_symptoms": [],
         "profile_suggestions": [],
+        "analysis_only": False, "manual_review_reasons": [],
+        "preliminary_analysis": False, "analysis_questions": [],
         "agent_stop": "", "agent_traces": {}, "agent_artifacts": {}, "herb_review": {},
     }
 
@@ -359,7 +365,9 @@ async def pre_safety(state: FlowState) -> FlowState:
     except Exception:
         result = {"decision": "block", "risk_categories": ["preflight_unavailable"],
                   "reason": "预审超时、失败或结构无法校验", "required_questions": []}
-    if result["decision"] != "allow":
+    analysis_only = bool(result.get("analysis_allowed") and identity_gate.get("analysis_allowed")
+                         and result["decision"] == "clarify" and not result.get("question_keys"))
+    if result["decision"] != "allow" and not analysis_only:
         response = response_for(safe, result)
         return {**base, "safety_state": safe, "preflight": result,
                 "intent_type": "safety_rejected" if result["decision"] == "block" else "safety_advisory",
@@ -367,8 +375,12 @@ async def pre_safety(state: FlowState) -> FlowState:
     # Resume the original complaint after safety clarification without losing it.
     if previous.get("status") in {"needs_info", "restricted", "blocked"} and not state.get("pending_context"):
         base["pending_context"] = safe.get("episode", "")
-    safe.update(status="resolved", pending=None, episode="")
-    return {**base, "safety_state": safe, "preflight": result, "intent_type": ""}
+    reasons = (["过敏原“" + "、".join(uncovered_allergens(safe)) + "”尚未覆盖自动药材风险校验，个人用药适用性需人工复核"]
+               if analysis_only else [])
+    safe.update(status="restricted" if analysis_only else "resolved", pending=None, episode="")
+    return {**base, "safety_state": safe, "preflight": result, "intent_type": "",
+            "analysis_only": analysis_only, "manual_review_reasons": reasons,
+            "analysis_questions": result.get("review_questions", [])[:3] if analysis_only else []}
 
 
 def pre_safety_route(state: FlowState) -> str:
@@ -423,7 +435,8 @@ def inquire(state: FlowState) -> FlowState:
     new = symptom_parser.extract(text, **source)
     new += symptom_parser.bind_answer(facts, pending, text, **source)
     if not new:
-        new += symptom_parser.bind_details(facts, text, **source)
+        for clause in re.finditer(r"[^，,。；;！？!?\n]+", text):
+            new += symptom_parser.bind_details(facts, clause[0], **source, start=clause.start())
     new += symptom_parser.extract(attachment_text(state), **source, kind="attachment")
     for fact in new:
         fact["episode_id"] = state.get("episode_id", "")
@@ -472,7 +485,7 @@ def inquire(state: FlowState) -> FlowState:
             "episode_text": combined,
             "response": "你好，我可以帮助整理症状信息，并展示中医知识检索与会诊流程。请描述主要不适、持续时间，以及有无过敏史。内容仅供学习研究参考。",
         }
-    has_duration = bool(re.search(r"\d|[一二两三四五六七八九十半]+(?:个)?(?:小时|天|周|月|年)", combined)) or any(
+    has_duration = bool(symptom_parser.duration_text(combined)) or any(
         f.get("duration_text") for f in facts if f["subject"] == subject and f["time_scope"] == "current" and not f.get("superseded_by"))
     has_detail = bool(re.search(
         r"伴|同时|并|没有|无|加重|减轻|反复|常|不用查古籍|不需要查文献|无需检索",
@@ -629,6 +642,8 @@ async def _make_plan(state: FlowState, *, revision: bool = False) -> dict:
     plan = migrate_plan(plan)
     for herb in plan.get("herbs", []):
         herb["verification_status"] = "unverified"
+        if state.get("analysis_only"):
+            herb["dosage"].update(min=None, max=None)
     return plan
 
 
@@ -689,6 +704,7 @@ def safety(state: FlowState) -> FlowState:
     # Clearing an unsupported dose changes the reviewed material: reject and regenerate.
     if fingerprint(plan) != state.get("reviewer_hash"):
         errors.append("剂量已因缺少依据清空，候选需重新审查")
+    errors += state.get("manual_review_reasons", [])
     review = {**review, "approved": not errors, "errors": errors}
     findings = list(dict.fromkeys(state.get("safety_findings", []) + errors))
     return {"treatment_plan": plan, "prescription_review": review,
@@ -697,6 +713,8 @@ def safety(state: FlowState) -> FlowState:
 
 
 def safety_route(state: FlowState) -> str:
+    if state.get("analysis_only"):
+        return "finish"
     if state.get("safety_errors") and state.get("safety_retry_count", 0) < MAX_SAFETY_REVISIONS:
         return "revise"
     return "finish"
@@ -712,6 +730,72 @@ def episode_write(state: FlowState) -> FlowState:
         text, data = episodes.summary(state)
         return {"context_summary": text, "episode_summary": data}
     return {"context_summary": "", "episode_summary": {}}
+
+
+def formula_references(state: FlowState) -> list[dict]:
+    """Public source entries, separate from an unapproved personal candidate."""
+    candidates = [state.get("treatment_plan", {}).get("name", "")]
+    for observation in state.get("agent_traces", {}).get("formula", []):
+        if observation.get("tool") == "search_formulas" and observation.get("status") == "success":
+            candidates += [row.get("name", "") for row in observation.get("result", {}).get("formulas", [])]
+    rows = []
+    for name in dict.fromkeys(candidates):
+        row = one("SELECT name,source,indication FROM formulas WHERE name=?", (name,))
+        if row and not contains_dosing(row["name"] + row["source"]):
+            if contains_dosing(row["indication"]):
+                row["indication"] = "原条目含用药内容，本轮省略。"
+            rows.append(row)
+        if len(rows) == 3:
+            break
+    return rows
+
+
+def herb_references(state: FlowState) -> list[dict]:
+    """Show only public entries actually looked up, never an executable herb list."""
+    rows = []
+    seen = set()
+    for role in ("herb", "formula"):
+        for observation in state.get("agent_traces", {}).get(role, []):
+            if observation.get("tool") != "lookup_herb" or observation.get("status") != "success":
+                continue
+            result = observation.get("result", {})
+            name = result.get("name") if result.get("found") else None
+            if not name or name in seen:
+                continue
+            row = one("SELECT name,properties,effects,contraindications,source FROM herbs WHERE name=?", (name,))
+            if not row or contains_dosing(row["name"] + row["source"]):
+                continue
+            for field in ("properties", "effects", "contraindications"):
+                if contains_dosing(row[field] or ""):
+                    row[field] = "涉及用药内容，本轮省略。"
+            rows.append(row)
+            seen.add(name)
+            if len(rows) == 4:
+                return rows
+    return rows
+
+
+def herb_reference_text(row: dict) -> str:
+    return (row["name"] + "：" + "；".join(label + row[key] for label, key in
+            (("性味归经：", "properties"), ("功效：", "effects"), ("条目禁忌：", "contraindications")) if row.get(key))
+            + "；知识来源：" + row["source"] + "。")
+
+
+def public_safety_warnings(state: FlowState) -> list[str]:
+    warnings = []
+    allergens = list(dict.fromkeys(f["entity"] for f in applicable_facts(state.get("safety_state", {}))
+                                  if f["category"] == "allergy" and f["assertion"] == "present")) if state.get("safety_state") else []
+    if allergens:
+        warnings.append("已记录过敏史：" + "、".join(allergens) + "。拟用药物的相关风险需医师或药师核对。")
+    for error in state.get("safety_findings", []) or state.get("safety_errors", []):
+        if re.search(r"十八反|十九畏|画像提示可能对", error) and not contains_dosing(error):
+            warnings.append(error[:250])
+    if state.get("analysis_only") or state.get("preliminary_analysis"):
+        warnings.append("当前辨证为初步分析，个人用药适用性尚未确认。")
+    if state.get("safety_errors"):
+        warnings.append("本轮用药建议尚未完成安全核验，需由执业中医师或药师复核。")
+    warnings.append("请勿依据本次分析自行抓药或调整用药。")
+    return list(dict.fromkeys(warnings))
 
 
 def final_consultation_notes(state: FlowState) -> list[dict]:
@@ -758,18 +842,49 @@ def final_consultation_notes(state: FlowState) -> list[dict]:
             "recommendation": "请勿自行抓药、加药或调整处方。",
         },
     ]
+    if state.get("analysis_only"):
+        references = formula_references(state)
+        notes[1].update(status="知识对照·待复核",
+                        content=("\n".join(row["name"] + "：" + row["indication"] for row in references) if references else "本轮未取得可展示的方剂知识条目。")
+                                + "这些是文献知识对照，未确认适用于当前咨询对象。",
+                        evidence="；".join(row["name"] + "：" + row["source"] for row in references),
+                        reasoning="过敏资料已传给各专家；当前未批准个人用药候选。")
+        herb_rows = herb_references(state)
+        notes[2].update(status="知识对照·待复核", content=("\n".join(herb_reference_text(row) for row in herb_rows)
+                        if herb_rows else "本轮未取得可展示的本草条目，不能声称已完成具体药材知识核对。") + "\n个人用药适用性尚未确认。",
+                        warning="；".join(errors))
+    artifact = state.get("agent_artifacts", {}).get("bianzheng", {})
+    notes[0].update(syndrome=artifact.get("syndrome", ""), confidence=artifact.get("confidence"),
+                    summary=artifact.get("summary") or notes[0]["content"])
+    comparison = state.get("agent_artifacts", {}).get("formula", {}).get("comparison", "")
+    notes[1]["summary"] = notes[1]["content"] + ("\n" + comparison if comparison and not contains_dosing(comparison) else "")
+    if errors:
+        advice = "当前尚不能形成可执行的个人处方，需由执业中医师结合面诊资料复核。"
+        if state.get("analysis_only"):
+            references = formula_references(state)
+            if references:
+                advice += "\n\n可供医师核对的方剂知识条目：" + "、".join(row["name"] for row in references) + "。这些条目不表示已为你选方。"
+    else:
+        advice = render_plan(plan) + "\n\n请由执业中医师确认个人适用性，勿自行抓药。"
+    notes[1]["prescription_advice"] = advice
+    herb_rows = herb_references(state)
+    notes[2]["summary"] = "\n".join(herb_reference_text(row).split("；知识来源：")[0] for row in herb_rows) or notes[2]["content"]
+    notes[2]["public_warnings"] = public_safety_warnings(state)
     return notes
 
 
 def finish(state: FlowState) -> FlowState:
     if state.get("intent_type") != "diagnose":
-        return {"response": state.get("response", "")}
+        response = state.get("response", "")
+        if state.get("analysis_only"):
+            response = "已记录过敏史，后续分析会保留这条风险信息。可以继续问诊与知识分析，个人用药适用性仍需复核。\n\n" + response
+        return {"response": response}
     is_consultation = bool(state.get("consultation_notes"))
     diagnosis = state.get("diagnosis", "资料不足。")
     if contains_dosing(diagnosis):
         diagnosis = "生成内容包含不允许展示的用药指令，本轮仅保留受限答复，请由医师核对。"
         state = {**state, "diagnosis": diagnosis, "safety_errors": ["答复检查未通过：包含剂量或用法"]}
-    lines = ["## 会诊综合" if is_consultation else "## 辨证思路", diagnosis]
+    lines = ["## 初步辨证（资料待补全）" if state.get("preliminary_analysis") else "## 会诊综合" if is_consultation else "## 辨证思路", diagnosis]
     docs = state.get("docs", [])
     if state.get("retrieval_warning"):
         lines.extend(["", state["retrieval_warning"]])
@@ -784,15 +899,37 @@ def finish(state: FlowState) -> FlowState:
     display_errors = (state.get("safety_findings", []) or errors) if errors else []
     plan = state.get("treatment_plan", {})
     if errors:
-        lines.extend(["", "## 安全校验", "候选方剂未通过确定性校验，具体药材清单已隐藏。请由执业医师人工复核。"])
+        if state.get("analysis_only"):
+            lines.extend(["", "## 方剂知识对照（适用性待复核）"])
+            references = formula_references(state)
+            lines.extend(f'- **{row["name"]}**：条目记载：{row["indication"]}；知识来源：{row["source"]}。' for row in references)
+            comparison = state.get("agent_artifacts", {}).get("formula", {}).get("comparison", "")
+            if comparison and not contains_dosing(comparison):
+                lines.extend(["", comparison])
+            lines.append("以上仅为检索到的文献条目，不表示已选为个人处方；本轮不展示剂量或用法。" if references
+                         else "本轮尚未取得可展示的方剂知识条目。")
+            lines.extend(["", "## 本草知识对照"])
+            herb_rows = herb_references(state)
+            lines.extend("- " + herb_reference_text(row) for row in herb_rows)
+            if not herb_rows:
+                lines.append("本轮未取得可展示的本草条目，无法提供有来源的具体药材分析。")
+        lines.extend(["", "## 安全校验",
+                      "本轮个人用药适用性尚待复核，不生成可执行处方。" if state.get("analysis_only")
+                      else "候选方剂未通过确定性校验，具体药材清单已隐藏。请由执业医师人工复核。"])
         lines.extend(f"- {error}" for error in display_errors)
     else:
         lines.extend(["", "## 方剂知识示例", render_plan(plan)])
         lines.append("配伍规则通过不等于剂量已核验，未核验项须人工复核；此为知识演示，不能作为个人处方。")
+    if state.get("analysis_questions"):
+        lines.extend(["", "## 仍待补充"])
+        lines.extend("- " + question for question in state["analysis_questions"] if not contains_dosing(question))
     lines.extend(["", "> 仅供学习与研究参考，不能代替执业医师面诊，也不应作为自行抓药的依据。"])
     notes = final_consultation_notes(state)
     response = "\n".join(lines)
-    if contains_dosing(json.dumps(notes, ensure_ascii=False)):
+    # prescription_advice is constructed above from the reviewed structured plan,
+    # never from model prose. Other note fields must remain dose-free.
+    prose_notes = [{key: value for key, value in note.items() if key != "prescription_advice"} for note in notes]
+    if contains_dosing(json.dumps(prose_notes, ensure_ascii=False)):
         return {"response": "答复检查未通过，本轮不展示具体治疗内容，请由医师核对。",
                 "consultation_notes": [], "safety_errors": ["最终答复包含剂量或用法"]}
     return {"response": response, "consultation_notes": notes,

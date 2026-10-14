@@ -47,7 +47,7 @@ def temporal_of(text: str) -> str:
         return "current"
     if re.search(r"结束|停用|停服|停药|(?:已经|已|现在|目前)停|不再|已停止|已经好了|已好转", text):
         return "ended"
-    if re.search(r"以前|曾经|既往|去年|昨晚|昨天|过去|小时(?:前|之前)", text):
+    if re.search(r"以前|曾经|曾(?:确诊|诊断|就诊|住院)|既往|去年|昨晚|昨天|过去|小时(?:前|之前)", text):
         return "past"
     return "current"
 
@@ -104,7 +104,8 @@ def extract_facts(text: str, *, subject="unknown", source_id="", kind="message",
         elif re.search(r"儿童|孩子|宝宝|婴儿|小孩|未成年", clause):
             add("age", "未知")
 
-        if "过敏" in clause:
+        no_current_reaction = re.search(r"(?:现在|目前|当前).{0,4}(?:没有|无|未出现)(?:任何)?过敏(?:反应|症状)", clause)
+        if "过敏" in clause and not no_current_reaction:
             match = re.search(r"对(?:于)?(.{1,35}?)(?:有|不)?过敏", clause)
             entities = []
             if match:
@@ -129,7 +130,7 @@ def extract_facts(text: str, *, subject="unknown", source_id="", kind="message",
             add("constitution", constitution[0], constitution.start(), constitution.end(), clause)
         for match in re.finditer(DISEASES, clause):
             add("history", match[0], match.start(), match.end(), clause)
-        history = re.search(r"(?:既往史[:：]|曾确诊|确诊为|患有)([^；。]{1,80})", clause)
+        history = re.search(r"(?:既往史[:：]|曾确诊(?:为)?|确诊为|曾诊断为|诊断为|患有)([^；。]{1,80})", clause)
         if history and not any(f["source"]["quote"] == clause and f["category"] == "history" for f in result):
             add("history", history[1], history.start(), history.end(), clause)
         medication = re.search(r"(?:正在|目前|现在|长期)(?:在)?(?:吃|服用|服|使用|用)([^；。]{1,60})", clause)
@@ -140,6 +141,10 @@ def extract_facts(text: str, *, subject="unknown", source_id="", kind="message",
             match = medication or known_med
             entity = medication[1] if medication else known_med[0]
             add("medication", entity, match.start(), match.end(), clause)
+        denial = re.search(r"(?:没有|未|不|无)(?:在|正在)?(服药|用药|服用(?:任何|其他)?药(?:物|品)?|使用(?:任何|其他)?药(?:物|品)?|吃药)", clause)
+        if denial and not (medication or known_med):
+            assertion = "uncertain" if assertion_of(clause, denial.start(1), denial.end(1)) == "uncertain" else "absent"
+            add("medication", denial[1], denial.start(1), denial.end(1), clause, assertion)
     return result
 
 
@@ -353,6 +358,14 @@ def applicable_facts(state: dict) -> list[dict]:
                  or state.get("subject_confirmed") and state["subject"] == "self")]
 
 
+def uncovered_allergens(state: dict) -> list[str]:
+    return list(dict.fromkeys(fact["entity"] for fact in applicable_facts(state)
+                             if fact["category"] == "allergy" and fact["assertion"] == "present"
+                             and fact["temporal_scope"] != "ended"
+                             and fact["entity"] not in {"过敏原不明", "过敏史"}
+                             and not mentioned_herbs(fact["entity"])))
+
+
 def gate_context(state: dict) -> dict:
     categories, keys = [], []
     restricted = False
@@ -409,17 +422,21 @@ def gate_context(state: dict) -> dict:
     if pending and pending["key"] in keys:
         keys.remove(pending["key"])
         keys.insert(0, pending["key"])
+    analysis_allowed = bool(restricted and not keys and set(categories) == {"allergy"}
+                            and state.get("subject_confirmed") and uncovered_allergens(state))
     return {"decision": "clarify" if keys or restricted else "allow",
             "risk_categories": list(dict.fromkeys(categories)),
             "reason": "风险资料待确认或需人工核对" if keys or restricted else "可继续流程，候选仍需独立校验",
             "required_questions": [QUESTIONS[key] for key in keys],
-            "question_keys": keys, "restricted": restricted}
+            "question_keys": keys, "restricted": restricted, "analysis_allowed": analysis_allowed}
 
 
 def response_for(state: dict, decision: dict) -> str:
     keys = decision.get("question_keys", [])
     if decision["decision"] == "block":
         state["status"] = "blocked"
+        if "preflight_unavailable" in decision.get("risk_categories", []):
+            return "安全预审暂时未能完成，本轮未进入辨证、方剂和本草分析。你的主诉与已确认资料已保留，请重试。"
         return "你提供的信息中出现可能需要及时处理的情况。若症状正在发生，请尽快联系当地急救服务或就近医疗机构，不要等待在线问答。"
     if keys:
         key = keys[0]
@@ -429,6 +446,12 @@ def response_for(state: dict, decision: dict) -> str:
         return "需要先确认安全资料，本轮不生成方剂或治疗建议。" + QUESTIONS[key]
     state["pending"] = None
     state["status"] = "restricted"
+    unsupported = [fact["entity"] for fact in applicable_facts(state)
+                   if fact["category"] == "allergy" and fact["assertion"] == "present"
+                   and fact["temporal_scope"] != "ended" and not mentioned_herbs(fact["entity"])
+                   and fact["entity"] not in {"过敏原不明", "过敏史"}]
+    if unsupported:
+        return "已记录过敏信息：" + "、".join(dict.fromkeys(unsupported)) + "。当前自动用药校验尚不覆盖这些过敏原，需由医师或药师核对，本轮未进入方剂和本草候选分析。可以继续补充症状与就诊资料。"
     return "已记录你补充的风险资料。资料补齐不表示可以安全用药；本轮保持受限，不生成方剂或治疗建议，请由医师或药师核对。可以继续补充症状与就诊资料。"
 
 
@@ -440,8 +463,20 @@ def candidate_key(fact: dict) -> str:
     return hashlib.sha256(json.dumps(value, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
 
 
+def eligible_profile_fact(fact: dict) -> bool:
+    """Long-term portrait excludes current symptoms and transient safety states."""
+    category = fact.get("category")
+    if category in {"allergy", "constitution"}:
+        return fact.get("entity") != "过敏原不明"
+    if category == "history":
+        quote = fact.get("source", {}).get("quote", "")
+        return bool(re.search(DISEASES, fact.get("entity", "")) or re.search(
+            r"既往史|既往诊疗|曾确诊|确诊为|诊断为|曾诊断|曾就诊|曾住院|做过.{0,12}手术", quote))
+    return False
+
+
 def profile_candidates(facts: list[dict]) -> list[dict]:
     return [copy.deepcopy(f) for f in facts
-            if f["category"] in {"allergy", "constitution", "history", "medication", "pregnancy_lactation"}
+            if eligible_profile_fact(f)
             and f["subject"] == "self" and f["assertion"] != "uncertain"
             and f["entity"] not in {"过敏原不明"} and f["source"]["kind"] == "message"]

@@ -12,7 +12,7 @@ from collections.abc import Callable
 import httpx
 from pydantic import BaseModel, ConfigDict, Field
 
-from .config import API_BASE, API_KEY, MODEL_MODE, MODEL_NAME
+from .config import API_BASE, API_KEY, MODEL_MODE, MODEL_NAME, TOOL_PROTOCOL
 from .prescription import CandidatePlan
 
 ROLES = ("inquiry", "knowledge", "safety_preflight", "summary", "profile_extraction", "retrieval_evaluation",
@@ -39,6 +39,7 @@ class InvocationContext:
     retrieval_deadline: float | None = None
     retrieval_terminal: str | None = None
     retrieval_cache: dict = field(default_factory=dict, repr=False)
+    tool_protocol: str = "json" if TOOL_PROTOCOL == "json" else "native"
 
     def check(self):
         if self.cancelled:
@@ -47,6 +48,10 @@ class InvocationContext:
 
 invocation: ContextVar[InvocationContext | None] = ContextVar("model_invocation", default=None)
 current_node: ContextVar[str | None] = ContextVar("model_node", default=None)
+
+
+class InvalidModelOutput(RuntimeError):
+    pass
 
 
 @dataclass(frozen=True)
@@ -98,7 +103,7 @@ class JSONObject(BaseModel):
     model_config = ConfigDict(extra="allow", strict=True)
 
 
-async def acomplete(system: str, user: str, *, role: str = "inquiry", schema: type[BaseModel] | None = None):
+async def acomplete(system: str, user: str, *, role: str = "inquiry", schema: type[BaseModel] | None = None, stream_output: bool = True):
     context = invocation.get()
     config = role_config(role)
     record = {"role": role, "node": current_node.get(), "model": config.model, "elapsed_ms": 0, "input_tokens": None,
@@ -120,7 +125,7 @@ async def acomplete(system: str, user: str, *, role: str = "inquiry", schema: ty
         from .context_budget import budget_request
         payload["messages"], payload["max_tokens"], record["budget"] = budget_request(payload["messages"], [], role)
         observe_input("model_request", {"role": role, "messages": payload["messages"], "budget": record["budget"]})
-        streaming = bool(context and context.emit and role in {"bianzheng", "formula"})
+        streaming = bool(stream_output and context and context.emit and role in {"bianzheng", "formula"})
         if streaming:
             payload.update(stream=True, stream_options={"include_usage": True})
         emitted = False
@@ -195,7 +200,7 @@ async def acomplete(system: str, user: str, *, role: str = "inquiry", schema: ty
                     await asyncio.sleep(min(0.25 * 2 ** attempt, 2))
                 except (ValueError, KeyError, IndexError, TypeError):
                     entry["status"] = "invalid_output"
-                    raise RuntimeError("模型未返回有效的结构化结果或正文") from None
+                    raise InvalidModelOutput("模型未返回有效的结构化结果或正文") from None
     except asyncio.CancelledError:
         record["status"] = "cancelled"
         raise
@@ -206,8 +211,8 @@ async def acomplete(system: str, user: str, *, role: str = "inquiry", schema: ty
         record["elapsed_ms"] = round((time.monotonic() - started) * 1000)
 
 
-async def acomplete_json(system: str, user: str, *, role: str, schema: type[BaseModel]):
-    return await acomplete(system, user, role=role, schema=schema)
+async def acomplete_json(system: str, user: str, *, role: str, schema: type[BaseModel], stream_output: bool = True):
+    return await acomplete(system, user, role=role, schema=schema, stream_output=stream_output)
 
 
 async def achat_tools(messages: list[dict], tools: list[dict], *, role: str) -> dict:
