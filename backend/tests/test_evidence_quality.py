@@ -27,7 +27,10 @@ def test_related_terms_are_frontloaded_without_becoming_patient_facts():
     assert "三周" in plan["semantic_query"]
     assert "口苦" not in plan["rerank_query"] and "咳嗽" not in plan["keyword_query"]
     assert len(plan["recall_queries"]) == 2 and plan["expansions"]
-    assert classics.retrieval_cache_key(plan) == classics.retrieval_cache_key(terms.search_plan(state, 2))
+    # A narrower retry has a different query and must not reuse the first
+    # no-match result. Merely changing its attempt counter still shares cache.
+    assert classics.retrieval_cache_key(plan) != classics.retrieval_cache_key(terms.search_plan(state, 2))
+    assert classics.retrieval_cache_key(plan) == classics.retrieval_cache_key({**plan, "attempt": 99})
 
 
 def test_expansion_catalog_rejects_invented_source_quote(tmp_path):

@@ -7,6 +7,7 @@ from dataclasses import dataclass, field
 from .documents import model_excerpt
 from .safety_context import applicable_facts
 from . import symptoms
+from .consultation_followup import answer_readings, scoped_answers, observation_ledger, inquiry_progress
 
 
 class ContextBudgetError(RuntimeError):
@@ -57,22 +58,56 @@ def clinical_bundle(state: dict) -> ContextBundle:
                        if f.get("source", {}).get("kind") != "summary"
                        and (not state.get("thread_id") or f.get("source", {}).get("thread_id") in {None, "", state["thread_id"]})]
     facts = symptoms.effective(scoped_symptoms, subject)
+    # Share source metadata once. Repeating the same message/date for every
+    # symptom and inherited attribute can consume the entire model request.
+    provenance, source_messages = [], {}
+    for fact in facts:
+        if fact.get("archived_episode"):
+            continue
+        source = fact.get("source", {})
+        message_id = source.get("message_id", "")
+        source_messages[message_id] = source.get("collected_at", "")
+        refs = {}
+        for field, ref in fact.get("evidence_refs", {}).items():
+            source_messages[ref.get("message_id", "")] = ref.get("collected_at", "")
+            if ref.get("fact_id") != fact["id"] or ref.get("message_id") != message_id:
+                refs[field] = [ref.get("fact_id"), ref.get("message_id")]
+        provenance.append({"id": fact["id"], "message_id": message_id, "evidence_refs": refs})
     items = [
         ContextItem(state.get("source_message_id") or "current", "本轮用户描述", state.get("message", ""), True),
         ContextItem("patient-scope", "咨询对象与病程", json.dumps({"subject": subject, "confirmed": safe.get("subject_confirmed", False),
                     "episode_id": state.get("episode_id", "")}, ensure_ascii=False), True),
         ContextItem("symptom-facts", "症状事实：保留时间、程度、变化和否认", symptoms.describe(facts, subject), True),
-        ContextItem("symptom-sources", "症状来源引用", json.dumps([{"id": f["id"], "message_id": f.get("source", {}).get("message_id"),
-                    "collected_at": f.get("source", {}).get("collected_at"), "episode_id": f.get("episode_id"), "evidence_refs": f.get("evidence_refs", {})} for f in facts
-                    if not f.get("archived_episode")], ensure_ascii=False), True),
+        ContextItem("symptom-sources", "症状来源引用：未单列字段继承同条事实的消息来源", json.dumps({"message_dates": source_messages, "facts": provenance},
+                    ensure_ascii=False, separators=(",", ":")), True),
         ContextItem("safety-facts", "适用安全事实", json.dumps(applicable_facts(safe), ensure_ascii=False), True),
         ContextItem("profile", "患者画像：空白为未知，内容为用户自述", json.dumps(state.get("profile", {}), ensure_ascii=False), True),
         ContextItem("pending", "待回答问题", state.get("pending_question", ""), True),
     ]
-    if state.get("analysis_only"):
+    if state.get("answered_question"):
+        items.append(ContextItem("answered-inquiry", "上一轮问题与本轮回答（问题不是症状事实）", json.dumps({
+            "question": state["answered_question"], "answer": state.get("message", ""),
+            "answer_message_id": state.get("source_message_id", ""),
+        }, ensure_ascii=False), True))
+    answers = scoped_answers(state)
+    if answers:
+        items.append(ContextItem("inquiry-answers", "已回答的问诊问题：保留未知，问题本身不是症状事实",
+                                 json.dumps([{key: row[key] for key in ("question", "answer", "answer_message_id", "stage") if key in row}
+                                             for row in answers], ensure_ascii=False), True))
+        items.append(ContextItem("answer-readings", "用户回答释义：按问题逐项对应，均为自述，不代表医学核实；不得重复询问",
+                                 json.dumps([{key: row[key] for key in ("question", "interpretation", "topics", "status", "answer_message_id")}
+                                             for row in answer_readings(state)], ensure_ascii=False, separators=(",", ":")), True))
+    observations = [{key: row[key] for key in ("topics", "status", "quote", "answer_message_id")}
+                    for row in observation_ledger(state) if not row.get("question")]
+    if observations:
+        items.append(ContextItem("observations", "已答与主动报告的观察：未知和否认均需保留；问题不是阳性依据",
+                                 json.dumps(observations, ensure_ascii=False, separators=(",", ":")), True))
+    items.append(ContextItem("inquiry-progress", "本次就诊共享追问进度",
+                             json.dumps(inquiry_progress(state), ensure_ascii=False), True))
+    if state.get("analysis_only") or state.get("preliminary_analysis"):
         items.append(ContextItem("analysis-boundary", "本轮分析范围", json.dumps({
-            "mode": "knowledge_only", "manual_review_reasons": state.get("manual_review_reasons", []),
-            "instruction": "继续症状追问、辨证假设及方剂本草文献对照。已明确的非草药过敏史保留待复核，不单独作为停止知识分析的理由。不得确认个人用药适用性，所有候选剂量留空，不提供用法。"
+            "mode": "provisional_reference", "manual_review_reasons": state.get("manual_review_reasons", []),
+            "instruction": "先追问辨证及选方所需的必要依据；追问后仍缺可选资料，可继续给出有依据的辨证、方剂和具体组成的处方参考，并逐项说明安全与剩余缺项。已明确的非草药过敏史保留待复核。不得确认个人用药适用性，所有候选剂量留空，不提供用法。"
         }, ensure_ascii=False), True))
     if state.get("file_text"):
         items.append(ContextItem("current-attachments", "病历相关原文摘录", model_excerpt(state["file_text"]), True))

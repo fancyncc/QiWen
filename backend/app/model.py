@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import re
 import time
 from contextvars import ContextVar
 from dataclasses import dataclass, field
@@ -10,7 +11,7 @@ from typing import Literal
 from collections.abc import Callable
 
 import httpx
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from .config import API_BASE, API_KEY, MODEL_MODE, MODEL_NAME, TOOL_PROTOCOL
 from .prescription import CandidatePlan
@@ -51,7 +52,68 @@ current_node: ContextVar[str | None] = ContextVar("model_node", default=None)
 
 
 class InvalidModelOutput(RuntimeError):
-    pass
+    def __init__(self, message: str, validation: dict | None = None):
+        super().__init__(message)
+        self.validation = validation or {}
+
+
+def validation_summary(exc: Exception, schema: type[BaseModel] | None) -> dict:
+    """Never include model values, validation messages, or response bodies."""
+    if not isinstance(exc, ValidationError) or schema is None:
+        return {"kind": "response_structure"}
+    fields = set()
+
+    def collect(value):
+        if isinstance(value, dict):
+            fields.update(value.get("properties", {}))
+            for child in value.values():
+                collect(child)
+        elif isinstance(value, list):
+            for child in value:
+                collect(child)
+
+    collect(schema.model_json_schema())
+    issues = [{"path": [part if isinstance(part, int) or part in fields else "unknown_field" for part in error["loc"]],
+               "type": error["type"]} for error in exc.errors(include_input=False, include_context=False, include_url=False)[:8]]
+    return {"kind": "json" if any(issue["type"] == "json_invalid" for issue in issues) else "schema", "issues": issues}
+
+
+def structured_content(content: str) -> str:
+    """Unwrap only a single enclosing Markdown fence, then validate normally.
+
+    Prose, multiple JSON objects, unknown fields and clinical value errors must
+    still fail strict validation. No partial extraction or coercion is allowed.
+    """
+    match = re.fullmatch(r"```(?:json)?[ \t]*\r?\n(.*?)\r?\n```", content.strip(), flags=re.DOTALL)
+    return match[1] if match else content
+
+
+class ModelServiceError(RuntimeError):
+    def __init__(self, details: dict):
+        super().__init__("模型服务调用未完成")
+        category = details.get("category")
+        self.details = {"category": category if category in {"upstream_unavailable", "rate_limited", "authentication", "timeout", "connection", "invalid_output", "http_error", "unavailable"} else "unavailable"}
+        status = details.get("http_status")
+        if isinstance(status, int) and not isinstance(status, bool) and 400 <= status <= 599:
+            self.details["http_status"] = status
+
+
+def failure_details(exc: Exception) -> dict:
+    """Allowlisted diagnostics only; never persist URLs, headers or response bodies."""
+    if isinstance(exc, ModelServiceError):
+        return dict(exc.details)
+    if isinstance(exc, httpx.HTTPStatusError):
+        status = exc.response.status_code
+        category = ("upstream_unavailable" if status >= 500 else "rate_limited" if status == 429
+                    else "authentication" if status in {401, 403} else "http_error")
+        return {"category": category, "http_status": status}
+    if isinstance(exc, (TimeoutError, httpx.TimeoutException)):
+        return {"category": "timeout"}
+    if isinstance(exc, httpx.TransportError):
+        return {"category": "connection"}
+    if isinstance(exc, (InvalidModelOutput, ValueError, KeyError, IndexError, TypeError)):
+        return {"category": "invalid_output"}
+    return {"category": "unavailable"}
 
 
 @dataclass(frozen=True)
@@ -181,7 +243,7 @@ async def acomplete(system: str, user: str, *, role: str = "inquiry", schema: ty
                     content = data["choices"][0]["message"]["content"]
                     if not isinstance(content, str) or not content.strip():
                         raise ValueError("模型返回空正文")
-                    result = schema.model_validate_json(content).model_dump() if schema else content
+                    result = schema.model_validate_json(structured_content(content)).model_dump() if schema else content
                     if streaming and not emitted:
                         context.emit("candidate.delta", {"channel": "plan_json" if schema else "body", "text": content})
                     entry["status"] = "success"
@@ -192,20 +254,23 @@ async def acomplete(system: str, user: str, *, role: str = "inquiry", schema: ty
                     raise
                 except (httpx.TransportError, httpx.HTTPStatusError, TimeoutError) as exc:
                     entry["status"] = "failed"
+                    entry["failure"] = failure_details(exc)
                     retryable = not isinstance(exc, httpx.HTTPStatusError) or exc.response.status_code in {408, 429} or exc.response.status_code >= 500
                     if emitted or not retryable or attempt >= config.retries:
-                        raise RuntimeError("模型调用失败，已达到重试上限") from None
+                        raise ModelServiceError(entry["failure"]) from None
                     if context:
                         context.check()
                     await asyncio.sleep(min(0.25 * 2 ** attempt, 2))
-                except (ValueError, KeyError, IndexError, TypeError):
+                except (ValueError, KeyError, IndexError, TypeError) as exc:
                     entry["status"] = "invalid_output"
-                    raise InvalidModelOutput("模型未返回有效的结构化结果或正文") from None
+                    entry["validation"] = record["validation"] = validation_summary(exc, schema)
+                    raise InvalidModelOutput("模型未返回有效的结构化结果或正文", record["validation"]) from None
     except asyncio.CancelledError:
         record["status"] = "cancelled"
         raise
-    except Exception:
+    except Exception as exc:
         record["status"] = "failed"
+        record["failure"] = failure_details(exc)
         raise
     finally:
         record["elapsed_ms"] = round((time.monotonic() - started) * 1000)
@@ -287,11 +352,12 @@ async def achat_tools(messages: list[dict], tools: list[dict], *, role: str) -> 
                     raise
                 except (httpx.TransportError, httpx.HTTPStatusError, TimeoutError) as exc:
                     entry["status"] = "failed"
+                    entry["failure"] = failure_details(exc)
                     retryable = (not isinstance(exc, httpx.HTTPStatusError)
                                  or exc.response.status_code in {408, 429}
                                  or exc.response.status_code >= 500)
                     if not retryable or attempt >= config.retries:
-                        raise RuntimeError("模型工具决策失败，已达到重试上限") from None
+                        raise ModelServiceError(entry["failure"]) from None
                     if context:
                         context.check()
                     await asyncio.sleep(min(0.25 * 2 ** attempt, 2))
@@ -301,8 +367,9 @@ async def achat_tools(messages: list[dict], tools: list[dict], *, role: str) -> 
     except asyncio.CancelledError:
         record["status"] = "cancelled"
         raise
-    except Exception:
+    except Exception as exc:
         record["status"] = "failed"
+        record["failure"] = failure_details(exc)
         raise
     finally:
         record["elapsed_ms"] = round((time.monotonic() - started) * 1000)

@@ -49,14 +49,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   if (!hydrated || !token) {
     return (
-      <div className="flex h-screen items-center justify-center text-muted-foreground">
+      <div className="flex h-dvh shrink-0 items-center justify-center text-muted-foreground">
         加载中...
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen w-full overflow-hidden">
+    <div className="flex h-dvh w-full shrink-0 overflow-hidden">
       <aside className="chat-sidebar hidden w-72 flex-col border-r border-sidebar-border md:flex">
         <SidebarContent
           username={username ?? ""}
@@ -67,7 +67,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           }}
         />
       </aside>
-      <main className="chat-surface flex min-h-0 min-w-0 flex-1 flex-col">{children}</main>
+      <main className="chat-surface flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">{children}</main>
     </div>
   );
 }

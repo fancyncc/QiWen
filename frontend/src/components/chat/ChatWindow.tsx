@@ -37,6 +37,8 @@ export function mergeAssistantMessages(msgs: MessageItem[]): MessageItem[] {
           notes: m.notes ?? last.notes,
           stages: m.stages ?? last.stages,
           elapsedMs: m.elapsedMs ?? last.elapsedMs,
+          flow: m.flow ?? last.flow,
+          mode: m.mode ?? last.mode,
         };
       } else {
         result[result.length - 1] = {
@@ -45,6 +47,8 @@ export function mergeAssistantMessages(msgs: MessageItem[]): MessageItem[] {
           notes: last.notes ?? m.notes,
           stages: last.stages ?? m.stages,
           elapsedMs: last.elapsedMs ?? m.elapsedMs,
+          flow: m.flow ?? last.flow,
+          mode: m.mode ?? last.mode,
         };
       }
     } else {
@@ -68,7 +72,7 @@ export function ChatWindow({ threadId }: { threadId: string }) {
   const [input, setInput] = useState("");
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [uploading, setUploading] = useState(false);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const messagesRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const modeBusy = changingMode || (!!threadId && loadingThreads);
 
@@ -94,7 +98,10 @@ export function ChatWindow({ threadId }: { threadId: string }) {
 
   // 新消息时自动滚到底部
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    const viewport = messagesRef.current;
+    // Only scroll the message viewport: scrollIntoView also moves the document
+    // when any descendant accidentally contributes overflow outside the shell.
+    viewport?.scrollTo({ top: viewport.scrollHeight, behavior: "smooth" });
   }, [messages]);
 
   async function handleUpload(file: File) {
@@ -128,21 +135,21 @@ export function ChatWindow({ threadId }: { threadId: string }) {
   const examplePrompts = ["肚子胀、怕冷、大便稀", "最近总是失眠多梦", "头痛、眼睛干涩"];
 
   return (
-    <div className="flex h-full min-h-0 flex-1 flex-col">
-      <div className="flex flex-wrap items-center justify-center gap-3 border-b border-border px-4 py-2 text-sm">
+    <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+      <div className="flex shrink-0 flex-wrap items-center justify-center gap-3 border-b border-border px-4 py-2 text-sm">
         <label htmlFor="consultation-mode">问诊模式</label>
         <select id="consultation-mode" value={mode} disabled={streaming || modeBusy}
           onChange={(event) => changeMode(event.target.value as "fixed" | "multi")}
           className="rounded-md border border-border bg-card px-2 py-1">
           <option value="multi">多 Agent 会诊</option>
-          <option value="fixed">固定流程</option>
+          <option value="fixed">固定工作流</option>
         </select>
         <span className="text-xs text-muted-foreground">
-          {mode === "multi" ? "辨证 → 方剂 → 本草 → 独立审查" : "辨证 → 方剂 → 独立审查"}
+          {mode === "multi" ? "辨证 → 方剂 → 本草 → 独立审查 → 安全校验" : "问诊 → 古籍检索（按需）→ 辨证 → 调理方案 → 配伍与用药校验"}
         </span>
       </div>
       <ProfileSuggestions threadId={currentThreadId} streaming={streaming} refreshKey={messages.length} />
-      <div className="min-h-0 flex-1 overflow-y-auto">
+      <div ref={messagesRef} role="region" aria-label="问诊消息" className="min-h-0 flex-1 overflow-y-auto">
         <div className="mx-auto max-w-3xl space-y-4 px-4 py-6">
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-14 text-center sm:py-20">
@@ -172,11 +179,10 @@ export function ChatWindow({ threadId }: { threadId: string }) {
               return <MessageBubble key={i} message={m} isStreaming={isStreamingLast} />;
             })
           )}
-          <div ref={bottomRef} />
         </div>
       </div>
 
-      <div className="px-4 pb-4 pt-3 sm:pb-6">
+      <div className="shrink-0 px-4 pb-4 pt-3 sm:pb-6">
         <div className="mx-auto mb-1 flex max-w-3xl flex-wrap justify-end">
           <ProfileFacts />
         </div>

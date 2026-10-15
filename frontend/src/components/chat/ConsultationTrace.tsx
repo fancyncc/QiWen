@@ -1,14 +1,15 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import { Check, ChevronDown, Loader2, Stethoscope } from "lucide-react";
+import { Check, ChevronDown, CircleAlert, Loader2, Stethoscope } from "lucide-react";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { Badge } from "@/components/ui/badge";
-import type { ConsultationNote, Stage } from "@/lib/types";
+import type { ConsultationNote, Stage, WorkflowPresentation } from "@/lib/types";
+import { FixedWorkflowTrace } from "./FixedWorkflow";
 
 /** 固定阶段顺序（与后端 graph_multiagent STAGE_LABELS 一致）。 */
 const STAGE_ORDER: { stage: string; label: string }[] = [
@@ -24,7 +25,7 @@ const STAGE_ORDER: { stage: string; label: string }[] = [
 /** 专家按辨证、方剂、本草的证据依赖顺序执行。 */
 const SPECIALIST_STAGES = new Set(["bianzheng", "fangji", "bencao"]);
 
-type CellStatus = "pending" | "active" | "done";
+type CellStatus = "pending" | "active" | "done" | "failed" | "cancelled";
 
 /** 只整理实际收到的阶段，不把未执行的专家阶段补成已完成。 */
 function reconcileStages(stages: Stage[]): Stage[] {
@@ -39,11 +40,13 @@ function reconcileStages(stages: Stage[]): Stage[] {
 function deriveStatus(stageId: string, stages: Stage[]): CellStatus {
   const found = stages.find((s) => s.stage === stageId);
   if (!found) return "pending";
+  if (found.status === "failed" || found.status === "cancelled") return found.status;
   return found.status === "done" ? "done" : "active";
 }
 
 /** 步骤状态图标：done=勾、active=旋转、pending=暗点。 */
 function StepIcon({ status }: { status: CellStatus }) {
+  if (status === "failed" || status === "cancelled") return <CircleAlert className="h-3 w-3 text-destructive" aria-hidden />;
   if (status === "done") return <Check className="h-3 w-3" aria-hidden />;
   if (status === "active")
     return <Loader2 className="h-3 w-3 animate-spin" aria-hidden />;
@@ -111,6 +114,8 @@ function StepRow({
       >
         <StepIcon status={status} />
         {label}
+        {status === "failed" && <span className="text-destructive">· 执行失败</span>}
+        {status === "cancelled" && <span className="text-muted-foreground">· 已停止</span>}
       </div>
       {status === "done" && <NoteSummaryLine note={note} />}
     </div>
@@ -206,7 +211,7 @@ function NoteCard({ note }: { note: ConsultationNote }) {
       )}
       <Field label="加减" value={note.modifications} />
       <Field label="建议" value={note.suggestions} />
-      <Field label="分析摘要" value={note.reasoning} />
+      <Field label="分析依据" value={note.reasoning} />
       {/辨证/.test(specialist) && typeof note.confidence === "number" && <p className="mt-2 text-[11px] text-muted-foreground">置信度为模型自评，不代表诊断准确率。</p>}
     </div>
   );
@@ -217,30 +222,41 @@ function NoteCard({ note }: { note: ConsultationNote }) {
  *
  * - 追问/纯问诊轮（仅问诊阶段、无笔记）：流式中单行"问诊中"，完成后不渲染
  *   （答案本身即是结果，无消失问题）。
- * - 会诊轮：流式中垂直展示实时步骤（并行专家簇缩进分组）；
- *   完成后自动折叠为永久摘要条，可展开查看步骤与会诊笔记。
+ * - 会诊轮：默认收起，流式中仅显示当前阶段；可展开查看步骤与会诊笔记。
  */
 export function ConsultationTrace({
   stages,
   notes,
   streaming = false,
   elapsedMs,
+  mode,
+  flow,
 }: {
   stages?: Stage[];
   notes?: ConsultationNote[];
   streaming?: boolean;
   elapsedMs?: number;
+  mode?: "fixed" | "multi";
+  flow?: WorkflowPresentation;
 }) {
   const hasSpecialists = (stages ?? []).some((s) => SPECIALIST_STAGES.has(s.stage));
-  const [open, setOpen] = useState(!streaming && (notes?.length ?? 0) >= 3);
+  const [open, setOpen] = useState(false);
   const wasStreaming = useRef(streaming);
   const contentId = useId();
 
   // 流式结束自动折叠（用户仍可手动展开）
   useEffect(() => {
-    if (wasStreaming.current && !streaming) setOpen((notes?.length ?? 0) >= 3);
+    if (wasStreaming.current && !streaming) setOpen(false);
     wasStreaming.current = streaming;
-  }, [streaming, notes?.length]);
+  }, [streaming]);
+
+  if (flow?.intent === "requirements") return <p className="mb-3 text-xs text-muted-foreground">本轮仅查询已有资料和待答问题，未执行专家分析。</p>;
+  if (mode === "fixed" && (flow || stages?.length)) {
+    return <FixedWorkflowTrace stages={stages} flow={flow} streaming={streaming} elapsedMs={elapsedMs} />;
+  }
+  if (flow?.mode === "multi" && (flow.status === "awaiting_input" || flow.status === "unavailable") && !streaming) {
+    return <FixedWorkflowTrace stages={stages} flow={flow} streaming={false} elapsedMs={elapsedMs} title="多 Agent 会诊" />;
+  }
 
   if (!stages?.length && !notes?.length) return null;
 
@@ -276,23 +292,9 @@ export function ConsultationTrace({
     notes?.length && notes.length < 3 ? `${notes.length} 位专家` : null,
   ].filter(Boolean);
 
-  // 流式中：实时展开步骤
-  if (streaming) {
-    return (
-      <div
-        className="mb-2 rounded-md border border-border/60 bg-muted/40 px-3 py-2"
-        role="status"
-        aria-label="会诊进度"
-        aria-live="polite"
-      >
-        <div className="mb-1 flex items-center gap-1.5 text-xs font-medium text-primary">
-          <Stethoscope className="h-3.5 w-3.5" aria-hidden />
-          多专家会诊中
-        </div>
-        <StepList stages={stages ?? []} />
-      </div>
-    );
-  }
+  const actualStages = [...new Map((stages ?? []).map((stage) => [stage.stage, stage])).values()];
+  const activeStage = actualStages.filter((stage) => stage.status === "start").at(-1);
+  const currentStage = activeStage ? `${activeStage.label}中` : "正在处理";
 
   // 完成后：折叠摘要条（永久保留，可展开）
   return (
@@ -303,8 +305,8 @@ export function ConsultationTrace({
         aria-controls={contentId}
       >
         <span className="flex items-center gap-1.5">
-          <Stethoscope className="h-3.5 w-3.5" aria-hidden />
-          {summaryParts.join(" · ")}
+          {streaming ? <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden /> : <Stethoscope className="h-3.5 w-3.5" aria-hidden />}
+          <span aria-live="polite">{streaming ? `多 Agent 会诊 · ${currentStage}` : summaryParts.join(" · ")}</span>
         </span>
         <ChevronDown
           className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-180" : ""}`}

@@ -83,7 +83,11 @@ def test_body_card_data_and_edit_invalidate_review(monkeypatch):
         headers = auth(token)
         first = client.post("/api/chat", headers=headers, json={"message": "我最近失眠三天，白天疲劳"}).json()
         message = first["message"]
-        assert render_plan(message["prescription"]) in message["content"]
+        reference = first["flow"]["prescription_reference"]
+        assert reference["name"] == message["prescription"]["name"]
+        assert {item["name"] for item in reference["herbs"]} == {item["name"] for item in message["prescription"]["herbs"]}
+        assert all(item["dosage"]["min"] is None for item in reference["herbs"])
+        assert "文献参考范围" in message["content"]
         assert message["prescription_review"]["plan_hash"] == fingerprint(message["prescription"])
         assert all(item["verification_status"] == "unverified" for item in message["prescription"]["herbs"])
         original_finish = workflow.finish

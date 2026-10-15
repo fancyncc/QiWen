@@ -29,11 +29,16 @@ describe("ConsultationTrace", () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it("会诊轮流式中：只展示实际启动的步骤", () => {
-    const { container } = render(
+  it("会诊轮流式中默认仅显示当前阶段，展开后只展示实际启动的步骤", () => {
+    const { container, rerender } = render(
       <ConsultationTrace stages={SPECIALIST_STAGES} streaming={true} />
     );
-    expect(screen.getByText("多专家会诊中")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "多 Agent 会诊 · 方剂中" })).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByText("依次会诊")).not.toBeInTheDocument();
+    rerender(<ConsultationTrace stages={[...SPECIALIST_STAGES, { stage: "fangji", label: "方剂", status: "done" }, { stage: "bencao", label: "本草", status: "start" }]} streaming />);
+    expect(screen.getByRole("button", { name: "多 Agent 会诊 · 本草中" })).toHaveAttribute("aria-expanded", "false");
+    rerender(<ConsultationTrace stages={SPECIALIST_STAGES} streaming />);
+    fireEvent.click(screen.getByRole("button"));
     expect(screen.getByText("依次会诊")).toBeInTheDocument();
     for (const label of ["问诊", "辨证", "方剂"]) {
       expect(screen.getByText(label)).toBeInTheDocument();
@@ -72,7 +77,7 @@ describe("ConsultationTrace", () => {
     expect(screen.getByText(/阴虚火旺/)).toBeInTheDocument();
   });
 
-  it("专家阶段完成即显示单行结论卡（渐进揭示）", () => {
+  it("展开后显示已完成专家的单行结论卡", () => {
     const stagesWithNote: Stage[] = [
       { stage: "inquiry", label: "问诊", status: "done" },
       {
@@ -84,6 +89,7 @@ describe("ConsultationTrace", () => {
       { stage: "fangji", label: "方剂", status: "start" },
     ];
     render(<ConsultationTrace stages={stagesWithNote} streaming={true} />);
+    fireEvent.click(screen.getByRole("button"));
     expect(screen.getByText(/证候：脾胃虚寒证 · 置信度 85%/)).toBeInTheDocument();
     // 进行中的方剂无结论卡
     expect(screen.queryByText(/推荐方/)).not.toBeInTheDocument();
@@ -101,6 +107,7 @@ describe("ConsultationTrace", () => {
     const { container } = render(
       <ConsultationTrace stages={stagesWithWarning} streaming={true} />
     );
+    fireEvent.click(screen.getByRole("button"));
     expect(screen.getByText(/安全警告：甘草反海藻/)).toBeInTheDocument();
     expect(container.querySelector(".text-destructive")).not.toBeNull();
   });
@@ -122,6 +129,15 @@ describe("ConsultationTrace", () => {
   it("仅笔记无阶段（历史会话）时显示摘要条", () => {
     render(<ConsultationTrace notes={NOTES} streaming={false} />);
     expect(screen.getByText(/会诊过程/)).toBeInTheDocument();
+  });
+
+  it("完整三位专家的历史会诊默认收起，手动展开后仍可查看结论", () => {
+    render(<ConsultationTrace notes={[...NOTES, { specialist: "方剂", recommended_formulas: ["测试方"] }, { specialist: "本草", safety_warnings: ["测试警告"] }]} />);
+    expect(screen.getByRole("button")).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByText("阴虚火旺")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button"));
+    expect(screen.getByText("阴虚火旺")).toBeInTheDocument();
+    expect(screen.getByText("测试方")).toBeInTheDocument();
   });
 
   it("安全预审结束却未进入专家时保留流程位置", () => {

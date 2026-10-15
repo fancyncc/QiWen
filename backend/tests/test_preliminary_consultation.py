@@ -13,6 +13,56 @@ from app.safety_context import make_context, extract_facts
 from test_api import register, auth
 
 
+def test_completed_literature_comparison_without_personal_plan_continues_to_herbs(monkeypatch):
+    original = multi.run_agent_graph
+
+    async def literature_only(**kwargs):
+        run = await original(**kwargs)
+        if kwargs["role"] == "formula":
+            run.output.update(status="completed", plan=None, question="",
+                              comparison="已检索方剂条目，供知识对照；个人适用性仍需复核。")
+        return run
+
+    monkeypatch.setattr(multi, "run_agent_graph", literature_only)
+    with TestClient(app) as client:
+        token, uid = register(client, "literature_" + uuid4().hex[:8])
+        h = auth(token)
+        client.patch(f"/api/profiles/{uid}", headers=h, json={"allergies": "青霉素"})
+        tid = client.post("/api/threads", headers=h, json={"mode": "multi"}).json()["id"]
+        for text in ["肚子胀、怕冷、大便稀", "本人",
+                     "舌质偏白，舌苔厚，腹部喜欢温热和按压，平时经常四肢发凉且精神疲倦"]:
+            response = client.post("/api/chat", headers=h, json={"thread_id": tid, "message": text})
+            assert response.status_code == 200
+        data = response.json()
+        assert data["intent_type"] == "diagnose"
+        assert set(data["trace"]["agents"]["artifacts"]) == {"bianzheng", "formula", "herb"}
+        assert data["trace"]["agents"]["artifacts"]["formula"]["plan"] is None
+        assert "已检索方剂条目" in data["notes"][1]["summary"]
+        assert len(data["notes"]) == 3 and data["notes"][2]["public_warnings"]
+        assert data["message"]["prescription"] is None
+        assert not data["message"]["prescription_review"]["approved"]
+        assert "请补充当前用药和过敏情况" not in data["response"]
+        assert not contains_dosing(data["response"])
+
+
+@pytest.mark.parametrize("analysis_only", [True, False])
+def test_completed_null_plan_is_an_evidence_limit_not_a_phantom_patient_question(monkeypatch, analysis_only):
+    import asyncio
+    from app.agents.runtime import AgentRun
+
+    async def completed(**kwargs):
+        return AgentRun(output={"status": "completed", "plan": None, "question": "", "comparison": "知识对照"},
+                        trace=[], observations=[])
+
+    monkeypatch.setattr(multi, "run_agent_graph", completed)
+    state = {"analysis_only": analysis_only, "safety_state": {"subject": "self", "subject_confirmed": True},
+             "symptoms": ["腹胀"], "preflight": {"decision": "allow"}}
+    result = asyncio.run(multi.formula_agent(state))
+    assert result["agent_stop"] == "" and result["analysis_only"]
+    assert not result["treatment_plan"]["herbs"]
+    assert "pending_question" not in result and "response" not in result
+
+
 @pytest.mark.parametrize("formula_has_plan", [True, False])
 def test_missing_tongue_pulse_and_classics_do_not_end_known_complaint_flow(monkeypatch, formula_has_plan):
     original = multi.run_agent_graph
@@ -21,9 +71,9 @@ def test_missing_tongue_pulse_and_classics_do_not_end_known_complaint_flow(monke
         run = await original(**kwargs)
         if kwargs["role"] == "bianzheng":
             run.output.update(status="need_user_input", conclusion="已知失眠、入睡困难、易惊醒；辨证方向尚需舌脉与伴随表现区分。",
-                              uncertainties=["舌象尚未提供", "脉象尚未提供", "经典检索未命中"], question="请补充舌象、脉象。")
+                              uncertainties=["舌象尚未提供", "脉象尚未提供", "经典检索未命中"], question="", information_gap="optional")
         if kwargs["role"] == "formula" and not formula_has_plan:
-            run.output.update(status="need_user_input", plan=None, question="个人选方资料不足。")
+            run.output.update(status="need_user_input", plan=None, question="", information_gap="evidence")
         return run
 
     monkeypatch.setattr(multi, "run_agent_graph", incomplete)
@@ -40,14 +90,19 @@ def test_missing_tongue_pulse_and_classics_do_not_end_known_complaint_flow(monke
             data = result.json()
             assert data["intent_type"] == "diagnose"
             assert set(data["trace"]["agents"]["artifacts"]) == {"bianzheng", "formula", "herb"}
-            assert "初步辨证" in data["response"] and "方剂知识对照" in data["response"] and "本草知识对照" in data["response"]
-            assert "酸枣仁汤" in data["response"] and "功效：" in data["response"] and "知识来源：" in data["response"]
-            assert "仍待补充" in data["response"]
-            assert not contains_dosing(data["response"])
+            assert "辨证结果" in data["response"] and "处方建议" in data["response"] and "本草核对" in data["response"]
+            assert data["notes"][2]["summary"] and "条目功效" in data["response"]
+            assert "舌象尚未提供" in data["notes"][0]["uncertainties"]
+            if formula_has_plan:
+                reference = data["flow"]["prescription_reference"]
+                assert "酸枣仁汤" in data["response"] and "文献参考范围" in data["response"]
+                assert not reference["approved"] and all(item["dosage"]["min"] is None for item in reference["herbs"])
+            else:
+                assert "prescription_reference" not in data["flow"] and not contains_dosing(data["response"])
             assert data["message"]["prescription"] is None and not data["message"]["prescription_review"]["approved"]
             assert any(f.get("duration_text") == "一个星期" for f in data["trace"]["inquiry"]["facts"])
         history = client.get(f"/api/threads/{tid}/messages", headers=h).json()
-        assert "本草知识对照" in history[-1]["content"]
+        assert "本草核对" in history[-1]["content"]
 
 
 @pytest.mark.parametrize("change", ["unconfirmed", "no_symptoms", "no_duration", "blocked", "pending_risk", "pending_symptom"])

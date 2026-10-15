@@ -6,7 +6,7 @@ import json
 import re
 from uuid import uuid4
 
-from .model import SafetyPreflight, acomplete_json
+from .model import SafetyPreflight, InvalidModelOutput, acomplete_json
 from .safety import contains_dosing
 from .safety_context import extract_facts, make_context, gate_context, merge_facts, QUESTIONS, applicable_facts, eligible_profile_fact
 from .db import now
@@ -26,6 +26,20 @@ entity 必须在 quote 中出现，age 为年龄数字；subject 仅 self、unkn
 区分假设、否定、他人、既往与当前。不得把模型推测的体质、疾病当成自述。
 “目前未服药”“没有用药”是否定用药信息，不得记录为当前正在用药或仅因此要求补充全部药品。
 required_questions 仅列需确认的资料问题，reason 解释判断，不添加未提供的事实。"""
+
+
+async def model_preflight(payload: str) -> dict:
+    try:
+        return await acomplete_json(POLICY, payload, role="safety_preflight", schema=SafetyPreflight)
+    except InvalidModelOutput as exc:
+        # One format repair, not a clinical fallback or an unlimited provider
+        # retry. The corrected output still passes the same strict schema and
+        # all source/evidence checks in assess(). Network errors are not caught.
+        feedback = ("\n上次输出未通过格式校验。请重新审查同一份输入，只返回符合 Schema 的 JSON 对象，不要 Markdown 或额外文字。"
+                    "只使用 Schema 允许的字段和枚举。observations 只能包含明确有原文证据的安全事实；普通症状不得另造 category，"
+                    "没有新增安全事实时返回空列表。不要改写或猜测事实，也不要为了通过格式校验改成 allow。"
+                    "脱敏校验位置：" + json.dumps(exc.validation, ensure_ascii=False))
+        return await acomplete_json(POLICY + feedback, payload, role="safety_preflight", schema=SafetyPreflight)
 
 
 def deterministic_gate(text: str, profile: dict, context: dict | None = None) -> dict:
@@ -56,10 +70,8 @@ async def assess(text: str, profile: dict, *, mock: bool, context: dict | None =
             fact for fact in context.get("symptom_facts", [])
             if fact.get("subject") in {context.get("subject"), "unknown"}
         ]
-    model = await acomplete_json(POLICY,
-                                json.dumps({"current_input": text, "profile": profile, "safety_context": model_context,
-                                            "requested_scope": "knowledge_only" if deterministic.get("analysis_allowed") else "inquiry_and_analysis"}, ensure_ascii=False),
-                                role="safety_preflight", schema=SafetyPreflight)
+    model = await model_preflight(json.dumps({"current_input": text, "profile": profile, "safety_context": model_context,
+                                             "requested_scope": "knowledge_only" if deterministic.get("analysis_allowed") else "inquiry_and_analysis"}, ensure_ascii=False))
     if contains_dosing(json.dumps({k: v for k, v in model.items() if k != "observations"}, ensure_ascii=False)):
         raise RuntimeError("预审输出包含不允许的用药内容")
     observations = []

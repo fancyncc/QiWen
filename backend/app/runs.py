@@ -23,6 +23,8 @@ class Run:
     events: list[dict] = field(default_factory=list)
     queue: asyncio.Queue = field(default_factory=asyncio.Queue)
     task: asyncio.Task | None = None
+    deadline_task: asyncio.Task | None = None
+    cancel_reason: str = ""
     started: float = field(default_factory=time.monotonic)
     terminal: dict | None = None
     phase: str = "preparation"
@@ -43,7 +45,8 @@ class Run:
         payload = {"done": True, "run_id": self.id, "thread_id": self.thread_id,
                    "elapsed_ms": trace["elapsedMs"], "response": result["response"],
                    "intent_type": result.get("intent_type"), "symptoms": result.get("symptoms", []),
-                   "notes": result.get("consultation_notes", []), "message": answer, "trace": trace}
+                   "notes": result.get("consultation_notes", []), "message": answer, "trace": trace,
+                   "flow": trace.get("presentation")}
         return {**payload, "candidate_id": self.candidate_id, "sequence": self.sequence + 1,
                 "type": "answer.final", "payload": payload}
 
@@ -117,7 +120,7 @@ class Run:
         return {"run_id": self.id, "events": self.events, "model_calls": self.context.calls,
                 "context_usage": self.context.contexts,
                 "elapsedMs": round((time.monotonic() - self.started) * 1000), "mode": self.mode,
-                "phases_ms": self.phases_ms}
+                "phases_ms": self.phases_ms, "cancel_reason": self.cancel_reason}
 
 
 active: dict[str, Run] = {}
@@ -133,7 +136,9 @@ def persist_stop(run: Run, status: str):
             from uuid import uuid4
             db.execute("INSERT INTO messages(id,thread_id,role,content,intent_type,trace,created_at) VALUES(?,?,?,?,?,?,?)",
                        (str(uuid4()), run.thread_id, "assistant",
-                        "已停止，本轮没有生成最终答复。" if status == "cancelled" else "问答暂不可用，本轮未提供治疗建议，请稍后重试。",
+                        ("本轮运行超过 5 分钟，已停止，请稍后重试。" if run.cancel_reason == "timeout"
+                         else "服务更新中断了本轮问答，请重新发送。" if run.cancel_reason in {"service_shutdown", "service_restart"}
+                         else "已停止，本轮没有生成最终答复。") if status == "cancelled" else "问答暂不可用，本轮未提供治疗建议，请稍后重试。",
                         status, json.dumps(trace, ensure_ascii=False), now()))
 
 
@@ -159,13 +164,15 @@ async def execute(run: Run, message: str, profile: dict, file_text: str, save):
                                (json.dumps(run.telemetry(), ensure_ascii=False), now(), run.id))
                 run.emit("stage", event)
             elif event["type"] == "result":
+                from .consultation_followup import inquiry_progress
                 # No await between the cancellation fence and atomic result + episode commit.
                 run.set_phase("ready")
                 trace = {**run.telemetry(), "status": "completed", "preflight": event["data"].get("preflight", {}),
                          "classics_retrieval": {"attempts": event["data"].get("retrieval_history", []),
                                                 "final": event["data"].get("retrieval_trace", {})},
                          "inquiry": {"facts": event["data"].get("symptom_facts", []),
-                                     "pending": event["data"].get("symptom_pending")},
+                                     "pending": event["data"].get("symptom_pending"),
+                                     "progress": inquiry_progress(event["data"])},
                          "agents": {"traces": event["data"].get("agent_traces", {}),
                                     "artifacts": event["data"].get("agent_artifacts", {})},
                          "identity_scope": event["data"].get("identity_scope", ""),
@@ -194,7 +201,7 @@ async def execute(run: Run, message: str, profile: dict, file_text: str, save):
         # Custom stream events may be interrupted before delivery; close all unfinished nodes explicitly.
         run.close_nodes("cancelled")
         persist_stop(run, "cancelled")
-        run.terminal = {"cancelled": True, "run_id": run.id, "thread_id": run.thread_id}
+        run.terminal = {"cancelled": True, "run_id": run.id, "thread_id": run.thread_id, "cancel_reason": run.cancel_reason}
         run.terminal = run.emit("run.cancelled", run.terminal, force=True)
         raise
     except Exception as exc:
@@ -206,6 +213,8 @@ async def execute(run: Run, message: str, profile: dict, file_text: str, save):
         run.terminal = {"error": message, "run_id": run.id}
         run.terminal = run.emit("run.failed", run.terminal, force=True)
     finally:
+        if run.deadline_task and run.deadline_task is not asyncio.current_task():
+            run.deadline_task.cancel()
         invocation.reset(token)
         from .checkpoint_retention import prune
         try:
@@ -217,7 +226,12 @@ async def execute(run: Run, message: str, profile: dict, file_text: str, save):
             active.pop(run.id, None)
 
 
-async def cancel(run_id: str):
+async def expire(run: Run, seconds: float):
+    await asyncio.sleep(seconds)
+    await cancel(run.id, reason="timeout")
+
+
+async def cancel(run_id: str, *, reason: str = "requested"):
     run = active.get(run_id)
     if not run:
         return
@@ -225,6 +239,8 @@ async def cancel(run_id: str):
     if not row or row["status"] not in {"running", "cancelling"}:
         return
     first_cancellation = not run.context.cancelled
+    if first_cancellation:
+        run.cancel_reason = reason
     run.context.cancelled = True
     with connection() as db:
         db.execute("UPDATE chat_runs SET status='cancelling',updated_at=? WHERE id=? AND status='running'", (now(), run_id))
@@ -241,7 +257,7 @@ async def cancel(run_id: str):
     # Handles cancellation before the task got its first execution opportunity.
     if run.terminal is None:
         persist_stop(run, "cancelled")
-        run.terminal = {"cancelled": True, "run_id": run.id, "thread_id": run.thread_id}
+        run.terminal = {"cancelled": True, "run_id": run.id, "thread_id": run.thread_id, "cancel_reason": run.cancel_reason}
         run.terminal = run.emit("run.cancelled", run.terminal, force=True)
         active.pop(run.id, None)
 
@@ -252,6 +268,7 @@ def recover_interrupted():
         rows = [dict(row) for row in db.execute("SELECT * FROM chat_runs WHERE status IN ('running','cancelling')")]
     for row in rows:
         run = Run(row["id"], row["thread_id"], row["user_id"], "fixed")
+        run.cancel_reason = "service_restart"
         candidate = one("SELECT id FROM candidates WHERE run_id=? ORDER BY created_at DESC LIMIT 1", (run.id,))
         run.candidate_id = candidate["id"] if candidate else None
         run.sequence = one("SELECT COALESCE(MAX(sequence),0) AS value FROM run_events WHERE run_id=?", (run.id,))["value"]

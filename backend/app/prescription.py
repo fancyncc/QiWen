@@ -164,13 +164,17 @@ def render_plan(plan: dict) -> str:
         + ("；" + item["preparation"] if item["preparation"] else "") + "）" for item in plan["herbs"])
 
 
-def knowledge_context(herbs: list[str] | None = None) -> str:
+def knowledge_context(herbs: list[str] | None = None, *, verified_only: bool = False) -> str:
     query = "SELECT id,herb_id,herb_name,min_dose,max_dose,unit,preparation,source,verification_status FROM dosage_evidence"
+    clauses, params = [], []
+    if verified_only:
+        clauses.append("verification_status='verified' AND reviewed_by IS NOT NULL AND reviewed_by<>'' AND reviewed_at IS NOT NULL AND reviewed_at<>'' AND population='general_adult'")
     if herbs is not None:
         herbs = list(dict.fromkeys(normalize(name) for name in herbs))[:40]
         if not herbs:
             return "[]"
-        rows = all_rows(query + " WHERE herb_name IN (" + ",".join("?" for _ in herbs) + ") LIMIT 40", tuple(herbs))
-    else:
-        rows = all_rows(query + " LIMIT 120")
+        clauses.append("herb_name IN (" + ",".join("?" for _ in herbs) + ")")
+        params.extend(herbs)
+    rows = all_rows(query + (" WHERE " + " AND ".join(clauses) if clauses else "")
+                    + (" LIMIT 40" if herbs is not None else " LIMIT 120"), tuple(params))
     return json.dumps(rows, ensure_ascii=False)

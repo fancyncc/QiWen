@@ -101,6 +101,7 @@ export const api = {
       method: "PUT", body: JSON.stringify({ mode }),
     })),
   deleteThread: (id: string) => request(`/threads/${id}`, { method: "DELETE" }),
+  getActiveRun: (id: string) => request<{ run_id: string; thread_id: string; status: string; mode?: "fixed" | "multi" } | null>(`/threads/${id}/active-run`),
   getMessages: async (id: string): Promise<MessageItem[]> =>
     (await request<BackendMessage[]>(`/threads/${id}/messages`)).map(mapMessage),
 

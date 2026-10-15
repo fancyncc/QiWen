@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { streamChat } from "@/lib/stream";
+import { resumeChatRun } from "@/lib/resume-run";
 import { api } from "@/lib/api";
 import type { ConsultationNote, MessageItem, Stage } from "@/lib/types";
 import { toast } from "sonner";
@@ -24,7 +25,7 @@ import { toast } from "sonner";
  *  事件丢失的场景由完成态 reconcileStages 前缀重建兜底。 */
 function reduceStages(
   prev: Stage[],
-  ev: { stage: string; label: string; status: "start" | "done"; note?: ConsultationNote }
+  ev: Stage
 ): Stage[] {
   if (ev.status === "start") {
     if (prev.some((s) => s.stage === ev.stage)) {
@@ -34,9 +35,8 @@ function reduceStages(
     }
     return [...prev, { stage: ev.stage, label: ev.label, status: "start" }];
   }
-  return prev.map((s) =>
-    s.stage === ev.stage ? { ...s, status: "done" as const, note: ev.note } : s
-  );
+  return prev.some((s) => s.stage === ev.stage)
+    ? prev.map((s) => s.stage === ev.stage ? { ...s, ...ev } : s) : [...prev, ev];
 }
 
 export function useChat(threadId: string, initialMessages: MessageItem[] = [], mode: "fixed" | "multi" = "multi") {
@@ -48,9 +48,9 @@ export function useChat(threadId: string, initialMessages: MessageItem[] = [], m
   /** 轮次序号：每次 send 递增。用于丢弃迟到的上一轮 resync（防止覆盖新一轮的乐观消息）。 */
   const turnSeqRef = useRef(0);
   const qc = useQueryClient();
-  const cancelActive = useCallback(() => {
+  const cancelActive = useCallback((reason = "view_changed") => {
     ++turnSeqRef.current;
-    abortRef.current?.abort();
+    abortRef.current?.abort(reason);
     abortRef.current = null;
   }, []);
 
@@ -68,21 +68,58 @@ export function useChat(threadId: string, initialMessages: MessageItem[] = [], m
     let cancelled = false;
     const sequence = turnSeqRef.current;
     if (threadId) api
-      .getMessages(threadId)
-      .then((msgs) => !cancelled && sequence === turnSeqRef.current && setMessages(msgs))
+      .getActiveRun(threadId)
+      .then(async (run) => {
+        if (cancelled || sequence !== turnSeqRef.current) return;
+        const msgs = await api.getMessages(threadId);
+        if (cancelled || sequence !== turnSeqRef.current) return;
+        setMessages(msgs);
+        if (!run) return;
+        const controller = new AbortController();
+        abortRef.current = controller;
+        setStreaming(true);
+        setMessages([...msgs, { role: "assistant", content: "", mode: run.mode }]);
+        const current = () => !cancelled && sequence === turnSeqRef.current && !controller.signal.aborted;
+        const failed = (error: Error) => {
+          if (!current()) return;
+          setMessages((items) => items.map((item, index) => index === items.length - 1
+            ? { ...item, content: error.message, stages: undefined } : item));
+        };
+        await resumeChatRun(run.run_id, threadId, {
+          signal: controller.signal, onError: failed,
+          onEvent: (event) => {
+            if (!current()) return;
+            if (event.type === "token" || event.type === "stage") {
+              setMessages((items) => {
+                if (!current()) return items;
+                return items.map((item, index) => index !== items.length - 1 ? item
+                  : event.type === "token" ? { ...item, content: item.content + event.content }
+                    : { ...item, stages: reduceStages(item.stages ?? [], event) });
+              });
+            } else if (event.type === "done") {
+              setMessages((items) => items.map((item, index) => index === items.length - 1
+                ? { ...item, notes: event.notes, elapsedMs: event.elapsed_ms, flow: event.flow } : item));
+              qc.invalidateQueries({ queryKey: ["threads"] });
+              qc.invalidateQueries({ queryKey: ["profile"] });
+              void api.getMessages(threadId).then((items) => { if (current()) setMessages(items); }).catch(() => {});
+            } else if (event.type === "error") failed(new Error(event.message));
+          },
+        });
+        if (current()) { setStreaming(false); abortRef.current = null; }
+      })
       .catch(() => !cancelled && sequence === turnSeqRef.current && setMessages([]));
     return () => {
       cancelled = true;
       cancelActive();
     };
-  }, [threadId, cancelActive]);
+  }, [threadId, cancelActive, qc]); // Mode changes do not restart an active run.
 
   const send = useCallback(
     async (text: string, files: string[] = []) => {
       if (!text.trim() || abortRef.current) return;
       const myTurn = ++turnSeqRef.current;
       const userMsg: MessageItem = { role: "user", content: text };
-      setMessages((m) => [...m, userMsg, { role: "assistant", content: "" }]);
+      setMessages((m) => [...m, userMsg, { role: "assistant", content: "", mode }]);
       setStreaming(true);
 
       const controller = new AbortController();
@@ -154,6 +191,7 @@ export function useChat(threadId: string, initialMessages: MessageItem[] = [], m
                         ...copy[i],
                         ...(incomingNotes && incomingNotes.length > 0 ? { notes: incomingNotes } : {}),
                         ...(typeof elapsedMs === "number" ? { elapsedMs } : {}),
+                        ...(ev.flow ? { flow: ev.flow } : {}),
                       };
                       break;
                     }
@@ -237,7 +275,7 @@ export function useChat(threadId: string, initialMessages: MessageItem[] = [], m
   );
 
   const stop = useCallback(() => {
-    cancelActive();
+    cancelActive("user_stop");
     setStreaming(false);
     setMessages((old) => old.map((message, index) => index === old.length - 1 && message.role === "assistant" && !message.content
       ? { ...message, content: "已停止，本轮没有生成最终答复。" } : message));

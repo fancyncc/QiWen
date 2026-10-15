@@ -184,9 +184,9 @@ def test_multi_expert_cards_are_persisted_after_safety_review():
         thread = client.post("/api/threads", headers=headers, json={"mode": "multi"}).json()["id"]
         result = client.post("/api/chat", headers=headers,
                              json={"message": "我最近失眠三天，白天疲劳", "thread_id": thread}).json()
-        assert "## 会诊综合" in result["response"]
+        assert "## 辨证结果" in result["response"]
         assert [note["expert"] for note in result["notes"]] == ["辨证", "方剂", "本草"]
-        assert result["notes"][0]["status"] == "资料有限"
+        assert result["notes"][0]["status"] == "初步辨证"
         assert "酸枣仁汤" in result["notes"][1]["content"]
         assert result["notes"][2]["warning"] == ""
         saved = client.get(f"/api/threads/{thread}/messages", headers=headers).json()[-1]
@@ -434,7 +434,8 @@ def test_skip_urgent_and_exhausted_retrieval_routes(monkeypatch):
         skipped_trace = client.get(f'/api/threads/{skipped["thread_id"]}/messages', headers=headers).json()[-1]["trace"]["events"]
         skipped_stages = [event["stage"] for event in skipped_trace if event["status"] == "start"]
         assert "rag_decision" in skipped_stages and "search" not in skipped_stages
-        assert "本轮按要求未检索古籍" in skipped["response"]
+        assert "本轮按要求未检索古籍" not in skipped["response"]
+        assert next(step for step in skipped["flow"]["steps"] if step["stage"] == "search")["status"] == "skipped"
 
         urgent = client.post("/api/chat", headers=headers,
                              json={"message": "现在胸痛，呼吸困难"}).json()
@@ -451,8 +452,9 @@ def test_skip_urgent_and_exhausted_retrieval_routes(monkeypatch):
                                 json={"message": "我最近咳嗽三天，伴有疲劳"}).json()
         exhausted_trace = client.get(f'/api/threads/{exhausted["thread_id"]}/messages', headers=headers).json()[-1]["trace"]["events"]
         exhausted_stages = [event["stage"] for event in exhausted_trace if event["status"] == "start"]
-        # All supported expansions already participated; do not repeat identical work.
-        assert exhausted_stages.count("search") == 1
-        assert exhausted_stages.count("rewrite_query") == 0
-        assert "检索结果相关性不足" in exhausted["response"]
-        assert "当前没有可引用的古籍片段" in exhausted["response"]
+        # Bounded narrower retries retain the same positive observations.
+        assert 1 <= exhausted_stages.count("search") <= 3
+        assert exhausted_stages.count("rewrite_query") == exhausted_stages.count("search") - 1
+        assert "检索结果相关性不足" not in exhausted["response"]
+        assert "当前没有可引用的古籍片段" not in exhausted["response"]
+        assert exhausted["intent_type"] == "diagnose" and "辨证结论" in exhausted["response"]

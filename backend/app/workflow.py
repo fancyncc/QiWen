@@ -6,7 +6,9 @@ import asyncio
 import inspect
 import time
 from typing import TypedDict
+from typing import Literal
 from uuid import uuid4
+from pydantic import BaseModel, ConfigDict, Field
 
 from langgraph.graph import END, START, StateGraph
 from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
@@ -14,22 +16,34 @@ from langgraph.config import get_stream_writer
 
 from .config import CHECKPOINT_PATH, MODEL_MODE
 from .db import one
-from .model import acomplete, acomplete_json, CandidatePlan, ReviewResult, invocation, current_node
+from .model import acomplete, acomplete_json, CandidatePlan, ReviewResult, invocation, current_node, failure_details
 from .preflight import assess
 from .prescription import migrate_plan, names, review_plan, fingerprint, patient_fingerprint, render_plan, knowledge_context
+from .prescription_reference import reference_prescription, render_reference
+from .clinical_output import ASSESSMENT_STYLE, FORMULA_STYLE, ClinicalAssessmentFields, assessment_text, formula_explanation, herb_explanation, selection_advice
 from .classics import passage_excerpt, retrieve_classics
 from .terms import CLASSIC_TERMS, search_plan as build_search_plan
-from .safety import check_herbs, mentioned_herbs, normalize, contains_dosing
+from .safety import KNOWN, check_herbs, mentioned_herbs, normalize, contains_dosing
 from . import safety_store
 from .safety_context import make_context, applicable_facts, gate_context, response_for, profile_candidates, merge_facts, extract_facts, subject_of, uncovered_allergens
 from . import symptoms as symptom_parser
 from .symptoms import SYMPTOM_ALIASES
 from .documents import model_excerpt, normalize_document
 from .context import clinical_context
+from .consultation_followup import (InformationGap, FOLLOWUP_RULE, TREATMENT_RULE, needs_patient_answer,
+    question_text, followup_response, validate_followup, after_inquiry_schema, pending_inquiry, observation_records, bind_inquiry_items)
 from . import episodes
 
 
 class FlowState(TypedDict, total=False):
+    workflow_mode: str
+    diagnosis_summary: str
+    formula_reasoning: str
+    treatment_safety_notes: list[str]
+    clarification_stage: str
+    non_drug_advice: list[str]
+    medical_guidance: list[str]
+    compatibility_check: dict
     episode_id: str
     episode_pending: bool
     episode_summary: dict
@@ -72,6 +86,10 @@ class FlowState(TypedDict, total=False):
     symptom_pending: dict | None
     intent_type: str
     pending_question: str
+    answered_question: str
+    inquiry_answers: list[dict]
+    pending_inquiry: dict
+    inquiry_observations: list[dict]
     pending_context: str
     docs: list[dict]
     search_query: str
@@ -125,7 +143,9 @@ def prepare(state: FlowState) -> FlowState:
         "profile_suggestions": [],
         "analysis_only": False, "manual_review_reasons": [],
         "preliminary_analysis": False, "analysis_questions": [],
+        "pending_inquiry": {}, "inquiry_observations": [],
         "agent_stop": "", "agent_traces": {}, "agent_artifacts": {}, "herb_review": {},
+        "diagnosis_summary": "", "formula_reasoning": "", "treatment_safety_notes": [], "clarification_stage": "", "answered_question": "", "inquiry_answers": [], "non_drug_advice": [], "medical_guidance": [], "compatibility_check": {},
     }
 
 
@@ -203,7 +223,7 @@ def subject_resolve(state: FlowState) -> FlowState:
         return {"identity_mode": "knowledge", "identity_scope": "", "identity_urgent": False, "identity_resolved_now": False, "identity_previous": previous,
                 "identity_current": current, "safety_state": safe, "safety_state_version": previous["version"],
                 "source_message_id": source_id, "symptom_facts": [], "symptom_pending": None,
-                "pending_context": "", "pending_question": ""}
+                "pending_context": "", "pending_question": "", "inquiry_answers": [], "pending_inquiry": {}, "inquiry_observations": []}
     safe, current = make_context(previous, text, attached, message_id=source_id, thread_id=state["thread_id"])
     if re.search(r"两个孩子|两位孩子|大宝.*二宝|哥哥.*弟弟", text):
         safe.update(subject="unknown", subject_confirmed=False, pending={"key": "subject", "subject": "unknown"})
@@ -241,7 +261,10 @@ def subject_resolve(state: FlowState) -> FlowState:
             "identity_current": current, "safety_state": safe, "safety_state_version": previous["version"],
             "source_message_id": source_id, "symptom_facts": facts,
             **{key: target_clinical.get(key, None if key == "symptom_pending" else "")
-               for key in ("pending_context", "pending_question", "symptom_pending")}}
+               for key in ("pending_context", "pending_question", "symptom_pending")},
+            "inquiry_answers": target_clinical.get("inquiry_answers") or [],
+            "pending_inquiry": target_clinical.get("pending_inquiry") or {},
+            "inquiry_observations": target_clinical.get("inquiry_observations") or []}
 
 
 def rule_pre_safety(state: FlowState) -> FlowState:
@@ -351,6 +374,11 @@ async def pre_safety(state: FlowState) -> FlowState:
                 "episode_text": safe.get("episode", ""), "response": response}
     if state.get("episode_pending"):
         return {**base, "intent_type": "consult", "preflight": {"decision": "allow", "risk_categories": [], "required_questions": []}}
+    from .requirements import is_requirements_query, requirements_reply
+    if is_requirements_query(state):
+        return {**base, "intent_type": "requirements", "response": requirements_reply(state, identity_gate),
+                "preflight": {"decision": "not_requested", "scope": "requirements_only", "analysis_allowed": False,
+                              "risk_categories": [], "question_keys": [], "required_questions": []}}
     try:
         result = await assess(text, profile, mock=MODEL_MODE == "mock", context=safe)
         additions = result.pop("observations", [])
@@ -362,9 +390,9 @@ async def pre_safety(state: FlowState) -> FlowState:
                 fact["source"]["kind"] = "attachment"
         base["profile_suggestions"] += profile_candidates(additions)
         safe["facts"] = merge_facts(safe["facts"], additions)
-    except Exception:
+    except Exception as exc:
         result = {"decision": "block", "risk_categories": ["preflight_unavailable"],
-                  "reason": "预审超时、失败或结构无法校验", "required_questions": []}
+                  "reason": "预审超时、失败或结构无法校验", "required_questions": [], "failure": failure_details(exc)}
     analysis_only = bool(result.get("analysis_allowed") and identity_gate.get("analysis_allowed")
                          and result["decision"] == "clarify" and not result.get("question_keys"))
     if result["decision"] != "allow" and not analysis_only:
@@ -384,7 +412,7 @@ async def pre_safety(state: FlowState) -> FlowState:
 
 
 def pre_safety_route(state: FlowState) -> str:
-    return "blocked" if state.get("intent_type") in {"safety_rejected", "safety_advisory"} else "allowed"
+    return "blocked" if state.get("intent_type") in {"safety_rejected", "safety_advisory", "requirements"} else "allowed"
 
 
 def symptom_observations(text: str) -> tuple[list[str], list[str]]:
@@ -466,12 +494,23 @@ def inquire(state: FlowState) -> FlowState:
         unresolved["id"] = (pending["id"] if pending and pending.get("id") and
                             (pending["kind"], pending["symptom"]) == (unresolved["kind"], unresolved["symptom"])
                             else str(uuid4()))
-    base = {"symptom_facts": facts, "symptom_pending": unresolved,
+    answered_question = state.get("pending_question", "") if previous and not pending else ""
+    answers = list(state.get("inquiry_answers", []))
+    if answered_question:
+        answers.append({"question": answered_question, "answer": text, "answer_message_id": state.get("source_message_id", ""),
+                        "thread_id": state["thread_id"], "subject": subject, "episode_id": state.get("episode_id", ""),
+                        **(state.get("pending_inquiry") or {"stage": "inquiry"})})
+        bind_inquiry_items(state, answers)
+    observations = [*state.get("inquiry_observations", []),
+                    *observation_records(state, text, state.get("source_message_id", ""))]
+    base = {"symptom_facts": facts, "symptom_pending": unresolved, "answered_question": answered_question, "inquiry_answers": answers,
+            "inquiry_observations": observations, "pending_inquiry": {},
             "symptoms": symptoms, "denied_symptoms": denied_symptoms, "episode_text": combined}
     if unresolved:
         return {**base, "intent_type": "consult", "pending_context": combined,
                 "pending_question": unresolved["question"], "response": unresolved["question"]}
-    if previous and re.fullmatch(r"(?:不知道|不清楚|跳过|不是|是|是的|有|没有|没有了)[。！! ]*", text.strip()) and not new:
+    if (previous and re.fullmatch(r"(?:不知道|不清楚|跳过|不是|是|是的|有|没有|没有了)[。！! ]*", text.strip())
+            and not new and not answered_question):
         question = state.get("pending_question") or followup_question(symptoms, denied_symptoms)
         return {**base, "intent_type": "consult", "pending_context": combined,
                 "pending_question": question, "response": "这条回答还不能补全资料。" + question}
@@ -583,6 +622,40 @@ def _context(state: FlowState) -> str:
     return clinical_context(state)
 
 
+class FixedAssessment(ClinicalAssessmentFields):
+    model_config = ConfigDict(extra="forbid", strict=True)
+    status: Literal["completed", "need_user_input"]
+    conclusion: str = Field(max_length=3500)
+    summary: str = Field(default="", max_length=700)
+    questions: list[str] = Field(default_factory=list, max_length=3)
+    information_gap: InformationGap
+    followup_reason: str = Field(default="", max_length=500)
+    uncertainties: list[str] = Field(default_factory=list, max_length=3)
+
+
+class FixedTreatment(CandidatePlan):
+    information_gap: InformationGap
+    followup_reason: str = Field(default="", max_length=500)
+    questions: list[str] = Field(default_factory=list, max_length=3)
+    non_drug_advice: list[str] = Field(default_factory=list, max_length=5)
+    medical_guidance: list[str] = Field(default_factory=list, max_length=4)
+    rationale: str = Field(default="", max_length=2000)
+    safety_notes: list[str] = Field(default_factory=list, max_length=8)
+
+
+async def _complete_with_answers(state: FlowState, system: str, user: str, *, role: str, schema: type[BaseModel]) -> dict:
+    artifact = await acomplete_json(system, user, role=role, schema=schema)
+
+    async def repair(feedback):
+        return await acomplete_json(system, user + "\n" + feedback, role=role, schema=schema)
+
+    async def finalize(feedback):
+        return await acomplete_json(system, user + "\n" + feedback, role=role, schema=after_inquiry_schema(schema, role=role))
+
+    return await validate_followup(state, artifact, repair, assessment=role == "bianzheng",
+                                   finalize=finalize)
+
+
 async def bianzheng(state: FlowState) -> FlowState:
     if MODEL_MODE == "mock":
         # Exercise the same source/budget contract in offline evaluations.
@@ -593,12 +666,33 @@ async def bianzheng(state: FlowState) -> FlowState:
                      + (f"用户表示没有{denied}。" if denied else "")
                      + "信息不足以确定证型，以下仅展示分析流程。")
     else:
-        diagnosis = await acomplete(
+        assessment = await _complete_with_answers(state,
             "你是中医知识辅助系统。区分用户报告的症状与明确否认的症状；后者不能作为阳性依据。"
             "历史自述不是本轮已确认症状，保留时间和否定含义，不得覆盖当前明确说明。"
-            "只解释可能的辨证思路和不确定性，不作确诊，不编造古籍出处或药物剂量。",
-            _context(state), role="bianzheng",
+            "只解释可能的辨证思路和不确定性，不作确诊，不编造古籍出处或药物剂量。返回符合 Schema 的 JSON。"
+            "summary 用约150字总结初步方向，conclusion 保存详细分析。若缺少继续分析所必需的主诉或症状区分信息，"
+            "status=need_user_input，questions 最多三个具体问题；这会暂停本轮，不能把追问伪装成最终方案。"
+            "已回答的信息不要重复询问。简短回答须结合上一轮问题理解；多个问题仅回答‘没有’时不能推定全部阴性，必要时澄清具体指向。"
+            "用户明确不清楚或无法提供的资料保留未知，不能编造；只有影响继续分析的必要信息才追问。"
+            "主诉已明确时缺少舌脉或文献未命中仍可作初步分析，列实际支持和反证，把局限写入结论。"
+            "有尚未回答且有助区分的精神、面色等症状应在 questions 具体追问，同时在 conclusion 保留初步分析；"
+            "不能仅写因资料不足尚不能确定就结束。明确不清楚的项目保留未知，不循环追问。" + ASSESSMENT_STYLE + FOLLOWUP_RULE,
+            _context(state), role="bianzheng", schema=FixedAssessment,
         )
+        diagnosis = assessment_text(assessment)
+        if needs_patient_answer(assessment):
+            question = question_text(assessment)
+            return {"intent_type": "consult", "clarification_stage": "bianzheng", "pending_question": question,
+                    **pending_inquiry(state, assessment, "bianzheng"),
+                    "pending_context": state.get("episode_text", ""),
+                    "response": followup_response(state, assessment, assessment=True), "diagnosis": diagnosis,
+                    "diagnosis_summary": assessment["summary"], "preliminary_analysis": True}
+        optional = assessment.get("information_gap") == "optional"
+        return {"diagnosis": diagnosis, "diagnosis_summary": assessment["summary"], "bianzheng_note": diagnosis,
+                "preliminary_analysis": optional,
+                "analysis_questions": list(dict.fromkeys([*state.get("analysis_questions", []), *assessment.get("uncertainties", [])]))[:3],
+                "manual_review_reasons": list(dict.fromkeys([*state.get("manual_review_reasons", []),
+                    *(["四诊资料尚不完整，辨证及处方参考需由医师复核"] if optional else [])]))}
 
     context = invocation.get()
     if MODEL_MODE == "mock" and context and context.emit:
@@ -623,42 +717,87 @@ async def _make_plan(state: FlowState, *, revision: bool = False) -> dict:
         else:
             name = ""
         if name:
-            import json
             row = one("SELECT name,structured_herbs FROM formulas WHERE name=?", (name,))
             plan = {"name": row["name"], "herbs": json.loads(row["structured_herbs"])} if row else {"name": "基础方剂数据缺失", "herbs": []}
         else:
             plan = {"name": "暂无匹配的示例方剂", "herbs": []}
     else:
         retry_context = ("\n上次候选未通过安全校验：" + "；".join(state.get("safety_errors", []))) if revision else ""
+        from .agents.tools import search_formulas, SearchArgs
+        from .formula_risks import toxic_herbs
+        query = " ".join(state.get("symptoms", [])) or state.get("diagnosis", "")[:250] or state.get("episode_text", "")[:250]
+        found_sources = search_formulas(state, SearchArgs(query=query or "未提供主诉"))["formulas"]
+        eligible_sources = [row for row in found_sources if not toxic_herbs(row)]
+        formula_sources = (eligible_sources or found_sources)[:4]
+        formula_sources = [{"name": row["name"], "indication": row["indication"], "source": row["source"],
+                            "contraindications": row.get("contraindications", ""),
+                            "herbs": [{key: item[key] for key in ("herb_id", "name", "source_ids")}
+                                      for item in row.get("herbs", []) if isinstance(item, dict)]}
+                           for row in formula_sources]
         evidence_names = names(state.get("treatment_plan", {})) + mentioned_herbs(state.get("message", "") + state.get("diagnosis", ""))
+        evidence_names += [item["name"] for row in formula_sources for item in row.get("herbs", []) if isinstance(item, dict)]
         for doc in state.get("docs", []):
             evidence_names += mentioned_herbs(passage_excerpt(doc))
-        plan = await acomplete_json(
-            "你是中医知识演示系统。返回候选方剂 JSON，按 Schema 返回 name 和结构化 herbs。每味药包含 herb_id、name、dosage、preparation、source_ids、verification_status。剂量只能依据提供的知识记录，缺少依据时 min/max 为空；所有 verification_status 均为 unverified，不要自行声称核验。禁止自行抓药指令。",
-            _context(state) + "\n辨证思路：" + state.get("diagnosis", "") + retry_context + "\n可用剂量出处（未列出的药材必须留空剂量）：" + knowledge_context(evidence_names), role="formula", schema=CandidatePlan,
+        plan = await _complete_with_answers(state,
+            "你是中医知识演示系统。返回调理方案 JSON，按 Schema 返回 name 和结构化 herbs，以及 non_drug_advice、medical_guidance、rationale、safety_notes。rationale 说明选方依据和未确认的条件，safety_notes 逐项说明用药安全问题。每味药包含 herb_id、name、dosage、preparation、source_ids、verification_status。剂量只能依据提供的知识记录，缺少依据时 min/max 为空；所有 verification_status 均为 unverified，不要自行声称核验。禁止自行抓药指令。非药物建议只讨论日常生活，不含药材、剂量或煎服方法；就医指引根据已知资料说明面诊需求和需及时评估的情况，不编造患者未报告的危险症状。不要重复辨证长文。需要用户补充必要病情信息时填 questions，herbs 留空。" + FOLLOWUP_RULE + TREATMENT_RULE,
+            _context(state) + "\n选方内容要求：" + FORMULA_STYLE + "\n辨证思路：" + state.get("diagnosis", "") + retry_context
+            + "\n实际检索的方剂与药材标识（据实际症状核对选方，不能猜测标识；条目剂量不等于已核验）："
+            + json.dumps(formula_sources, ensure_ascii=False)
+            + "\n可用已核验剂量出处（未列出的药材必须留空剂量，组成中的 source_ids 仅表示出处，不表示剂量已核验）："
+            + knowledge_context(evidence_names, verified_only=True), role="formula", schema=FixedTreatment,
         )
+        from .formula_selection import repair_source_choice
+        plan = await repair_source_choice(state, plan, formula_sources, acomplete_json)
         if not isinstance(plan.get("name"), str) or not isinstance(plan.get("herbs"), list):
             plan = {"name": "未能解析候选方剂", "herbs": []}
     plan = migrate_plan(plan)
     for herb in plan.get("herbs", []):
         herb["verification_status"] = "unverified"
-        if state.get("analysis_only"):
+        if state.get("analysis_only") or plan.get("information_gap") == "evidence":
             herb["dosage"].update(min=None, max=None)
     return plan
 
 
 async def formula(state: FlowState) -> FlowState:
     plan = await _make_plan(state)
-    return {"treatment_plan": plan, "formula_note": f'候选方剂：{plan["name"]}'}
+    if needs_patient_answer(plan):
+        return fixed_plan_question(state, plan)
+    return {"treatment_plan": {key: plan[key] for key in ("name", "herbs")}, "formula_note": f'候选方剂：{plan["name"]}',
+            **fixed_plan_limits(state, plan),
+            "formula_reasoning": plan.get("rationale", ""), "treatment_safety_notes": plan.get("safety_notes", []),
+            "non_drug_advice": plan.get("non_drug_advice", []), "medical_guidance": plan.get("medical_guidance", [])}
 
 
 async def revise_formula(state: FlowState) -> FlowState:
     plan = await _make_plan(state, revision=True)
+    if needs_patient_answer(plan):
+        return fixed_plan_question(state, plan)
     note = f'调整后候选方剂：{plan["name"]}'
     notes = [{**item, "content": note} if item.get("expert") == "方剂" else item
              for item in state.get("consultation_notes", [])]
-    return {"treatment_plan": plan, "formula_note": note, "consultation_notes": notes,
+    return {"treatment_plan": {key: plan[key] for key in ("name", "herbs")}, "formula_note": note, "consultation_notes": notes,
+            **fixed_plan_limits(state, plan),
+            "formula_reasoning": plan.get("rationale", ""), "treatment_safety_notes": plan.get("safety_notes", []),
+            "non_drug_advice": plan.get("non_drug_advice", state.get("non_drug_advice", [])),
+            "medical_guidance": plan.get("medical_guidance", state.get("medical_guidance", [])),
             "safety_retry_count": state.get("safety_retry_count", 0) + 1}
+
+
+def fixed_plan_limits(state: FlowState, plan: dict) -> dict:
+    gap = plan.get("information_gap")
+    if gap not in {"optional", "evidence"}:
+        return {}
+    reason = "选方依据仍有缺项，处方参考需由医师复核" if gap == "optional" else "方剂或药材依据仍待核验，处方参考需由医师复核"
+    return {"preliminary_analysis": True, "analysis_only": bool(state.get("analysis_only") or gap == "evidence"),
+            "manual_review_reasons": list(dict.fromkeys([*state.get("manual_review_reasons", []), reason]))}
+
+
+def fixed_plan_question(state: FlowState, plan: dict) -> FlowState:
+    question = question_text(plan)
+    return {"intent_type": "consult", "clarification_stage": "formula", "response": question,
+            **pending_inquiry(state, plan, "formula"),
+            "pending_question": question, "pending_context": state.get("episode_text", ""),
+            "treatment_plan": {}, "consultation_notes": []}
 
 
 def herb_expert(state: FlowState) -> FlowState:
@@ -677,10 +816,25 @@ def synthesize(state: FlowState) -> FlowState:
 async def _review(plan: dict, context: str) -> tuple[bool, str]:
     if MODEL_MODE == "mock":
         return True, ""
+    source = one("SELECT name,indication,source,structured_herbs,contraindications FROM formulas WHERE name=?", (plan.get("name", ""),))
+    if source:
+        try:
+            source["composition"] = names({"herbs": json.loads(source.pop("structured_herbs") or "[]")})
+        except (ValueError, TypeError):
+            return False, "方剂组成来源无法解析，需医师核对。"
+    herb_sources = [one("SELECT name,properties,effects,contraindications,source FROM herbs WHERE name IN (?,?)",
+                       (item["name"], normalize(item["name"]))) for item in plan.get("herbs", [])]
     result = await acomplete_json(
         "你是独立安全审查者。审查候选方剂核对药材标识、剂量范围与单位、炮制、出处及患者过敏/孕哺/年龄/合并用药条件。缺少依据的剂量不可声称已核验，不提供自行用药指令。"
+        "若本轮范围为 provisional_reference，审查的是有来源的候选知识是否可供医师复核，approved 不代表批准个人用药。"
+        "可选舌脉未知、剂量留空和已标注的待人工核对事项，本身不构成知识内容错误；不能据此抹掉实际存在的组成和本草资料。"
+        "在provisional_reference范围，核对的是知识内容及风险表述是否真实；不批准个人适用性。"
+        "候选只覆盖部分表现但已明确范围与剩余缺项时，可供医师参考，不应仅因未覆盖全部症状而否决。"
+        "真实相关药材过敏、明确禁忌、配伍冲突、编造来源或不受支持的剂量仍须拒绝。"
         "返回 JSON：approved 布尔值、reason 字符串。确定性配伍校验由程序另行执行。",
-        context + "\n候选方案：" + str(plan), role="reviewer", schema=ReviewResult,
+        context + "\n候选方案：" + json.dumps(plan, ensure_ascii=False)
+        + "\n实际查得的方剂与药材条目（不是个人适用性批准）：" + json.dumps({"formula": source, "herbs": herb_sources}, ensure_ascii=False),
+        role="reviewer", schema=ReviewResult,
     )
     return result.get("approved") is True, str(result.get("reason", "审查未通过"))
 
@@ -707,7 +861,14 @@ def safety(state: FlowState) -> FlowState:
     errors += state.get("manual_review_reasons", [])
     review = {**review, "approved": not errors, "errors": errors}
     findings = list(dict.fromkeys(state.get("safety_findings", []) + errors))
+    herbal_names = names(plan)
+    compatibility_errors = check_herbs(herbal_names) if herbal_names else []
+    checking = ("not_checked" if not herbal_names else "unknown" if any(normalize(name) not in KNOWN for name in herbal_names)
+                else "conflict_retrying" if compatibility_errors and not state.get("analysis_only") and state.get("safety_retry_count", 0) < MAX_SAFETY_REVISIONS
+                else "conflict_unresolved" if compatibility_errors else "passed")
     return {"treatment_plan": plan, "prescription_review": review,
+            "compatibility_check": {"status": checking, "personal_plan_approved": bool(review["approved"] and review["dosage_status"] == "verified" and not state.get("analysis_only")),
+                                    "dosage_status": review["dosage_status"]},
             "reviewed_hash": fingerprint(plan) if not errors else "",
             "safety_errors": errors, "safety_findings": findings}
 
@@ -715,13 +876,23 @@ def safety(state: FlowState) -> FlowState:
 def safety_route(state: FlowState) -> str:
     if state.get("analysis_only"):
         return "finish"
+    if state.get("safety_errors") and set(state["safety_errors"]) <= set(state.get("manual_review_reasons", [])):
+        return "finish"
     if state.get("safety_errors") and state.get("safety_retry_count", 0) < MAX_SAFETY_REVISIONS:
         return "revise"
     return "finish"
 
 
+def fixed_safety(state: FlowState) -> FlowState:
+    """Fixed mode validates the immutable candidate with rules, not a reviewer model."""
+    return safety({**state, "reviewer_approved": True, "reviewer_hash": fingerprint(state.get("treatment_plan", {})),
+                   "safety_errors": []})
+
+
 def context_budget(state: FlowState) -> FlowState:
     # Informational stage; every actual model call enforces its own input budget.
+    if state.get("intent_type") == "requirements":
+        return {"context_chars": 0}
     return {"context_chars": len(_context(state))}
 
 
@@ -787,6 +958,10 @@ def public_safety_warnings(state: FlowState) -> list[str]:
                                   if f["category"] == "allergy" and f["assertion"] == "present")) if state.get("safety_state") else []
     if allergens:
         warnings.append("已记录过敏史：" + "、".join(allergens) + "。拟用药物的相关风险需医师或药师核对。")
+    from .formula_risks import toxic_herbs
+    toxic = toxic_herbs(state.get("treatment_plan", {}))
+    if toxic:
+        warnings.append("高风险药材：候选涉及" + "、".join(toxic) + "等有毒药材，炮制、剂量与个人适用性必须由医师面诊核对，不能自行使用。")
     for error in state.get("safety_findings", []) or state.get("safety_errors", []):
         if re.search(r"十八反|十九畏|画像提示可能对", error) and not contains_dosing(error):
             warnings.append(error[:250])
@@ -799,77 +974,40 @@ def public_safety_warnings(state: FlowState) -> list[str]:
 
 
 def final_consultation_notes(state: FlowState) -> list[dict]:
-    """Create display notes only after the reviewer and deterministic checks finish."""
+    """Publish clinical explanations after the independent checks finish."""
     if not state.get("consultation_notes"):
         return []
-    errors = (state.get("safety_findings", []) or state.get("safety_errors", []))
-    if not state.get("safety_errors"):
-        errors = []
-    plan = state.get("treatment_plan", {})
-    symptoms = "、".join(state.get("symptoms", [])) or "未提取到明确症状词"
-    denied = "、".join(state.get("denied_symptoms", []))
-    docs = state.get("docs", [])
-    source = (f'本轮检索片段：《{docs[0]["title"]}》{docs[0]["chapter"]}'
-              if docs else "本轮没有可引用的古籍片段")
-    allergies = state.get("profile", {}).get("allergies", "")
-    formula_source = "内置方剂知识种子" if MODEL_MODE == "mock" else "已配置的模型生成候选"
-    notes = [
-        {
-            "expert": "辨证", "status": "资料有限",
-            "content": state.get("diagnosis", "现有信息不足以分析。"),
-            "evidence": (f"本轮识别到的描述：{symptoms}；"
-                         + (f"用户表示没有：{denied}；" if denied else "") + f"{source}。"),
-            "reasoning": "仅整理现有描述与检索信息；缺少面诊资料，不能据此确定证型。",
-        },
-        {
-            "expert": "方剂", "status": "需人工复核" if errors else "知识示例",
-            "content": ("候选方剂未通过安全审查，名称与药材清单已隐藏。" if errors
-                        else f'候选知识示例：{plan.get("name", "暂无候选")}。'),
-            "evidence": ("候选内容未展示。" if errors else f"候选来源：{formula_source}。"),
-            "reasoning": ("安全校验未通过，不提供替代用药方案。" if errors
-                          else "该候选用于知识对照；现有资料不能证明其适合当前用户。"),
-            "recommendation": ("请由执业医师和中药师审核完整处方。" if errors
-                               else "剂量与出处按结构化数据展示，未核验项需医师和药师复核，不可自行服用。"),
-        },
-        {
-            "expert": "本草", "status": "发现风险" if errors else "规则已核对",
-            "content": ("确定性校验发现需人工处理的项目。" if errors
-                        else "已核对已收录药材名称、十八反十九畏规则和画像中的过敏信息。"),
-            "evidence": f"画像过敏信息：{allergies or '未填写'}。",
-            "reasoning": ("当前候选不能作为用药依据。" if errors
-                          else "未命中内置规则不等于临床安全，仍需结合病史和完整处方审核。"),
-            "warning": "；".join(errors) if errors else "",
-            "recommendation": "请勿自行抓药、加药或调整处方。",
-        },
-    ]
-    if state.get("analysis_only"):
-        references = formula_references(state)
-        notes[1].update(status="知识对照·待复核",
-                        content=("\n".join(row["name"] + "：" + row["indication"] for row in references) if references else "本轮未取得可展示的方剂知识条目。")
-                                + "这些是文献知识对照，未确认适用于当前咨询对象。",
-                        evidence="；".join(row["name"] + "：" + row["source"] for row in references),
-                        reasoning="过敏资料已传给各专家；当前未批准个人用药候选。")
-        herb_rows = herb_references(state)
-        notes[2].update(status="知识对照·待复核", content=("\n".join(herb_reference_text(row) for row in herb_rows)
-                        if herb_rows else "本轮未取得可展示的本草条目，不能声称已完成具体药材知识核对。") + "\n个人用药适用性尚未确认。",
-                        warning="；".join(errors))
+    reference = reference_prescription(state)
     artifact = state.get("agent_artifacts", {}).get("bianzheng", {})
-    notes[0].update(syndrome=artifact.get("syndrome", ""), confidence=artifact.get("confidence"),
-                    summary=artifact.get("summary") or notes[0]["content"])
-    comparison = state.get("agent_artifacts", {}).get("formula", {}).get("comparison", "")
-    notes[1]["summary"] = notes[1]["content"] + ("\n" + comparison if comparison and not contains_dosing(comparison) else "")
-    if errors:
-        advice = "当前尚不能形成可执行的个人处方，需由执业中医师结合面诊资料复核。"
-        if state.get("analysis_only"):
-            references = formula_references(state)
-            if references:
-                advice += "\n\n可供医师核对的方剂知识条目：" + "、".join(row["name"] for row in references) + "。这些条目不表示已为你选方。"
-    else:
-        advice = render_plan(plan) + "\n\n请由执业中医师确认个人适用性，勿自行抓药。"
-    notes[1]["prescription_advice"] = advice
-    herb_rows = herb_references(state)
-    notes[2]["summary"] = "\n".join(herb_reference_text(row).split("；知识来源：")[0] for row in herb_rows) or notes[2]["content"]
-    notes[2]["public_warnings"] = public_safety_warnings(state)
+    diagnosis = state.get("diagnosis", "现有信息不足以分析。")
+    explanation = formula_explanation(state)
+    herb_analysis = herb_explanation(state)
+    if not herb_analysis:
+        # Legacy/mock records have no specialist rationale. Keep factual entry
+        # information labelled as such; never invent a patient-specific role.
+        rows = herb_references(state)
+        herb_analysis = "\n".join(row["name"] + "（条目功效）：" + row["effects"] for row in rows if row.get("effects"))
+    warnings = public_safety_warnings(state)
+    notes = [
+        {"expert": "辨证", "status": "初步辨证", "content": diagnosis,
+         "summary": artifact.get("summary") or state.get("diagnosis_summary") or diagnosis,
+         "syndrome": artifact.get("syndrome", ""), "confidence": artifact.get("confidence"),
+         "uncertainties": [item for item in artifact.get("uncertainties", state.get("analysis_questions", [])) if not contains_dosing(item)]},
+        {"expert": "方剂", "status": "处方参考·待复核" if reference else "选方待复核",
+         "content": explanation or selection_advice(state, reference),
+         "summary": explanation or selection_advice(state, reference),
+         "prescription_advice": selection_advice(state, reference),
+         "recommended_formulas": [reference["name"]] if reference else []},
+        {"expert": "本草", "status": "药物分析·待复核", "content": herb_analysis or "尚未取得具体药物分析，个人适用性需医师核对。",
+         "summary": herb_analysis or "尚未取得具体药物分析，个人适用性需医师核对。",
+         "public_warnings": warnings, "warning": "；".join(warnings) if state.get("safety_errors") else ""},
+    ]
+    evidence = ["本次已确认的症状与问诊记录：" + "、".join(state.get("symptoms", []))
+                + ("；明确否认：" + "、".join(state["denied_symptoms"]) if state.get("denied_symptoms") else ""),
+                "方剂出处：" + reference["source"] if reference else "方剂的来源及适用条件尚待核对。",
+                "实际查询的药材条目：" + "、".join(row["name"] for row in herb_references(state))]
+    for note, source in zip(notes, evidence):
+        note.update(reasoning=note["summary"], evidence=source)
     return notes
 
 
@@ -879,52 +1017,33 @@ def finish(state: FlowState) -> FlowState:
         if state.get("analysis_only"):
             response = "已记录过敏史，后续分析会保留这条风险信息。可以继续问诊与知识分析，个人用药适用性仍需复核。\n\n" + response
         return {"response": response}
-    is_consultation = bool(state.get("consultation_notes"))
+    if state.get("workflow_mode") == "fixed":
+        from .workflow_presentation import fixed_sections
+        sections, _ = fixed_sections(state)
+        reference = reference_prescription(state)
+        rendered = []
+        for section in sections:
+            rendered.append("## " + section["title"] + "\n\n" + section["content"])
+            if section["id"] == "medication" and reference:
+                rendered.append(render_reference(reference))
+        if not reference:
+            rendered.append("## 安全说明\n\n" + "\n".join("- " + item for item in public_safety_warnings(state)))
+        response = "\n\n".join(rendered)
+        return {"response": response}
     diagnosis = state.get("diagnosis", "资料不足。")
     if contains_dosing(diagnosis):
-        diagnosis = "生成内容包含不允许展示的用药指令，本轮仅保留受限答复，请由医师核对。"
-        state = {**state, "diagnosis": diagnosis, "safety_errors": ["答复检查未通过：包含剂量或用法"]}
-    lines = ["## 初步辨证（资料待补全）" if state.get("preliminary_analysis") else "## 会诊综合" if is_consultation else "## 辨证思路", diagnosis]
-    docs = state.get("docs", [])
-    if state.get("retrieval_warning"):
-        lines.extend(["", state["retrieval_warning"]])
-    if docs:
-        lines.extend(["", "## 检索出处"])
-        lines.extend(f'- 《{d["title"]}》{d["chapter"]}：'
-                     + ("原文涉及古籍用药内容，摘录已省略。" if contains_dosing(passage_excerpt(d))
-                        else passage_excerpt(d)) for d in docs)
+        return {"response": "辨证内容包含未经核对的用药信息，请由医师复核。", "consultation_notes": [],
+                "safety_errors": ["答复检查未通过：辨证包含剂量或用法"]}
+    reference = reference_prescription(state)
+    lines = ["## 辨证结果", diagnosis, "", "## 处方建议", selection_advice(state, reference)]
+    if reference:
+        lines.extend(["", render_reference(reference)])
     else:
-        lines.extend(["", "本轮按要求未检索古籍。" if not state.get("search_required") else "当前没有可引用的古籍片段。"])
-    errors = state.get("safety_errors", [])
-    display_errors = (state.get("safety_findings", []) or errors) if errors else []
-    plan = state.get("treatment_plan", {})
-    if errors:
-        if state.get("analysis_only"):
-            lines.extend(["", "## 方剂知识对照（适用性待复核）"])
-            references = formula_references(state)
-            lines.extend(f'- **{row["name"]}**：条目记载：{row["indication"]}；知识来源：{row["source"]}。' for row in references)
-            comparison = state.get("agent_artifacts", {}).get("formula", {}).get("comparison", "")
-            if comparison and not contains_dosing(comparison):
-                lines.extend(["", comparison])
-            lines.append("以上仅为检索到的文献条目，不表示已选为个人处方；本轮不展示剂量或用法。" if references
-                         else "本轮尚未取得可展示的方剂知识条目。")
-            lines.extend(["", "## 本草知识对照"])
-            herb_rows = herb_references(state)
-            lines.extend("- " + herb_reference_text(row) for row in herb_rows)
-            if not herb_rows:
-                lines.append("本轮未取得可展示的本草条目，无法提供有来源的具体药材分析。")
-        lines.extend(["", "## 安全校验",
-                      "本轮个人用药适用性尚待复核，不生成可执行处方。" if state.get("analysis_only")
-                      else "候选方剂未通过确定性校验，具体药材清单已隐藏。请由执业医师人工复核。"])
-        lines.extend(f"- {error}" for error in display_errors)
-    else:
-        lines.extend(["", "## 方剂知识示例", render_plan(plan)])
-        lines.append("配伍规则通过不等于剂量已核验，未核验项须人工复核；此为知识演示，不能作为个人处方。")
-    if state.get("analysis_questions"):
-        lines.extend(["", "## 仍待补充"])
-        lines.extend("- " + question for question in state["analysis_questions"] if not contains_dosing(question))
-    lines.extend(["", "> 仅供学习与研究参考，不能代替执业医师面诊，也不应作为自行抓药的依据。"])
+        lines.extend(["", "## 安全说明", *["- " + warning for warning in public_safety_warnings(state)]])
     notes = final_consultation_notes(state)
+    herb_analysis = herb_explanation(state) or (notes[2].get("summary", "") if len(notes) > 2 else "")
+    if herb_analysis:
+        lines.extend(["", "## 本草核对", herb_analysis])
     response = "\n".join(lines)
     # prescription_advice is constructed above from the reviewed structured plan,
     # never from model prose. Other note fields must remain dose-free.
@@ -945,13 +1064,15 @@ def instrument(name: str, function):
         writer = get_stream_writer()
         started = time.monotonic()
         node_token = current_node.set(name)
-        writer({"type": "stage", "stage": name, "label": LABELS.get(name, name), "status": "start"})
+        label = ({"formula": "调理方案", "revise_formula": "重新生成调理方案", "safety": "配伍与用药校验"}.get(name, LABELS.get(name, name))
+                 if state.get("workflow_mode") == "fixed" else LABELS.get(name, name))
+        writer({"type": "stage", "stage": name, "label": label, "status": "start"})
 
         try:
             if context and context.emit:
                 if name == "revise_formula" or (name == "formula" and state.get("safety_errors")):
                     context.emit("candidate.started", {"text": state.get("diagnosis", ""), "revision": True})
-                if name == "reviewer":
+                if name == "reviewer" or (name == "safety" and state.get("workflow_mode") == "fixed"):
                     context.emit("candidate.completed", {"text": state.get("diagnosis", "") + "\n\n## 候选方剂\n" + render_plan(state["treatment_plan"]),
                                                          "plan": state["treatment_plan"]})
                     context.emit("review.started", {})
@@ -968,11 +1089,12 @@ def instrument(name: str, function):
                 if context.emit and name == "safety":
                     context.emit("review.approved" if result["prescription_review"]["approved"] else "review.rejected",
                                  {"review": result["prescription_review"], "plan": result["treatment_plan"]})
-            writer({"type": "stage", "stage": name, "label": LABELS.get(name, name), "status": "done",
+            writer({"type": "stage", "stage": name, "label": label, "status": "done",
+                    **({"outcome": result.get("compatibility_check", {}).get("status", "unknown")} if name == "safety" else {}),
                     "elapsed_ms": round((time.monotonic() - started) * 1000)})
             return result
         except BaseException as exc:
-            writer({"type": "stage", "stage": name, "label": LABELS.get(name, name),
+            writer({"type": "stage", "stage": name, "label": label,
                     "status": "cancelled" if isinstance(exc, asyncio.CancelledError) else "failed",
                     "elapsed_ms": round((time.monotonic() - started) * 1000)})
             raise
@@ -1009,10 +1131,10 @@ def build_graph(mode: str):
     graph.add_conditional_edges("pre_safety", pre_safety_route,
                                 {"blocked": "context_budget", "allowed": "inquiry"})
     graph.add_edge("inquiry", "main_route")
-    graph.add_node("safety", instrument("safety", safety))
+    graph.add_node("safety", instrument("safety", safety if mode == "multi" else fixed_safety))
     if mode == "multi":
         from .agents.multi import (bianzheng_agent, bianzheng_route, formula_agent, formula_route,
-                                   herb_agent, review_agents, synthesize_agents)
+                                   herb_agent, herb_route, review_agents, synthesize_agents)
         graph.add_node("bianzheng_agent", instrument("bianzheng", bianzheng_agent))
         graph.add_node("formula_agent", instrument("formula", formula_agent))
         graph.add_node("herb_agent", instrument("herb", herb_agent))
@@ -1025,7 +1147,8 @@ def build_graph(mode: str):
                                     {"continue": "formula_agent", "stop": "context_budget"})
         graph.add_conditional_edges("formula_agent", formula_route,
                                     {"continue": "herb_agent", "stop": "context_budget"})
-        graph.add_edge("herb_agent", "synthesis")
+        graph.add_conditional_edges("herb_agent", herb_route,
+                                    {"continue": "synthesis", "stop": "context_budget"})
         graph.add_edge("synthesis", "multi_reviewer")
         graph.add_edge("multi_reviewer", "safety")
         graph.add_conditional_edges("safety", safety_route,
@@ -1038,7 +1161,6 @@ def build_graph(mode: str):
         graph.add_node("bianzheng", instrument("bianzheng", bianzheng))
         graph.add_node("formula", instrument("formula", formula))
         graph.add_node("revise_formula", instrument("revise_formula", revise_formula))
-        graph.add_node("reviewer", instrument("reviewer", reviewer))
         graph.add_conditional_edges("main_route", main_route,
                                     {"diagnose": "rag_decision", "knowledge": "knowledge_search", "end": "episode_write"})
         graph.add_conditional_edges("rag_decision", rag_route,
@@ -1048,10 +1170,11 @@ def build_graph(mode: str):
                                     {"rewrite": "rewrite_query", "ready": "evidence_ready"})
         graph.add_edge("rewrite_query", "search")
         graph.add_edge("evidence_ready", "bianzheng")
-        graph.add_edge("bianzheng", "formula")
-        graph.add_edge("formula", "reviewer")
-        graph.add_edge("reviewer", "safety")
-        graph.add_edge("revise_formula", "reviewer")
+        graph.add_conditional_edges("bianzheng", lambda state: "pause" if state.get("intent_type") == "consult" else "continue",
+                                    {"pause": "context_budget", "continue": "formula"})
+        for node in ("formula", "revise_formula"):
+            graph.add_conditional_edges(node, lambda state: "pause" if state.get("intent_type") == "consult" else "continue",
+                                        {"pause": "context_budget", "continue": "safety"})
         graph.add_conditional_edges("safety", safety_route,
                                     {"revise": "revise_formula", "finish": "context_budget"})
     graph.add_edge("context_budget", "episode_write")
@@ -1086,7 +1209,7 @@ async def run_flow(thread_id: str, mode: str, message: str, profile: dict, file_
         # Import only current-thread checkpoint fields declared by this workflow.
         # Retired cross-session summary channels cannot survive legacy checkpoints.
         prior = {key: value for key, value in prior.items() if key in FlowState.__annotations__}
-        state = {**prior, "message": message, "profile": profile, "file_text": model_excerpt(file_text),
+        state = {**prior, "workflow_mode": mode, "message": message, "profile": profile, "file_text": model_excerpt(file_text),
                  "thread_id": thread_id, "user_id": user_id, "run_id": run_id}
         config = {"configurable": {"thread_id": run_id}, "recursion_limit": 50}
         attempts = {}

@@ -18,6 +18,18 @@ function makeSSEStream(events: object[]): ReadableStream<Uint8Array> {
 describe("streamChat (SSE 解析)", () => {
   afterEach(() => { vi.useRealTimers(); });
 
+  it("切换对话仅断开流，不发送取消请求", async () => {
+    const controller = new AbortController();
+    const fetcher = vi.fn().mockResolvedValue({ ok: true, status: 200, body: new ReadableStream() });
+    vi.stubGlobal("fetch", fetcher);
+    const running = streamChat({ message: "腹胀" }, { signal: controller.signal, onEvent: vi.fn() });
+    await Promise.resolve();
+    controller.abort("view_changed");
+    await running;
+    expect(fetcher).toHaveBeenCalledTimes(1);
+    expect(JSON.parse(fetcher.mock.calls[0][1].body).background).toBe(true);
+  });
+
   it("服务重启后旧 SSE 未关闭，也会核对已取消状态并结束等待", async () => {
     vi.useFakeTimers();
     const events: ChatStreamEvent[] = [];

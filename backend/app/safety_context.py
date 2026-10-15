@@ -37,7 +37,7 @@ def assertion_of(text: str, start: int, end: int) -> str:
     before, after = text[:start], text[end:end + 8]
     if re.search(r"不是没有|并非没有|不能说没有|不代表没有|没有否认|不能排除|不确定|不知道|可能|好像|疑似|不太清楚", before + after):
         return "uncertain"
-    if re.search(NEGATIVE, before[-18:]) or re.fullmatch(r"(?:不过敏|阴性|没有|无)[了。 ]*", after):
+    if re.search(NEGATIVE, before[-18:]) or re.search(r"未\s*$", before) or re.fullmatch(r"(?:不过敏|阴性|没有|无)[了。 ]*", after):
         return "absent"
     return "present"
 
@@ -436,7 +436,16 @@ def response_for(state: dict, decision: dict) -> str:
     if decision["decision"] == "block":
         state["status"] = "blocked"
         if "preflight_unavailable" in decision.get("risk_categories", []):
-            return "安全预审暂时未能完成，本轮未进入辨证、方剂和本草分析。你的主诉与已确认资料已保留，请重试。"
+            failure = decision.get("failure", {})
+            reason = {"upstream_unavailable": "模型上游服务异常", "rate_limited": "模型服务请求受限",
+                      "authentication": "模型服务认证或权限异常", "timeout": "模型服务响应超时",
+                      "connection": "暂时无法连接模型服务", "invalid_output": "模型返回结果未通过格式或来源校验"}.get(failure.get("category"), "模型服务调用未完成")
+            status = failure.get("http_status")
+            if isinstance(status, int) and not isinstance(status, bool) and 400 <= status <= 599:
+                reason += f"（HTTP {status}）"
+            return ("安全预审暂时未能完成：" + reason + "。本轮未进入辨证、方剂和本草分析。"
+                    "这不是在要求你补充病情资料。你的主诉与已确认资料已保留，服务恢复后可在本对话继续。"
+                    "也可以询问“还需要补充哪些资料”，查看已记录信息和待答问题。")
         return "你提供的信息中出现可能需要及时处理的情况。若症状正在发生，请尽快联系当地急救服务或就近医疗机构，不要等待在线问答。"
     if keys:
         key = keys[0]

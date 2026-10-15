@@ -10,7 +10,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
-from app import model, workflow
+from app import model, workflow, runs
 from app.db import one
 from test_api import register, auth
 from test_model import configure, output
@@ -71,7 +71,7 @@ def test_cancel_ownership_model_cleanup_no_memory_or_success(monkeypatch, blocke
         if role == blocked_role:
             return httpx.Response(200, stream=SlowBody())
         return output(json.dumps({"decision": "allow", "risk_categories": [], "reason": "stub", "required_questions": []})
-                      if role == "safety_preflight" else "资料不足，不作确诊。")
+                      if role == "safety_preflight" else json.dumps({"status": "completed", "information_gap": "none", "conclusion": "资料有限的初步分析。", "summary": "初步分析。", "questions": []}))
     configure(monkeypatch, handler)
     monkeypatch.setattr(workflow, "MODEL_MODE", "openai_compatible")
     for role in model.ROLES:
@@ -88,9 +88,11 @@ def test_cancel_ownership_model_cleanup_no_memory_or_success(monkeypatch, blocke
         assert entered.wait(5)
         assert client.post(f"/api/runs/{run_id}/cancel", headers=auth(other)).status_code == 404
         assert client.get(f"/api/runs/{run_id}", headers=auth(other)).status_code == 404
+        assert client.get(f"/api/threads/{thread}/active-run", headers=auth(other)).status_code == 404
+        assert client.get(f"/api/threads/{thread}/active-run", headers=headers).json()["run_id"] == run_id
         conflict = client.post("/api/chat", headers=headers, json={"thread_id": thread, "message": "新的问题"})
         assert conflict.status_code == 409
-        result = client.post(f"/api/runs/{run_id}/cancel", headers=headers)
+        result = client.post(f"/api/runs/{run_id}/cancel", headers=headers, json={"reason": "user_stop"})
         assert result.json()["status"] == "cancelled", result.text
         assert closed.wait(2)
         assert future.result(timeout=5).json()["cancelled"]
@@ -101,6 +103,8 @@ def test_cancel_ownership_model_cleanup_no_memory_or_success(monkeypatch, blocke
         assert len(messages) == 2
         assert messages[-1]["intent_type"] == "cancelled"
         assert messages[-1]["trace"]["model_calls"][-1]["status"] == "cancelled"
+        assert messages[-1]["trace"]["cancel_reason"] == "user_stop"
+        assert client.get(f"/api/threads/{thread}/active-run", headers=headers).json() is None
         assert one("SELECT * FROM profile_memories WHERE thread_id=?", (thread,)) is None
         assert one("SELECT * FROM thread_safety_state WHERE thread_id=?", (thread,)) is None
         assert one("SELECT * FROM profile_suggestions WHERE run_id=?", (run_id,)) is None
@@ -127,8 +131,56 @@ def test_completed_result_is_authoritative_and_cancel_is_noop():
         assert all("elapsed_ms" in event for event in final["trace"]["events"] if event["status"] == "done")
 
 
+def test_background_answer_commits_after_browser_disconnect(monkeypatch):
+    async def exercise(token, thread, run_id):
+        started, release = asyncio.Event(), asyncio.Event()
+
+        async def flow(*args):
+            yield {"type": "stage", "stage": "inquiry", "label": "问诊", "status": "start"}
+            started.set()
+            await release.wait()
+            yield {"type": "stage", "stage": "inquiry", "label": "问诊", "status": "done"}
+            yield {"type": "result", "data": {"intent_type": "chat", "response": "后台完成的结果"}}
+
+        monkeypatch.setattr(runs, "run_flow", flow)
+        incoming = asyncio.Queue()
+        incoming.put_nowait({"type": "http.request", "body": json.dumps({
+            "run_id": run_id, "thread_id": thread, "message": "你好", "background": True,
+        }).encode(), "more_body": False})
+
+        async def receive():
+            return await incoming.get()
+
+        async def send(message):
+            pass
+
+        scope = {"type": "http", "asgi": {"version": "3.0", "spec_version": "2.3"},
+                 "http_version": "1.1", "method": "POST", "scheme": "http", "path": "/api/chat",
+                 "raw_path": b"/api/chat", "query_string": b"stream=true", "root_path": "",
+                 "server": ("test", 80), "client": ("test", 1234),
+                 "headers": [(b"authorization", ("Bearer " + token).encode()), (b"content-type", b"application/json")]}
+        response_task = asyncio.create_task(app(scope, receive, send))
+        await asyncio.wait_for(started.wait(), 5)
+        run = runs.active[run_id]
+        incoming.put_nowait({"type": "http.disconnect"})
+        await asyncio.wait_for(response_task, 5)
+        assert not run.context.cancelled
+        release.set()
+        await asyncio.wait_for(run.task, 5)
+        assert one("SELECT status FROM chat_runs WHERE id=?", (run_id,))["status"] == "completed"
+        assert one("SELECT content FROM messages WHERE thread_id=? AND role='assistant'", (thread,))["content"] == "后台完成的结果"
+        assert one("SELECT type FROM run_events WHERE run_id=? ORDER BY sequence DESC LIMIT 1", (run_id,))["type"] == "answer.final"
+        assert run.deadline_task.done()
+
+    with TestClient(app) as client:
+        token, _ = register(client, "background_" + uuid4().hex[:8])
+        thread = client.post("/api/threads", headers=auth(token), json={}).json()["id"]
+        asyncio.run(exercise(token, thread, str(uuid4())))
+
+
 @pytest.mark.parametrize("asgi_version", ["2.3", "2.4"])
-def test_disconnect_cancels_model_and_leaves_stopped_history(monkeypatch, asgi_version):
+@pytest.mark.parametrize("background", [False, True])
+def test_disconnect_cancels_legacy_requests_but_background_runs_continue(monkeypatch, asgi_version, background):
     async def exercise(token, thread_id, run_id):
         started, closed = asyncio.Event(), asyncio.Event()
         class SlowBody(httpx.AsyncByteStream):
@@ -142,7 +194,7 @@ def test_disconnect_cancels_model_and_leaves_stopped_history(monkeypatch, asgi_v
         monkeypatch.setattr(workflow, "MODEL_MODE", "openai_compatible")
         incoming = asyncio.Queue()
         incoming.put_nowait({"type": "http.request", "body": json.dumps({
-            "run_id": run_id, "thread_id": thread_id, "message": "我最近失眠三天，白天疲劳",
+            "run_id": run_id, "thread_id": thread_id, "message": "我最近失眠三天，白天疲劳", "background": background,
         }).encode(), "more_body": False})
         sent = []
         async def receive():
@@ -158,6 +210,10 @@ def test_disconnect_cancels_model_and_leaves_stopped_history(monkeypatch, asgi_v
         await asyncio.wait_for(started.wait(), 5)
         incoming.put_nowait({"type": "http.disconnect"})
         await asyncio.wait_for(task, 5)
+        if background:
+            assert one("SELECT status FROM chat_runs WHERE id=?", (run_id,))["status"] == "running"
+            # Detached work is bounded by the same server timer even with no browser left.
+            await runs.expire(runs.active[run_id], 0.01)
         await asyncio.wait_for(closed.wait(), 5)
         # The worker finalizer is retained independently of the disconnected response.
         for _ in range(30):
@@ -165,6 +221,8 @@ def test_disconnect_cancels_model_and_leaves_stopped_history(monkeypatch, asgi_v
                 break
             await asyncio.sleep(0.05)
         assert one("SELECT status FROM chat_runs WHERE id=?", (run_id,))["status"] == "cancelled"
+        trace = json.loads(one("SELECT telemetry FROM chat_runs WHERE id=?", (run_id,))["telemetry"])
+        assert trace["cancel_reason"] == ("timeout" if background else "client_disconnect")
         assert one("SELECT summary FROM profile_memories WHERE thread_id=?", (thread_id,)) is None
         assert not any(b'"token"' in message.get("body", b"") for message in sent)
     with TestClient(app) as client:
@@ -257,19 +315,23 @@ def test_successful_provider_pipeline_persists_role_node_usage(monkeypatch):
         }
         from app.prescription import structured_herb
         replies["formula"]["herbs"] = [structured_herb(name) for name in ["酸枣仁", "茯苓", "知母", "川芎", "甘草"]]
+        if role == "formula" and "RetrievedFormulaChoice" in payload["messages"][0]["content"]:
+            return output(json.dumps({"selected_name": "酸枣仁汤", "information_gap": "optional",
+                                      "rationale": "依据已知失眠疲劳比较来源方剂，个人适用性待复核。", "safety_notes": []}),
+                          {"prompt_tokens": 12, "completion_tokens": 3})
         if payload.get("tools") and role == "bianzheng":
             if not any(message.get("role") == "tool" for message in payload["messages"]):
                 return httpx.Response(200, json={"choices": [{"message": {"content": None, "tool_calls": [{
                     "id": "classic-call", "type": "function", "function": {
                         "name": "search_classics", "arguments": '{"query":"失眠"}'}}
                 ]}}], "usage": {"prompt_tokens": 12, "completion_tokens": 3}})
-            content = json.dumps({"status": "completed", "conclusion": "资料不足，不作确诊。",
+            content = json.dumps({"status": "completed", "information_gap": "none", "conclusion": "失眠和白天疲劳提示需区分睡眠相关的虚实与气血情况，仅作初步分析。",
                                   "evidence_ids": [], "uncertainties": ["缺少面诊"], "question": ""})
         elif payload.get("tools") and role == "formula":
-            content = json.dumps({"status": "completed", "plan": replies["formula"],
+            content = json.dumps({"status": "completed", "information_gap": "none", "plan": replies["formula"],
                                   "evidence_ids": [], "uncertainties": ["剂量需复核"], "question": ""})
         elif payload.get("tools") and role == "herb":
-            content = json.dumps({"status": "approved", "problems": [], "required_actions": [],
+            content = json.dumps({"status": "approved", "information_gap": "none", "problems": [], "required_actions": [],
                                   "evidence_ids": [], "question": ""})
         else:
             content = json.dumps(replies[role]) if role in replies else "资料不足，不作确诊。"
@@ -290,8 +352,8 @@ def test_successful_provider_pipeline_persists_role_node_usage(monkeypatch):
         data = result.json()
         calls = data["trace"]["model_calls"]
         assert {call["role"] for call in calls} == {"safety_preflight", "cross_encoder", "bianzheng", "formula", "herb", "reviewer"}
-        assert sum(call["input_tokens"] or 0 for call in calls) == 72
-        assert sum(call["output_tokens"] or 0 for call in calls) == 18
+        assert sum(call["input_tokens"] or 0 for call in calls) == 84
+        assert sum(call["output_tokens"] or 0 for call in calls) == 21
         assert data["trace"]["classics_retrieval"]["final"]["rerank"]["status"] == "success"
         assert all(call["node"] and call["status"] == "success" for call in calls)
         saved = client.get(f'/api/threads/{data["thread_id"]}/messages', headers=headers).json()[-1]

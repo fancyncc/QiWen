@@ -260,6 +260,44 @@ def test_agent_graph_does_not_loop_on_repeated_invalid_results(monkeypatch):
     assert steps == [1, 2]
 
 
+def test_ambiguous_json_decision_uses_fresh_final_schema_after_real_observations(monkeypatch):
+    monkeypatch.setattr(model, "MODEL_MODE", "openai_compatible")
+    calls, executed = [], []
+    async def structured(system, user, **kwargs):
+        calls.append(kwargs["schema"])
+        if len(calls) == 1:
+            return {"tool": "add", "arguments": {"value": 2}, "final": None}
+        if len(calls) == 2:
+            # The premature final must never be accepted as the result.
+            return {"tool": "add", "arguments": {"value": 9}, "final": {"status": "completed", "total": 999}}
+        assert kwargs["schema"] is Result and "最后一次决策" in system
+        payload = json.loads(user)["conversation"]
+        assert any(m.get("role") == "tool" and json.loads(m["content"])["result"]["total"] == 3 for m in payload)
+        return {"status": "completed", "total": 3}
+    monkeypatch.setattr(model, "acomplete_json", structured)
+    token = model.invocation.set(model.InvocationContext(tool_protocol="json"))
+    try:
+        run = asyncio.run(run_agent_graph(name="格式恢复", role="herb", task="保留实际证据", state={},
+            tools=[ToolSpec("add", "加一", AddArgs, lambda _, args: (executed.append(args.value) or {"total": args.value + 1}))],
+            output_schema=Result, mock_planner=lambda *_: pytest.fail("unexpected mock"), max_steps=6))
+    finally:
+        model.invocation.reset(token)
+    assert len(calls) == 3 and executed == [2] and run.output["total"] == 3
+
+
+def test_null_optional_tool_wrappers_are_empty_without_coercing_clinical_values():
+    from app.agents.runtime import StructuredDecision
+    from pydantic import ValidationError
+    value = StructuredDecision.model_validate({"tool": None, "arguments": None, "tool_calls": None,
+                                               "final": {"status": "completed", "total": 3}})
+    assert value.arguments == {} and value.tool_calls == [] and value.final["total"] == 3
+    assert StructuredDecision.model_validate({"tool_calls": [{"name": "lookup", "arguments": None}]}).tool_calls[0].arguments == {}
+    with pytest.raises(ValidationError):
+        StructuredDecision.model_validate({"tool_calls": "null"})
+    with pytest.raises(ValidationError):
+        Result.model_validate({"status": "completed", "total": "3"})
+
+
 def test_agent_graph_accepts_fenced_json_without_weakening_schema(monkeypatch):
     monkeypatch.setattr(model, "MODEL_MODE", "mock")
     run = asyncio.run(run_agent_graph(

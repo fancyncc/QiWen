@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { MessageBubble } from "../MessageBubble";
 import { mapMessage, mapNote } from "@/lib/backend-contract";
 import { consultationPresentation, withoutSourceSection, presentNote } from "@/lib/consultation-presentation";
@@ -14,10 +14,54 @@ const message = () => mapMessage({ role: "assistant",
 });
 
 describe("会诊结果展示", () => {
-  it("直接展开三个专家摘要，保留置信度与本草警告，正文只显示两个结果部分", () => {
+  it("会诊收束后本草核对在主结果直接展示并保留在复制内容中", () => {
+    const data = message();
+    render(<MessageBubble message={data} />);
+    expect(screen.getByRole("heading", { name: "本草核对" })).toBeInTheDocument();
+    expect(screen.getByText("药材功效与禁忌的知识核对。")).toBeInTheDocument();
+    expect(consultationPresentation(data)).toContain("## 本草核对");
+  });
+  it("处方参考保留具体组成、缺项、出处和逐项安全说明", () => {
+    const advice = "### 处方参考（待医师复核）\n\n**来源明确的候选方剂**\n\n参考组成：\n- 茯苓：剂量待核验，未提供\n\n方剂出处：已检索的方剂条目\n\n尚未确认的依据：\n- 脉象仍未知\n\n### 安全说明\n\n- 已记录青霉素过敏，相关风险需核对。\n- 合并用药与相互作用未核验。";
+    const data = mapMessage({ role: "assistant", content: advice, notes: [
+      { expert: "辨证", content: "根据已提供信息作初步分析。", summary: "初步分析摘要。" },
+      { expert: "方剂", content: "候选待复核。", prescription_advice: advice },
+    ] });
+    render(<MessageBubble message={data} />);
+    expect(screen.getByRole("heading", { name: "处方参考（待医师复核）" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "安全说明" })).toBeInTheDocument();
+    for (const text of ["茯苓：剂量待核验，未提供", "脉象仍未知", "已记录青霉素过敏，相关风险需核对。", "合并用药与相互作用未核验。"]) {
+      expect(screen.getByText(text)).toBeInTheDocument();
+    }
+    expect(consultationPresentation(data)).toContain("方剂出处");
+  });
+  it("资料有限时保留初步辨证与明确的判断局限", () => {
+    const data = mapMessage({ role: "assistant", content: "原始答复", notes: [
+      { expert: "辨证", content: "根据实际症状给出初步方向。", summary: "初步分析摘要。", uncertainties: ["脉象不清楚，保留未知。"] },
+      { expert: "方剂", content: "文献对照", prescription_advice: "个人适用性待复核。" },
+    ] });
+    render(<MessageBubble message={data} />);
+    expect(screen.getByRole("heading", { name: "判断局限" })).toBeInTheDocument();
+    expect(screen.getByText("根据实际症状给出初步方向。")).toBeInTheDocument();
+    expect(screen.getByText("脉象不清楚，保留未知。")).toBeInTheDocument();
+    expect(consultationPresentation(data)).toContain("脉象不清楚");
+  });
+
+  it("等待补充时同时显示初步辨证和具体问题，保留复制及历史正文", () => {
+    const content = "## 初步辨证（待补充确认）\n\n已知症状支持初步方向，明确否认的齿痕不作为阳性依据。\n\n## 请继续补充\n\n是否容易精神疲乏？";
+    const data = mapMessage({ role: "assistant", intent_type: "consult", content,
+      flow: { mode: "multi", intent: "consult", status: "awaiting_input", steps: [], compatibility: { status: "not_checked" } } });
+    render(<MessageBubble message={data} />);
+    expect(screen.getByRole("heading", { name: "初步辨证（待补充确认）" })).toBeInTheDocument();
+    expect(screen.getByText("是否容易精神疲乏？")).toBeInTheDocument();
+    expect(consultationPresentation(data)).toBe(content);
+    expect(screen.queryByRole("heading", { name: "处方建议" })).not.toBeInTheDocument();
+  });
+  it("展开会诊过程后显示三个专家摘要，保留置信度与本草警告", () => {
     const data = message();
     render(<MessageBubble message={data} />);
     expect(screen.getByText(/会诊过程 · 3 位专家/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /会诊过程 · 3 位专家/ }));
     for (const title of ["辨证", "方剂", "本草"]) expect(screen.getByText(title, { exact: true })).toBeInTheDocument();
     expect(screen.getByText("置信度 72%")).toBeInTheDocument();
     expect(screen.getByRole("note", { name: "本草安全警告" })).toHaveTextContent("青霉素过敏");

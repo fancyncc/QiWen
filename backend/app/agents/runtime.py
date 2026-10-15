@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from typing import Any, Awaitable, Callable, TypedDict
 
 from langgraph.graph import END, START, StateGraph
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from .. import model
 from ..blocking import deadline, run_blocking
@@ -94,13 +94,34 @@ class StructuredToolCall(BaseModel):
     name: str
     arguments: dict[str, Any] = Field(default_factory=dict)
 
+    @model_validator(mode="before")
+    @classmethod
+    def empty_arguments(cls, value):
+        if isinstance(value, dict) and value.get("arguments", {}) is None:
+            return {**value, "arguments": {}}
+        return value
+
 
 class StructuredDecision(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
-    tool: str | None = None
+    tool: str | None = Field(default=None, description="调用单个工具时填写；输出final时必须为null")
     arguments: dict[str, Any] = Field(default_factory=dict)
-    final: dict[str, Any] | None = None
+    final: dict[str, Any] | None = Field(default=None, description="最终产物；需要工具时必须为null")
     tool_calls: list[StructuredToolCall] = Field(default_factory=list, max_length=20)
+
+    @model_validator(mode="before")
+    @classmethod
+    def empty_protocol_fields(cls, value):
+        # Compatible gateways commonly serialize unused optional protocol
+        # fields as null. Treat only these empty wrappers as empty containers;
+        # final artifacts and all clinical/tool argument values remain strict.
+        if not isinstance(value, dict):
+            return value
+        result = dict(value)
+        for key, empty in (("arguments", {}), ("tool_calls", [])):
+            if result.get(key, empty) is None:
+                result[key] = empty
+        return result
 
 
 async def run_agent_graph(
@@ -123,7 +144,7 @@ async def run_agent_graph(
     schemas = [tool.openai_schema() for tool in tools]
     system = (
         f"你是{name}。围绕任务自主选择允许的工具。每次收到工具结果后判断证据是否足够；"
-        "不足时继续调用工具，需要用户补充时在最终 JSON 中返回 need_user_input。"
+        "文献依据不足时继续调用工具；需要用户补充必要病情资料时，按最终 Schema 的状态枚举返回追问和 patient 资料缺口。"
         "不得编造工具结果、出处、剂量或安全结论。不要输出思维链。"
         "结束时只输出符合以下 JSON Schema 的对象："
         + json.dumps(output_schema.model_json_schema(), ensure_ascii=False)
@@ -133,7 +154,8 @@ async def run_agent_graph(
 
     async def structured_decision(current: AgentState) -> dict:
         remaining = max_steps - current["step"]
-        final_round = remaining == 1 or (remaining == 2 and current["step"] > 0)
+        final_round = (remaining == 1 or (remaining == 2 and current["step"] > 0)
+                       or bool(current["format_retries"] and current["observations"]))
         instruction = (
             system + "\n当前使用 JSON 工具决策协议。每轮只返回一个 JSON 对象。"
             "需要工具时返回 tool（下列工具名）、arguments（参数对象）、final=null；"
@@ -167,7 +189,9 @@ async def run_agent_graph(
             return {"final": decision}
         has_tools = bool(decision.get("tool") or decision.get("tool_calls"))
         if has_tools == (decision.get("final") is not None) or (decision.get("tool") and decision.get("tool_calls")):
-            raise model.InvalidModelOutput(f"{name}必须选择工具或最终产物之一")
+            raise model.InvalidModelOutput(f"{name}必须选择工具或最终产物之一",
+                                           {"kind": "decision_choice", "has_tools": has_tools,
+                                            "has_final": decision.get("final") is not None})
         if decision.get("tool_calls"):
             return {"tool_calls": [{"id": f"json-{name}-{current['step'] + 1}-{index}",
                                     "name": call["name"], "arguments": call["arguments"]}
@@ -188,13 +212,15 @@ async def run_agent_graph(
             if protocol == "json":
                 try:
                     decision = await structured_decision(current)
-                except model.InvalidModelOutput:
+                except model.InvalidModelOutput as exc:
                     if current["format_retries"] >= 1 or step >= max_steps:
                         raise
                     return {"step": step, "decision_failed": True,
                             "format_retries": current["format_retries"] + 1,
                             "messages": [*current["messages"], {"role": "user", "content":
-                                "上次工具决策未通过 JSON/Schema 校验。请只返回符合当前 Schema 的 JSON 对象，不要 Markdown 或额外文字。"}]}
+                                "上次工具决策未通过 JSON/Schema 校验。请只返回符合当前 Schema 的 JSON 对象，不要 Markdown 或额外文字。"
+                                + ("工具调用和最终产物必须二选一：调用工具时final=null；结束时tool=null、tool_calls=[]、arguments={}，final为完整产物。"
+                                   if exc.validation.get("kind") == "decision_choice" else "")}]}
             else:
                 try:
                     decision = await model.achat_tools(current["messages"], schemas, role=role)
@@ -291,6 +317,34 @@ async def run_agent_graph(
                         "format_retries": current["format_retries"] + 1, "retry_validation": True,
                         "decision_protocol": next_protocol}
             raise AgentLoopError(f"{name}未返回有效的结构化结果") from exc
+        if role in {"bianzheng", "formula", "herb"}:
+            from ..consultation_followup import validate_followup, after_inquiry_schema
+
+            async def regenerate_followup(feedback, schema):
+                from ..context_budget import budget_conversation
+                repair_messages = [*current["messages"], {"role": "user", "content": feedback}]
+                # Use one current schema. Retaining the old schema here both
+                # conflicted with the no-question constraint and counted it a
+                # second time once acomplete_json appended the new schema.
+                instructions = (f"你是{name}。根据上下文中本次用户事实、已回答问题及实际工具结果重新生成完整阶段产物。"
+                                "保留否认、未知、过敏、用药与对象范围；不得编造来源、症状、剂量或安全批准。"
+                                "不输出内部思维链，不再调用工具；按最后的修正要求和当前Schema完成。")
+                full_system = instructions + "\n只输出 JSON 对象，不要 Markdown。JSON Schema：" + json.dumps(schema.model_json_schema(), ensure_ascii=False)
+                payload, dropped = budget_conversation(full_system, repair_messages, role, remaining=1)
+                if dropped:
+                    instructions += "\n较早工具轮次因预算被整组省略。只能依据当前可见工具证据，不得引用已省略结果。"
+                corrected = await model.acomplete_json(instructions, payload, role=role, schema=schema, stream_output=False)
+                return schema.model_validate(corrected).model_dump()
+
+            async def repair_followup(feedback):
+                return await regenerate_followup(feedback, output_schema)
+
+            async def finalize_followup(feedback):
+                schema = after_inquiry_schema(output_schema, role=role)
+                return await regenerate_followup(feedback, schema)
+
+            artifact = await validate_followup(state, artifact, repair_followup, assessment=role == "bianzheng",
+                                               finalize=finalize_followup)
         completed = {"step": current["step"], "status": "completed", "stop_reason": artifact.get("status", "completed"),
                      "protocol": current["decision_protocol"]}
         if context and context.emit:

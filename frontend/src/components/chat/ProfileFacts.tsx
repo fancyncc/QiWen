@@ -31,7 +31,7 @@ export function ProfileFacts() {
     } finally { setBusy(false); }
   }
   return <>
-    <Button variant="ghost" size="sm" onClick={() => setOpen(true)}>已确认画像</Button>
+    <Button variant="ghost" size="sm" onClick={() => setOpen(true)}>查看长期资料</Button>
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>

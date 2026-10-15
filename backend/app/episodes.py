@@ -89,7 +89,8 @@ def resolve(state: dict) -> dict:
     safe["symptom_facts"] = facts
     return {**updates, "safety_state": safe, "episode_id": episode["id"],
             "identity_scope": f"{state['thread_id']}:{subject}:{safe.get('subject_epoch', 0)}",
-            **({"pending_context": boundary["message"] if boundary else "", "pending_question": "", "symptom_pending": None} if explicit_new else {})}
+            **({"pending_context": boundary["message"] if boundary else "", "pending_question": "", "symptom_pending": None,
+                "inquiry_answers": [], "pending_inquiry": {}, "inquiry_observations": []} if explicit_new else {})}
 
 
 def summary(state: dict) -> tuple[str, dict]:

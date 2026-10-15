@@ -1,0 +1,21 @@
+{
+  "version": "2026-10-15",
+  "source": "西湖大学神农阿尔法 · 中国药典条目",
+  "basis": "单味饮片文献用量范围；原条目未区分每剂或每日，口径需医师核定",
+  "notice": "下列是所列版本文献的单味药参考范围，不是本次个人拟用量，也不能直接拼成可服用处方；具体炮制、每剂用量、每日剂数和疗程须由医师确定。",
+  "herbs": [
+    {"name":"人参","min":3,"max":9,"unit":"g","locator":"nmm-001j","edition":"2015","preparation":"另煎兑服","quote":"3～9g，另煎兑服"},
+    {"name":"白术","min":6,"max":12,"unit":"g","locator":"nmm-00q9","edition":"2020","preparation":"白术饮片","quote":"6～12g。"},
+    {"name":"麸炒白术","min":6,"max":12,"unit":"g","locator":"nmm-00qb","edition":"2015","preparation":"麸炒白术","quote":"6～12 g。"},
+    {"name":"干姜","min":3,"max":10,"unit":"g","locator":"nmm-003i","edition":"2015","preparation":"干姜片","quote":"3～10g。"},
+    {"name":"甘草","min":2,"max":10,"unit":"g","locator":"nmm-00ma","edition":"2015","preparation":"甘草饮片","quote":"2～10g。"},
+    {"name":"茯苓","min":10,"max":15,"unit":"g","locator":"nmm-01ei","edition":"2015","preparation":"茯苓饮片","quote":"10～15g。"},
+    {"name":"酸枣仁","min":10,"max":15,"unit":"g","locator":"nmm-005x","edition":"2015","preparation":"用时捣碎","quote":"10～15g。"},
+    {"name":"炒酸枣仁","min":10,"max":15,"unit":"g","locator":"nmm-005z","edition":"2015","preparation":"清炒，用时捣碎","quote":"10～15g。"},
+    {"name":"川芎","min":3,"max":10,"unit":"g","locator":"nmm-00cg","edition":"2015","preparation":"川芎饮片","quote":"3～10g。"},
+    {"name":"生姜","min":3,"max":10,"unit":"g","locator":"nmm-003n","edition":"2015","preparation":"生姜饮片","quote":"3～10g。"},
+    {"name":"炙甘草","min":2,"max":10,"unit":"g","locator":"nmm-00n2","edition":"2015","preparation":"蜜炙甘草","quote":"2-10 g."},
+    {"name":"白芍","min":6,"max":15,"unit":"g","locator":"nmm-00qf","edition":"2015","preparation":"白芍饮片","quote":"6～15g。"},
+    {"name":"桂枝","min":3,"max":10,"unit":"g","locator":"nmm-01lh","edition":"2015","preparation":"桂枝饮片","quote":"3～10 g。"}
+  ]
+}

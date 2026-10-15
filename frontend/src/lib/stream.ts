@@ -29,10 +29,11 @@ export async function streamChat(req: ChatRequest, opts: StreamOptions): Promise
   const transport = new AbortController();
   const emit = (event: ChatStreamEvent) => { if (!opts.signal?.aborted) opts.onEvent(event); };
   if (opts.signal?.aborted) return;
-  const cancelRun = () => {
+  const cancelRun = (reason = "user_stop") => {
     void fetch((process.env.NEXT_PUBLIC_API_URL || "") + `/api/runs/${runId}/cancel`, {
       method: "POST",
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      body: JSON.stringify({ reason }),
       keepalive: true,
     }).catch(() => {});
   };
@@ -40,14 +41,17 @@ export async function streamChat(req: ChatRequest, opts: StreamOptions): Promise
     transport.abort();
     void reader?.cancel().catch(() => {});
   };
-  const abort = () => { cancelRun(); stopTransport(); };
+  const abort = () => {
+    if (opts.signal?.reason !== "view_changed") cancelRun();
+    stopTransport();
+  };
   opts.signal?.addEventListener("abort", abort, { once: true });
   // Bound even a connection that never returns headers or closes its body.
   const deadline = setTimeout(() => {
     if (closed || terminalSeen || opts.signal?.aborted) return;
     terminalSeen = true;
     opts.onError?.(new Error("本轮等待已超过 5 分钟，已停止请求。请稍后重试。"));
-    cancelRun();
+    cancelRun("timeout");
     stopTransport();
   }, 300_000);
 
@@ -69,7 +73,7 @@ export async function streamChat(req: ChatRequest, opts: StreamOptions): Promise
         if (!eventsResponse.ok) return;
         const events: { type: string; payload: {
           response?: string; message?: { content?: string }; thread_id?: string;
-          notes?: Parameters<typeof mapNote>[0][]; elapsed_ms?: number;
+          notes?: Parameters<typeof mapNote>[0][]; elapsed_ms?: number; flow?: import("./types").WorkflowPresentation;
         } }[] = await eventsResponse.json();
         if (closed || terminalSeen || opts.signal?.aborted) return;
         const final = events.find((event) => event.type === "answer.final")?.payload;
@@ -77,7 +81,7 @@ export async function streamChat(req: ChatRequest, opts: StreamOptions): Promise
         terminalSeen = true;
         emit({ type: "token", content: final.message?.content ?? final.response ?? "" });
         emit({ type: "done", thread_id: final.thread_id ?? run.thread_id ?? "",
-          notes: final.notes?.map(mapNote), elapsed_ms: final.elapsed_ms });
+          notes: final.notes?.map(mapNote), elapsed_ms: final.elapsed_ms, ...(final.flow ? { flow: final.flow } : {}) });
         stopTransport();
       } else if (run.status === "cancelled" || run.status === "failed") {
         terminalSeen = true;
@@ -101,7 +105,7 @@ export async function streamChat(req: ChatRequest, opts: StreamOptions): Promise
         "Content-Type": "application/json",
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
-      body: JSON.stringify({ ...req, run_id: runId }),
+      body: JSON.stringify({ ...req, run_id: runId, background: true }),
       signal: transport.signal,
     });
 
@@ -155,7 +159,7 @@ export async function streamChat(req: ChatRequest, opts: StreamOptions): Promise
               type: "stage",
               ...mapStage({
                 stage: payload.stage ?? "", label: payload.label ?? "",
-                status: payload.status, note: payload.note,
+                status: payload.status, note: payload.note, outcome: payload.outcome,
               }),
             });
           } else if (parsed.type === "answer.final") {
@@ -165,6 +169,7 @@ export async function streamChat(req: ChatRequest, opts: StreamOptions): Promise
               type: "done", thread_id: payload.thread_id ?? "",
               notes: Array.isArray(payload.notes) ? payload.notes.map(mapNote) : undefined,
               elapsed_ms: payload.elapsed_ms,
+              ...(payload.flow ? { flow: payload.flow } : {}),
             });
           } else if (parsed.type === "run.cancelled") {
             terminalSeen = true;

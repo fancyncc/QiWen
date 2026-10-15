@@ -1,15 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, Copy, Check, Loader2 } from "lucide-react";
+import { AlertTriangle, Copy, Check, ClipboardCheck, Loader2, ScrollText } from "lucide-react";
 import type { MessageItem } from "@/lib/types";
 import type { Components } from "react-markdown";
 import { PrescriptionCard } from "./PrescriptionCard";
+import { ClinicalPrescription, ClinicalSafety } from "./ClinicalPrescription";
 import { ConsultationTrace } from "./ConsultationTrace";
-import { consultationPresentation, presentNote } from "@/lib/consultation-presentation";
+import { FixedWorkflowAnswer, FollowupQuestion, ServiceUnavailableAnswer } from "./FixedWorkflow";
+import { consultationPresentation, consultationSections, presentNote } from "@/lib/consultation-presentation";
 
 /** 提取完整的 herb_names JSON，返回药材列表与剥离 JSON 后的文本。 */
 function extractHerbs(s: string): { text: string; herbs: string[] } {
@@ -141,10 +143,15 @@ export function MessageBubble({
 }) {
   const isUser = message.role === "user";
   const [copied, setCopied] = useState(false);
+  const resultId = useId();
+  const sections = consultationSections(message);
+  const structuredAnswer = Boolean(sections || message.flow?.mode === "fixed" || message.flow?.status === "awaiting_input"
+    || message.flow?.status === "unavailable" || message.flow?.intent === "requirements");
   const displayedContent = consultationPresentation(message);
   const { text: cleaned, herbs } = processContent(displayedContent, isStreaming);
   const isSafety = !isUser && cleaned.includes("安全警告");
   const hasTrace = Boolean(message.stages?.length || message.notes?.length);
+  const reference = message.flow?.prescription_reference;
 
   async function handleCopy() {
     try {
@@ -184,9 +191,44 @@ export function MessageBubble({
           notes={message.notes?.map(presentNote)}
           streaming={isStreaming}
           elapsedMs={message.elapsedMs}
+          mode={message.flow?.mode ?? message.mode}
+          flow={message.flow}
         />
-        <div className="max-w-[65ch] text-sm">
-          {cleaned ? (
+        <div className={structuredAnswer ? "mt-4 w-full min-w-0 space-y-4 text-sm" : "max-w-[65ch] text-sm"}>
+          {message.flow?.status === "unavailable" ? (
+            <ServiceUnavailableAnswer body={cleaned} markdown={(value) =>
+              <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>{processContent(value).text}</ReactMarkdown>} />
+          ) : message.flow?.status === "awaiting_input" ? (
+            <FollowupQuestion body={cleaned} markdown={(value) =>
+              <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>{processContent(value).text}</ReactMarkdown>} />
+          ) : message.flow?.mode === "fixed" || message.flow?.intent === "requirements" ? (
+            <FixedWorkflowAnswer flow={message.flow} body={cleaned} markdown={(value) =>
+              <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>{processContent(value).text}</ReactMarkdown>} />
+          ) : sections ? (
+            <>{([
+              { key: "diagnosis", title: "辨证结果", text: sections.diagnosis, icon: ClipboardCheck },
+              { key: "advice", title: "处方建议", text: sections.advice, icon: ScrollText },
+              ...(!reference ? [{ key: "herbs", title: "本草核对", text: sections.herbs, icon: ClipboardCheck }] : []),
+            ] as const).filter((section) => section.text).map(({ key, title, text, icon: Icon }) => (
+              <section key={key} aria-labelledby={`${resultId}-${key}`}
+                className="overflow-hidden rounded-xl border border-border/90 bg-card">
+                <div className="flex items-center gap-2.5 border-b border-border/60 bg-secondary/45 px-4 py-3 sm:px-5">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <Icon className="h-4 w-4" aria-hidden />
+                  </span>
+                  <h2 id={`${resultId}-${key}`} className="text-base font-semibold tracking-wide text-primary">{title}</h2>
+                </div>
+                <div className="break-words px-4 py-3 leading-7 text-foreground sm:px-5 sm:py-4 [&>p]:my-2.5 [&>p]:leading-7 [&>p:first-child]:mt-0 [&>p:last-child]:mb-0">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>
+                    {processContent(text || "", isStreaming).text}
+                  </ReactMarkdown>
+                </div>
+              </section>
+            ))}
+            {reference && <ClinicalPrescription reference={reference} />}
+            {(reference?.safety_warnings || message.flow?.safety_warnings) && <ClinicalSafety warnings={reference?.safety_warnings || message.flow?.safety_warnings || []} />}
+            </>
+          ) : cleaned ? (
             <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>
               {cleaned}
             </ReactMarkdown>

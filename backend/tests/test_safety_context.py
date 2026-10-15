@@ -196,9 +196,14 @@ def test_known_nonherbal_allergy_continues_inquiry_and_analysis_without_personal
         assert third["intent_type"] == "diagnose"
         assert third["trace"]["preflight"]["analysis_allowed"]
         assert third["trace"]["safety"]["status"] == "restricted"
-        assert {e["stage"] for e in third["trace"]["events"]} >= {"inquiry", "bianzheng", "formula", "reviewer", "safety"}
-        assert "方剂知识对照" in third["response"] and "桂枝汤" in third["response"]
-        assert "青霉素" in third["response"] and not contains_dosing(third["response"])
+        stages = {e["stage"] for e in third["trace"]["events"]}
+        assert stages >= {"inquiry", "bianzheng", "formula", "safety"}
+        assert ("reviewer" in stages) is (mode == "multi")
+        assert "处方参考" in third["response"] and "桂枝汤" in third["response"]
+        assert "参考组成" in third["response"] and "安全说明" in third["response"]
+        assert "青霉素" in third["response"] and "文献参考范围" in third["response"]
+        reference = third["flow"]["prescription_reference"]
+        assert not reference["approved"] and all(item["dosage"]["min"] is None for item in reference["herbs"])
         assert third["message"]["prescription"] is None and not third["message"]["prescription_review"]["approved"]
         assert client.get(f"/api/profiles/{uid}", headers=h).json()["allergies"] == "青霉素"
         if mode == "multi":

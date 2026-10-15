@@ -15,19 +15,23 @@ vi.mock("@/lib/stream", () => ({
   ),
 }));
 
-vi.mock("@tanstack/react-query", () => ({
-  useQueryClient: () => ({ invalidateQueries: vi.fn() }),
-}));
+vi.mock("@tanstack/react-query", () => {
+  const client = { invalidateQueries: vi.fn() };
+  return { useQueryClient: () => client };
+});
 
 vi.mock("@/lib/api", () => ({
   api: {
     getMessages: vi.fn(() => Promise.resolve([])),
+    getActiveRun: vi.fn(() => Promise.resolve(null)),
   },
   ApiError: class ApiError extends Error {},
 }));
 
 import { api } from "@/lib/api";
 import { streamChat, type StreamOptions } from "@/lib/stream";
+import { resumeChatRun } from "@/lib/resume-run";
+vi.mock("@/lib/resume-run", () => ({ resumeChatRun: vi.fn(() => Promise.resolve()) }));
 
 afterEach(() => { cleanup(); vi.clearAllMocks(); });
 
@@ -42,6 +46,26 @@ function pendingStream() {
 }
 
 describe("useChat request isolation", () => {
+  it("返回会话恢复原运行，切换页面仅断开观察，停止按钮明确取消", async () => {
+    vi.mocked(api.getActiveRun).mockResolvedValueOnce({ run_id: "running", thread_id: "one", status: "running" });
+    vi.mocked(api.getMessages).mockResolvedValueOnce([{ role: "user", content: "原问题" }]);
+    let options!: StreamOptions;
+    let finish!: () => void;
+    vi.mocked(resumeChatRun).mockImplementationOnce((_run, _thread, opts) => {
+      options = opts;
+      return new Promise<void>((resolve) => { finish = resolve; });
+    });
+    const { result, unmount } = renderHook(() => useChat("one"));
+    await waitFor(() => expect(result.current.streaming).toBe(true));
+    expect(streamChat).not.toHaveBeenCalled();
+    act(() => options.onEvent({ type: "stage", stage: "bianzheng", label: "辨证", status: "start" }));
+    expect(result.current.messages.at(-1)?.stages?.[0].stage).toBe("bianzheng");
+    act(() => result.current.stop());
+    expect(options.signal?.reason).toBe("user_stop");
+    await act(async () => finish());
+    unmount();
+  });
+
   it("连接失败的说明保留在答复气泡中，并结束等待", async () => {
     const stream = pendingStream();
     const { result } = renderHook(() => useChat(""));
@@ -111,6 +135,7 @@ describe("useChat request isolation", () => {
     vi.mocked(api.getMessages).mockImplementationOnce(() => new Promise((resolve) => { history = resolve; }));
     const stream = pendingStream();
     const { result } = renderHook(() => useChat("one"));
+    await act(async () => {});
     let sending!: Promise<void>;
     await act(async () => { sending = result.current.send("new message"); });
     await act(async () => { history([{ role: "assistant", content: "old history" }]); });

@@ -30,14 +30,51 @@ export function publicWarnings(values: string[]): string[] {
   return [...new Set(warnings.map(publicExpertText).filter(Boolean))];
 }
 
-export function consultationPresentation(message: MessageItem): string {
-  if (message.role === "user") return message.content;
+export function consultationSections(message: MessageItem): { diagnosis: string; advice: string; herbs?: string } | null {
+  if (message.role === "user" || message.flow?.status === "awaiting_input" || message.flow?.status === "unavailable"
+    || message.flow?.intent === "requirements" || message.intent_type === "consult") return null;
   const diagnosis = message.notes?.find((note) => /辨证/.test(note.specialist));
   const formula = message.notes?.find((note) => /方剂/.test(note.specialist));
-  if (!diagnosis || !formula) return withoutSourceSection(message.content);
-  const result = publicExpertText(diagnosis.result || diagnosis.reasoning || diagnosis.syndrome || "现有资料尚不足以确定证型。");
+  const herb = message.notes?.find((note) => /本草/.test(note.specialist));
+  if (!diagnosis || !formula) return null;
+  let result = publicExpertText(diagnosis.result || diagnosis.reasoning || diagnosis.syndrome || "现有资料尚不足以确定证型。");
+  const uncertainties = diagnosis.uncertainties?.map(publicExpertText).filter(Boolean);
+  if (uncertainties?.length) result += `\n\n### 判断局限\n\n${uncertainties.map((item) => `- ${item}`).join("\n")}`;
   const advice = publicExpertText(formula.prescription_advice || "当前尚不能形成可执行的个人处方，请由执业中医师结合面诊资料复核。");
-  return `## 辨证结果\n\n${result}\n\n## 处方建议\n\n${advice}`;
+  const herbs = herb ? publicExpertText(herb.reasoning || herb.result || "") : undefined;
+  return { diagnosis: result, advice, herbs };
+}
+
+export function consultationPresentation(message: MessageItem): string {
+  if (message.role === "user") return message.content;
+  if (message.flow?.mode === "fixed" && message.flow.sections?.length) {
+    return message.flow.sections.map((section) => `## ${section.title}\n\n${section.content}${section.id === "medication" ? prescriptionText(message) : ""}`).join("\n\n");
+  }
+  const sections = consultationSections(message);
+  return sections ? `## 辨证结果\n\n${sections.diagnosis}\n\n## 处方建议\n\n${sections.advice}${prescriptionText(message)}${sections.herbs ? `\n\n## 本草核对\n\n${sections.herbs}` : ""}`
+    : withoutSourceSection(message.content);
+}
+
+function prescriptionText(message: MessageItem): string {
+  const reference = message.flow?.prescription_reference;
+  const warnings = reference?.safety_warnings || message.flow?.safety_warnings || [];
+  const lines: string[] = [];
+  if (reference) {
+    lines.push("## 处方参考（待医师复核）", "", reference.name, "", reference.dose_notice || "个人适用性与剂量待医师确认。", "",
+      "| 药物 | 文献参考范围 | 本次拟用量 | 来源 |", "| --- | --- | --- | --- |");
+    for (const item of reference.herbs) {
+      const range = item.reference_dose;
+      const literature = range ? `${range.min}–${range.max} ${range.unit}；${range.basis}` : "暂无可核对记录";
+      const planned = item.verification_status === "verified" && item.dosage.min !== null
+        ? `${item.dosage.min}–${item.dosage.max} ${item.dosage.unit}（口径与个人适用性待确认）` : "待医师核定";
+      const preparation = item.preparation || range?.preparation;
+      lines.push(`| ${item.name}${preparation ? `（来源炮制／用法要求：${preparation}）` : ""} | ${literature} | ${planned} | ${range ? `[${range.source}](${range.url})` : "待补充"} |`);
+    }
+    lines.push("", `方剂出处：${reference.source}`);
+    if (reference.uncertainties.length) lines.push("", "### 尚待确认的适用条件", "", ...reference.uncertainties.map((item) => `- ${item}`));
+  }
+  if (warnings.length) lines.push("", "## 安全说明", "", ...publicWarnings(warnings).map((item) => `- ${item}`));
+  return lines.length ? "\n\n" + lines.join("\n") : "";
 }
 
 export function presentNote(note: ConsultationNote): ConsultationNote {

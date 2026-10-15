@@ -26,6 +26,7 @@ from .db import all_rows, connection, init_db, now, one
 from . import runs
 from . import safety_store
 from . import episodes
+from .workflow_presentation import build_presentation
 from .prescription import migrate_plan, legacy_plan, review_plan, fingerprint, patient_fingerprint
 from .documents import MAX_FILE_TEXT_CHARS
 
@@ -42,7 +43,7 @@ async def lifespan(_app: FastAPI):
     yield
     pending = [run.task for run in runs.active.values() if run.task is not None]
     for run_id in list(runs.active):
-        await runs.cancel(run_id)
+        await runs.cancel(run_id, reason="service_shutdown")
     if pending:
         await asyncio.gather(*pending, return_exceptions=True)
 
@@ -108,6 +109,11 @@ class ChatRequest(BaseModel):
     thread_id: str | None = None
     files: list[str] = Field(default_factory=list, max_length=5)
     mode: str = Field(default="fixed", pattern="^(fixed|multi)$")
+    background: bool = False
+
+
+class CancelRequest(BaseModel):
+    reason: Literal["user_stop", "timeout", "requested"] = "requested"
 
 
 def owned_thread(thread_id: str, user_id: str) -> dict:
@@ -271,6 +277,14 @@ def thread_messages(thread_id: str, user: dict = Depends(current_user)):
         if not item["prescription"] and item["role"] == "assistant":
             item["prescription"] = legacy_plan(item["content"])
         item["prescription_review"] = json.loads(item["prescription_review"] or "null")
+        if item["role"] == "assistant" and item.get("trace"):
+            if ("presentation" not in item["trace"] or
+                    "preflight_unavailable" in item["trace"].get("preflight", {}).get("risk_categories", [])
+                    and item["trace"].get("presentation", {}).get("status") != "unavailable"):
+                item["trace"]["presentation"] = build_presentation({
+                    "intent_type": item.get("intent_type"), "response": item["content"],
+                    "treatment_plan": item.get("prescription") or {}, "prescription_review": item.get("prescription_review"),
+                }, item["trace"], legacy=True)
     return rows
 
 
@@ -535,11 +549,13 @@ def _save_answer(run: runs.Run, result: dict, trace: dict):
             raise RuntimeError("候选或画像变化，必须重新生成并审查")
         safe_plan = checked
         review = latest_review
+    trace = {**trace, "presentation": build_presentation(result, trace)}
     answer_id = str(uuid4())
     answer = {"id": answer_id, "role": "assistant", "content": result["response"],
               "intent_type": result.get("intent_type"), "symptoms": result.get("symptoms", []),
               "notes": result.get("consultation_notes", []), "trace": trace, "prescription": safe_plan,
-              "prescription_review": review, "candidate_id": run.candidate_id}
+              "prescription_review": review, "candidate_id": run.candidate_id,
+              "flow": trace["presentation"]}
     final = run.final_event(result, answer, trace)
     with connection() as db:
         db.execute("BEGIN IMMEDIATE")
@@ -553,7 +569,8 @@ def _save_answer(run: runs.Run, result: dict, trace: dict):
         if safe and result.get("identity_mode") == "clinical":
             safe["symptom_facts"] = result.get("symptom_facts", [])
             safe.setdefault("clinical", {})[safe["subject"]] = {
-                key: result.get(key) for key in ("pending_context", "pending_question", "symptom_pending")}
+                key: result.get(key) for key in ("pending_context", "pending_question", "symptom_pending", "inquiry_answers",
+                                                "pending_inquiry", "inquiry_observations")}
             safety_store.commit_state(db, run.user_id, thread_id, safe, result.get("safety_state_version", 0))
         if personal:
             safety_store.add_suggestions(db, run.user_id, thread_id, run.id, result.get("profile_suggestions", []))
@@ -602,9 +619,9 @@ def get_run(run_id: str, user: dict = Depends(current_user)):
 
 
 @app.post("/api/runs/{run_id}/cancel")
-async def cancel_run(run_id: str, user: dict = Depends(current_user)):
+async def cancel_run(run_id: str, body: CancelRequest | None = None, user: dict = Depends(current_user)):
     owned_run(run_id, user["id"])
-    await runs.cancel(run_id)
+    await runs.cancel(run_id, reason=body.reason if body else "requested")
     return get_run(run_id, user)
 
 
@@ -626,10 +643,17 @@ def get_events(run_id: str, user: dict = Depends(current_user)):
             for row in all_rows("SELECT run_id,candidate_id,sequence,type,payload FROM run_events WHERE run_id=? ORDER BY sequence", (run_id,))]
 
 
+@app.get("/api/threads/{thread_id}/active-run")
+def active_thread_run(thread_id: str, user: dict = Depends(current_user)):
+    thread = owned_thread(thread_id, user["id"])
+    row = one("SELECT id,thread_id,status FROM chat_runs WHERE thread_id=? AND status IN ('running','cancelling') ORDER BY created_at DESC LIMIT 1", (thread_id,))
+    return {"run_id": row["id"], "thread_id": row["thread_id"], "status": row["status"], "mode": thread["mode"]} if row else None
+
+
 async def watch_disconnect(request: Request, run: runs.Run):
     while run.terminal is None:
         if await request.is_disconnected():
-            await runs.cancel(run.id)
+            await runs.cancel(run.id, reason="client_disconnect")
             return
         await asyncio.sleep(0.1)
 
@@ -640,6 +664,8 @@ async def chat(body: ChatRequest, request: Request, stream: bool = Query(False),
     run = runs.Run(body.run_id, thread["id"], user["id"], thread["mode"])
     runs.active[run.id] = run
     run.task = asyncio.create_task(runs.execute(run, body.message, profile, file_text, _save_answer))
+    if body.background:
+        run.deadline_task = asyncio.create_task(runs.expire(run, 300))
     if not stream:
         watcher = asyncio.create_task(watch_disconnect(request, run))
         try:
@@ -665,7 +691,8 @@ async def chat(body: ChatRequest, request: Request, stream: bool = Query(False),
         try:
             while True:
                 if await request.is_disconnected():
-                    await runs.cancel(run.id)
+                    if not body.background:
+                        await runs.cancel(run.id, reason="client_disconnect")
                     return
                 try:
                     item = await asyncio.wait_for(run.queue.get(), timeout=0.1)
@@ -675,7 +702,8 @@ async def chat(body: ChatRequest, request: Request, stream: bool = Query(False),
                 if item["type"] in {"answer.final", "run.cancelled", "run.failed"}:
                     return
         finally:
-            await runs.cancel(run.id)
+            if not body.background:
+                await runs.cancel(run.id, reason="client_disconnect")
 
     return StreamingResponse(events(), media_type="text/event-stream",
                              headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})

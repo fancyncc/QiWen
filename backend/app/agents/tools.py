@@ -49,7 +49,18 @@ async def search_classics(state: dict, args: SearchArgs) -> dict:
             previous = context.retrieval_cache.get(key) if context else None
             if not previous or previous[1].get("outcome") != "no_match" or not previous[1].get("retryable", True):
                 break
-    rows, trace = await retrieve_classics(plan)
+    attempts, seen = [], set()
+    for attempt in range(3):
+        key = (plan["keyword_query"], plan["semantic_query"])
+        if key in seen:
+            break
+        seen.add(key)
+        rows, trace = await retrieve_classics(plan)
+        attempts.append(trace)
+        if rows or trace.get("outcome") != "no_match" or not trace.get("retryable", False) or not clinical:
+            break
+        plan = search_plan(state, attempt=attempt + 1)
+    trace = {**trace, "query_attempts": attempts}
     return {"documents": [{"id": row["id"], "title": row["title"], "chapter": row["chapter"],
                              "excerpt": passage_excerpt(row), "retrieval": row.get("retrieval", {})} for row in rows],
             "status": trace.get("outcome", trace.get("rerank", {}).get("status", "unknown")),
@@ -82,9 +93,18 @@ def search_formulas(state: dict, args: SearchArgs) -> dict:
         for term in terms:
             escaped = term.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
             params += [f"%{escaped}%"] * 2
-        return all_rows("SELECT name,structured_herbs,indication,source FROM formulas WHERE "
+        rows = all_rows("SELECT name,structured_herbs,indication,source,contraindications FROM formulas WHERE "
                         + " OR ".join("(name LIKE ? ESCAPE '\\' OR indication LIKE ? ESCAPE '\\')" for _ in terms)
-                        + " ORDER BY name LIMIT 10", tuple(params))
+                        + " ORDER BY name", tuple(params))
+        # Prefer explicit formula names and coverage of several known findings;
+        # alphabetical order alone must not decide the short source list.
+        positive = {finding: related_terms([finding]) for finding in state.get("symptoms", [])}
+        for row in rows:
+            row["matched_terms"] = [term for term in terms if term in row["name"] + row["indication"]]
+            row["matched_findings"] = [finding for finding, aliases in positive.items()
+                                       if any(term in row["indication"] for term in aliases)]
+        return sorted(rows, key=lambda row: (-(100 if row["name"] in args.query else 0)
+                      - len(row["matched_findings"]) * 3 - len(row["matched_terms"]), row["name"]))[:10]
 
     terms = related_terms([args.query, *re.split(r"[\s，,、；;：:（）()]+", args.query)])
     rows = matches(terms)
@@ -94,8 +114,12 @@ def search_formulas(state: dict, args: SearchArgs) -> dict:
         rows = matches(terms)
         fallback = bool(rows)
     return {"matched_terms": terms, "symptom_fallback": fallback,
+            "status": "source_candidates" if rows else "no_source_match",
             "warning": "原查询无匹配，以下按本轮明确症状检索，仅作知识对照，不代表个人选方。" if fallback else "",
             "formulas": [{"name": row["name"], "indication": row["indication"], "source": row["source"],
+                            "contraindications": row["contraindications"],
+                            "matched_terms": row["matched_terms"], "matched_findings": row["matched_findings"],
+                            "selection_status": "requires_clinical_comparison",
                             "herbs": json.loads(row["structured_herbs"] or "[]")} for row in rows]}
 
 

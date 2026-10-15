@@ -76,6 +76,17 @@ def search_plan(state: dict, attempt=0) -> dict:
                                                   fact.get("duration_text", ""), fact.get("trend_text", "")])))
     query = " ".join(expanded) or state.get("message", "")[:300]
     semantic = "；".join(unique([*primary, *descriptors])) or query
+    # Retry only with a distinct, narrower view of the same positive findings;
+    # search expansions never become new symptoms or inferred syndromes.
+    if attempt == 1 and primary:
+        query = " ".join(primary)
+        semantic = "；".join(primary)
+        expanded = primary
+    elif attempt >= 2 and len(primary) > 1:
+        focused = primary[:2]
+        query = " ".join(focused)
+        semantic = "；".join(focused)
+        expanded = focused
     plan = make_plan(query, semantic, expanded, primary=primary, expansions=expansions,
                      unmapped=unknown, attempt=attempt + 1)
     plan["evidence_kind"] = "clinical_classics"
@@ -86,4 +97,7 @@ def search_plan(state: dict, attempt=0) -> dict:
         plan["recall_queries"].append({"kind": "classical_related", "keyword_query": " ".join(classical),
                                        "semantic_query": " ".join(classical)})
         plan["rerank_query"] = " ".join(unique([*primary, *classical]))
+    if attempt:
+        plan["recall_queries"] = [{"kind": "known_findings_retry", "keyword_query": query, "semantic_query": semantic}]
+        plan["rerank_query"] = " ".join(primary)
     return plan

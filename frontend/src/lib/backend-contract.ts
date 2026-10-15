@@ -1,4 +1,4 @@
-import type { ConsultationNote, MessageItem, Stage, ThreadInfo, UserProfile, ProfileFact, MedicalRecord } from "./types";
+import type { ConsultationNote, MessageItem, Stage, ThreadInfo, UserProfile, ProfileFact, MedicalRecord, WorkflowPresentation } from "./types";
 import { publicWarnings } from "./consultation-presentation";
 
 /** 适配自有后端的存储字段，页面继续使用现有展示模型。 */
@@ -18,18 +18,24 @@ export interface BackendNote {
   summary?: string;
   public_warnings?: string[];
   prescription_advice?: string;
+  uncertainties?: string[];
+  recommended_formulas?: string[];
+  modifications?: string;
 }
 export interface BackendStage {
   stage: string;
   label: string;
   status: string;
   note?: ConsultationNote;
+  outcome?: string;
 }
 export interface BackendMessage {
   role: "user" | "assistant";
   content: string;
+  intent_type?: string;
+  flow?: WorkflowPresentation;
   notes?: BackendNote[];
-  trace?: { events?: BackendStage[]; elapsedMs?: number } | null;
+  trace?: { events?: BackendStage[]; elapsedMs?: number; mode?: "fixed" | "multi"; presentation?: WorkflowPresentation } | null;
 }
 export interface BackendProfile {
   user_id: string;
@@ -54,6 +60,9 @@ export const mapNote = (value: BackendNote): ConsultationNote => ({
   ...(typeof value.confidence === "number" && Number.isFinite(value.confidence) && value.confidence >= 0 && value.confidence <= 1
     ? { confidence: value.confidence } : {}),
   ...(value.prescription_advice ? { prescription_advice: value.prescription_advice } : {}),
+  ...(value.uncertainties?.length ? { uncertainties: value.uncertainties } : {}),
+  ...(value.recommended_formulas?.length ? { recommended_formulas: value.recommended_formulas } : {}),
+  ...(value.modifications ? { modifications: value.modifications } : {}),
   ...((value.public_warnings?.length || value.warning)
     ? { safety_warnings: value.public_warnings?.length ? value.public_warnings : publicWarnings([value.warning!]) } : {}),
 });
@@ -64,7 +73,8 @@ export function mapStage(value: BackendStage): Stage {
   return {
     stage: aliases[value.stage] ?? value.stage,
     label: value.label,
-    status: value.status === "done" ? "done" : "start",
+    status: value.status === "done" || value.status === "failed" || value.status === "cancelled" ? value.status : "start",
+    ...(value.outcome ? { outcome: value.outcome } : {}),
     ...(value.note ? { note: value.note } : {}),
   };
 }
@@ -74,6 +84,9 @@ export const mapMessage = (value: BackendMessage): MessageItem => ({
   notes: value.notes?.map(mapNote),
   stages: value.trace?.events?.map(mapStage),
   elapsedMs: value.trace?.elapsedMs,
+  intent_type: value.intent_type,
+  mode: value.trace?.mode,
+  flow: value.flow ?? value.trace?.presentation,
 });
 export const mapProfile = (value: BackendProfile): UserProfile => ({
   patient_id: value.user_id,

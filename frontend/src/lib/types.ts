@@ -26,11 +26,47 @@ export interface ThreadInfo {
 export interface MessageItem {
   role: "user" | "assistant";
   content: string;
+  intent_type?: string;
+  mode?: "fixed" | "multi";
+  flow?: WorkflowPresentation;
   notes?: ConsultationNote[];
   /** 会诊阶段轨迹（per-message 持久，流式中实时更新，完成后保留为摘要条） */
   stages?: Stage[];
   /** 单轮响应用时（毫秒，来自 done 事件） */
   elapsedMs?: number;
+}
+
+export interface WorkflowPresentation {
+  mode: "fixed" | "multi";
+  intent: string;
+  status: "awaiting_input" | "blocked" | "answered" | "restricted" | "completed" | "cancelled" | "failed" | "unavailable";
+  steps: { stage: string; label: string; status: string; outcome?: string }[];
+  compatibility: { status: string; personal_plan_approved?: boolean; dosage_status?: string };
+  sections?: { id: string; title: string; content: string }[];
+  diagnosis_details?: string;
+  legacy?: boolean;
+  prescription_reference?: PrescriptionReference;
+  safety_warnings?: string[];
+}
+
+export interface PrescriptionReference {
+  name: string;
+  source: string;
+  rationale: string;
+  indication?: string;
+  approved: false;
+  dose_notice?: string;
+  uncertainties: string[];
+  safety_warnings: string[];
+  herbs: {
+    herb_id: string; name: string; preparation: string; effect?: string; cautions?: string;
+    verification_status: string;
+    dosage: { min: number | null; max: number | null; unit: string };
+    reference_dose?: {
+      min: number; max: number; unit: string; kind: "literature_range";
+      basis: string; preparation: string; source: string; url: string; quote: string; checked_at: string;
+    } | null;
+  }[];
 }
 
 export interface UserProfile {
@@ -103,6 +139,7 @@ export interface UploadResponse {
 /** 会诊笔记条目（多智能体专家输出，对应后端 consultation_notes）。 */
 export interface ConsultationNote {
   specialist: string;
+  uncertainties?: string[];
   status?: string;
   prescription_advice?: string;
   result?: string;
@@ -123,7 +160,8 @@ export interface ConsultationNote {
 export interface Stage {
   stage: string;
   label: string;
-  status: "start" | "done";
+  status: "start" | "done" | "failed" | "cancelled";
+  outcome?: string;
   note?: ConsultationNote;
 }
 
@@ -134,7 +172,8 @@ export type ChatStreamEvent =
       type: "stage";
       stage: string;
       label: string;
-      status: "start" | "done";
+      status: Stage["status"];
+      outcome?: string;
       note?: ConsultationNote;
     }
   | {
@@ -143,5 +182,6 @@ export type ChatStreamEvent =
       notes?: ConsultationNote[];
       diagnosis?: string;
       elapsed_ms?: number;
+      flow?: WorkflowPresentation;
     }
   | { type: "error"; message: string };

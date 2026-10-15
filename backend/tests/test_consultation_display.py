@@ -28,12 +28,12 @@ def test_display_notes_keep_real_confidence_and_concise_safety_warnings():
 
 
 def test_confidence_is_optional_and_bounded_in_model_schema():
-    assert BianzhengArtifact(status="completed", conclusion="说明").confidence is None
+    assert BianzhengArtifact(status="completed", information_gap="none", conclusion="说明").confidence is None
     with pytest.raises(ValidationError):
-        BianzhengArtifact(status="completed", conclusion="说明", confidence=95)
+        BianzhengArtifact(status="completed", information_gap="none", conclusion="说明", confidence=95)
 
 
-def test_structured_advice_can_show_reviewed_dose_but_model_summary_cannot():
+def test_unreviewed_candidate_doses_cannot_be_exposed_and_model_summary_remains_dose_free():
     with TestClient(app):
         plan = migrate_plan({"name": "知识示例", "herbs": ["茯苓"]})
         plan["herbs"][0]["dosage"].update(min=3, max=6)
@@ -41,6 +41,7 @@ def test_structured_advice_can_show_reviewed_dose_but_model_summary_cannot():
                  "diagnosis": "辨证结果待面诊确认。", "treatment_plan": plan, "safety_errors": [],
                  "agent_artifacts": {"bianzheng": {"summary": "可核对的摘要。"}}}
         result = finish(state)
-        assert result["consultation_notes"] and render_plan(plan) in result["consultation_notes"][1]["prescription_advice"]
+        assert result["consultation_notes"] and render_plan(plan) not in result["consultation_notes"][1]["prescription_advice"]
+        assert "3–6" not in result["response"]
         state["agent_artifacts"]["bianzheng"]["summary"] = "模型自行添加剂量999克"
         assert not finish(state)["consultation_notes"]
