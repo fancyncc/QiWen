@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import asyncio
-import io
 import json
 import sqlite3
 import time
@@ -12,13 +11,10 @@ from datetime import date
 from uuid import uuid4
 from typing import Literal
 
-from docx import Document
 from fastapi import Depends, FastAPI, File, HTTPException, Query, UploadFile, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
-from pypdf import PdfReader
-from pypdf.errors import PdfReadError
 
 from .auth import check_password, current_user, hash_password, make_token
 from .config import CORS_ORIGINS, MAX_UPLOAD_BYTES, MODEL_MODE, RAG_MODE, UPLOAD_DIR
@@ -28,10 +24,11 @@ from . import safety_store
 from . import episodes
 from .workflow_presentation import build_presentation
 from .prescription import migrate_plan, legacy_plan, review_plan, fingerprint, patient_fingerprint
-from .documents import MAX_FILE_TEXT_CHARS
+from .attachments import extract_file, parse_attachment
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
+    _app.state.upload_slots = asyncio.Semaphore(2)
     init_db()
     runs.recover_interrupted()
     if (RAG_MODE == "hybrid" and os.getenv("QIWEN_RAG_RERANK_MODE", "cross_encoder") == "cross_encoder"
@@ -420,35 +417,6 @@ def revoke_profile_fact(fact_id: str, revision: int = Query(ge=0), user: dict = 
     return safety_store.revoke(user["id"], fact_id, revision)
 
 
-def extract_file(filename: str, data: bytes) -> tuple[str, str]:
-    extension = Path(filename).suffix.lower()
-    def collect(parts):
-        chunks, size = [], 0
-        for part in parts:
-            size += len(part) + (1 if chunks else 0)
-            if size > MAX_FILE_TEXT_CHARS:
-                raise HTTPException(413, "附件文本超过 20000 字符，请拆分文件后上传；本次未保存，也未截断处理。")
-            chunks.append(part)
-        return "\n".join(chunks)
-
-    try:
-        if extension == ".txt":
-            return "text/plain", collect([data.decode("utf-8-sig")])
-        if extension == ".pdf" and data.startswith(b"%PDF"):
-            pages = PdfReader(io.BytesIO(data)).pages
-            return "application/pdf", collect(page.extract_text() or "" for page in pages)
-        if extension == ".docx" and data.startswith(b"PK"):
-            doc = Document(io.BytesIO(data))
-            return "application/vnd.openxmlformats-officedocument.wordprocessingml.document", collect(
-                block.text if hasattr(block, "text") else "\n".join(" | ".join(cell.text for cell in row.cells) for row in block.rows)
-                for block in doc.iter_inner_content())
-    except HTTPException:
-        raise
-    except Exception as exc:
-        raise HTTPException(400, "文件无法解析") from exc
-    raise HTTPException(400, "仅支持有效的 PDF、DOCX、UTF-8 TXT 文件")
-
-
 @app.post("/api/upload", status_code=201)
 async def upload(file: UploadFile = File(...), user: dict = Depends(current_user)):
     filename = Path(file.filename or "").name
@@ -457,7 +425,7 @@ async def upload(file: UploadFile = File(...), user: dict = Depends(current_user
     data = await file.read(MAX_UPLOAD_BYTES + 1)
     if len(data) > MAX_UPLOAD_BYTES:
         raise HTTPException(413, "文件不能超过 10 MB")
-    media_type, content = await asyncio.to_thread(extract_file, filename, data)
+    media_type, content = await parse_attachment(filename, data, app.state.upload_slots)
     file_id = str(uuid4())
     storage_name = file_id + Path(filename).suffix.lower()
     (UPLOAD_DIR / storage_name).write_bytes(data)
