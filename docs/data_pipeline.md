@@ -4,7 +4,7 @@
 
 ## 资料来源与种子
 
-`backend/resources/classics_source/` 保存六部古籍 TXT，`classics_segments/` 保存派生 JSON，原始资料于 2026-09-24 从 gstaryu/LingYi 的 `TCM_data/` 与 `storage/chunks/` 获取。资料来源和许可说明见 [resources/README.md](../backend/resources/README.md) 与 [Apache-2.0 许可](../backend/resources/Apache-2.0-LICENSE.txt)。TXT 保留“中国哲学书电子化计划 / Chinese Text Project”标记，数字底本再分发条件需与上游及原始来源分别核对。
+`backend/resources/classics_source/` 保存六部古籍 TXT，`classics_segments/` 保存派生 JSON，原始资料于 2026-09-24 归档。资源结构见 [resources/README.md](../backend/resources/README.md)，许可文本见 [Apache-2.0 许可](../backend/resources/Apache-2.0-LICENSE.txt)。数字底本的再分发条件需按具体资料分别核对。
 
 `knowledge_seed.json` 转换自上游手工种子，含 33 味本草、22 首方剂和 14 条禁忌说明；没有复制上游运行数据库、2015 版药典扩充数据或其他方剂提取产物。剂量默认未核验，结构及审查边界见 [agent.md](agent.md)。
 
